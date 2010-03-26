@@ -1,0 +1,194 @@
+package org.gcontracts.ast;
+
+import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.AssertStatement;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.control.CompilePhase;
+import org.codehaus.groovy.control.SourceUnit;
+import org.codehaus.groovy.syntax.Token;
+import org.codehaus.groovy.syntax.Types;
+import org.codehaus.groovy.transform.ASTTransformation;
+import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.gcontracts.annotations.Ensures;
+import org.gcontracts.annotations.Invariant;
+import org.gcontracts.annotations.Requires;
+
+import java.util.List;
+
+/**
+ * Custom AST transformation that removes closure annotations of {@link org.gcontracts.annotations.Invariant},
+ * {@link org.gcontracts.annotations.Requires} and {@link org.gcontracts.annotations.Ensures} and adds Java
+ * assertions which executing the constraint-code instead. <p/>
+ * Whenever a constraint is broken an {@link AssertionError} will be thrown.
+ *
+ * @see AssertionError
+ *
+ * @author andre.steingress@gmail.com
+ */
+@GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
+public class ContractValidationASTTransformation implements ASTTransformation {
+
+    public void visit(ASTNode[] nodes, SourceUnit unit) {
+        ModuleNode moduleNode = (ModuleNode)nodes[0];
+        for (ClassNode classNode : moduleNode.getClasses())
+            new AssertionInjector(classNode).rewrite();
+    }
+}
+
+/**
+ * Injects standard Java assertion statements which check the specified pre- and post-conditions and the class
+ * invariants.
+ */
+class AssertionInjector {
+
+    private static final String CLOSURE_ATTRIBUTE_NAME = "value";
+
+    private final ClassNode classNode;
+    private ClosureExpression classInvariant;
+
+    public AssertionInjector(ClassNode classNode) {
+        this.classNode = classNode;
+    }
+
+    public void rewrite() {
+        new ClassCodeVisitorSupport() {
+
+            @Override
+            public void visitClass(ClassNode type) {
+
+                List<AnnotationNode> annotations = type.getAnnotations();
+                for (AnnotationNode annotation: annotations)  {
+                    if (annotation.getClassNode().getTypeClass() == Invariant.class)  {
+                        generateInvariantAssertionStatement(type, annotation);
+                    }
+                }
+
+                super.visitClass(type);
+            }
+
+            @Override
+            public void visitMethod(MethodNode method) {
+
+                super.visitMethod(method);
+
+                List<AnnotationNode> annotations = method.getAnnotations();
+                for (AnnotationNode annotation: annotations)  {
+                    if (annotation.getClassNode().getTypeClass() == Requires.class)  {
+                        generatePreconditionAssertionStatement(method, annotation);
+                    } else if (annotation.getClassNode().getTypeClass() == Ensures.class)  {
+                        generatePostconditionAssertionStatement(method, annotation);
+                    }
+                }
+
+                // If there is a class invariant we will append the check to this invariant
+                // after each method call
+                if (classInvariant != null)  {
+                    generateInvariantAssertionStatement(method);
+                }
+            }
+
+            protected SourceUnit getSourceUnit() {
+                return null;
+            }
+        }.visitClass(classNode);
+    }
+
+    public void generateInvariantAssertionStatement(ClassNode type, AnnotationNode annotation)  {
+
+        // get the closure annotation
+        classInvariant = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+        // fix compilation with setting value() to java.lang.Object.class
+        annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
+
+        BlockStatement assertionBlock = new BlockStatement();
+        // assign the closure to a local variable and call() it
+        VariableExpression closureVariable = new VariableExpression("$invariantClosure");
+
+        // create a local variable to hold a reference to the newly instantiated closure
+        assertionBlock.addStatement(new ExpressionStatement(
+                new DeclarationExpression(closureVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        classInvariant)));
+
+        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
+                new MethodCallExpression(closureVariable, "call", ArgumentListExpression.EMPTY_ARGUMENTS)
+        ), new ConstantExpression("[invariant]")));
+
+        for (ConstructorNode constructor : type.getDeclaredConstructors())  {
+            ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
+        }
+    }
+
+    public void generateInvariantAssertionStatement(MethodNode method)  {
+
+        BlockStatement invariantCheck = createAssertionExpression(method, classInvariant, "invariant");
+        BlockStatement methodBlock = (BlockStatement) method.getCode();
+
+        methodBlock.addStatement(invariantCheck);
+    }
+
+    public void generatePreconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
+
+        // get the closure annotation
+        ClosureExpression closureExpression = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+        // fix compilation with setting value() to java.lang.Object.class
+        annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
+
+        BlockStatement preconditionCheck = createAssertionExpression(method, closureExpression, "precondition");
+        preconditionCheck.addStatement(method.getCode());
+
+        method.setCode(preconditionCheck);
+    }
+
+    public void generatePostconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
+
+        // get the closure annotation
+        ClosureExpression closureExpression = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+        // fix compilation with setting value() to java.lang.Object.class
+        annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
+
+        BlockStatement postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition");
+        BlockStatement methodBlock = (BlockStatement) method.getCode();
+
+        methodBlock.addStatement(postconditionCheck);
+    }
+
+    private BlockStatement createAssertionExpression(MethodNode method, ClosureExpression closureExpression, String constraint) {
+        BlockStatement assertionBlock = new BlockStatement();
+        // assign the closure to a local variable and call() it
+        VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
+
+        // create a local variable to hold a reference to the newly instantiated closure
+        assertionBlock.addStatement(new ExpressionStatement(
+                new DeclarationExpression(closureVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        closureExpression)));
+
+        ArgumentListExpression arguments = new ArgumentListExpression();
+
+        for (Parameter parameter : method.getParameters())  {
+            arguments.addExpression(new VariableExpression(parameter));
+        }
+
+        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
+                new MethodCallExpression(closureVariable, "call", arguments)
+        ), new ConstantExpression("[" + constraint + "] method " + method.getName() + "(" + getMethodParameters(method) + ")")));
+
+        return assertionBlock;
+    }
+
+    private String getMethodParameters(MethodNode method)  {
+        StringBuilder builder = new StringBuilder();
+
+        for (Parameter parameter : method.getParameters())  {
+            if (builder.length() > 0)  {
+                builder.append(", ");
+            }
+            builder.append(parameter.getName()).append(":").append(parameter.getType().getTypeClass().getName());
+        }
+
+        return builder.toString();
+    }
+}
