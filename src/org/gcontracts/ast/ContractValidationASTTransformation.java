@@ -53,8 +53,6 @@ import java.util.List;
 public class ContractValidationASTTransformation implements ASTTransformation {
 
     public void visit(ASTNode[] nodes, SourceUnit unit) {
-        assert 1 > 0 : "hallo";
-        
         ModuleNode moduleNode = (ModuleNode)nodes[0];
         for (ClassNode classNode : moduleNode.getClasses())
 
