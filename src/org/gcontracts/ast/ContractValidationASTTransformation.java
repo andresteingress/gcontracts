@@ -24,9 +24,7 @@ package org.gcontracts.ast;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.AssertStatement;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.syntax.Token;
@@ -37,6 +35,7 @@ import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -172,13 +171,53 @@ class AssertionInjector {
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
-        BlockStatement postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition");
         BlockStatement methodBlock = (BlockStatement) method.getCode();
 
-        methodBlock.addStatement(postconditionCheck);
+        // if return type is not void, than a "result" variable is provided in the postcondition expression
+        List<Statement> statements = methodBlock.getStatements();
+        if (statements.size() > 0)  {
+            BlockStatement postconditionCheck = null;
+
+            if (method.getReturnType() != ClassHelper.VOID_TYPE)  {
+                Statement lastStatement = statements.get(statements.size() - 1);
+
+                ReturnStatement returnStatement = getReturnStatement(lastStatement);
+
+                // Assign the return statement expression to a local variable of type Object
+                VariableExpression resultVariable = new VariableExpression("result");
+                ExpressionStatement resultVariableStatement = new ExpressionStatement(
+                new DeclarationExpression(resultVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        returnStatement.getExpression()));
+
+                statements.remove(statements.size() - 1);
+
+                postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new Parameter(ClassHelper.DYNAMIC_TYPE, "result"));
+                postconditionCheck.getStatements().add(0, resultVariableStatement);
+
+                methodBlock.addStatement(postconditionCheck);
+                methodBlock.addStatement(returnStatement);
+            } else {
+                postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition");
+                // postconditionCheck.addStatement(returnStatement);
+                methodBlock.addStatement(postconditionCheck);
+            }
+        }
     }
 
-    private BlockStatement createAssertionExpression(MethodNode method, ClosureExpression closureExpression, String constraint) {
+    private ReturnStatement getReturnStatement(Statement lastStatement)  {
+
+        if (lastStatement instanceof ReturnStatement)  {
+            return (ReturnStatement) lastStatement;
+        } else {
+            BlockStatement blockStatement = (BlockStatement) lastStatement;
+            List<Statement> statements = blockStatement.getStatements();
+
+            return statements.size() > 0 ? getReturnStatement(statements.get(statements.size() - 1)) : null;
+        }
+    }
+
+    private BlockStatement createAssertionExpression(MethodNode method, ClosureExpression closureExpression, String constraint, Parameter... optionalParameters) {
         BlockStatement assertionBlock = new BlockStatement();
         // assign the closure to a local variable and call() it
         VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
@@ -189,14 +228,15 @@ class AssertionInjector {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         closureExpression)));
 
-        ArgumentListExpression arguments = new ArgumentListExpression();
+        List<Expression> expressions = new ArrayList<Expression>();
 
-        for (Parameter parameter : method.getParameters())  {
-            arguments.addExpression(new VariableExpression(parameter));
+        // add optional parameters first in argument list
+        for (Parameter parameter : optionalParameters)  {
+            expressions.add(new VariableExpression(parameter));
         }
 
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(closureVariable, "call", arguments)
+                new MethodCallExpression(closureVariable, "call", expressions.size() <= 1 ? new ArgumentListExpression(expressions) : new ArgumentListExpression(new ArrayExpression(ClassHelper.OBJECT_TYPE, expressions)))
         ), new ConstantExpression("[" + constraint + "] method " + method.getName() + "(" + getMethodParameters(method) + ")")));
 
         return assertionBlock;
