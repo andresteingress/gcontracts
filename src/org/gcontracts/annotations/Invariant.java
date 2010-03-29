@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  *
  * @author andre.steingress@gmail.com
  */
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Invariant {
     Class value();
