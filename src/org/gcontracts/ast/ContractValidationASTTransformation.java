@@ -34,6 +34,7 @@ import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
+import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +70,7 @@ class AssertionInjector {
 
     private final ClassNode classNode;
     private ClosureExpression classInvariant;
+    private FieldNode fieldInvariant;
 
     public AssertionInjector(ClassNode classNode) {
         this.classNode = classNode;
@@ -124,18 +126,12 @@ class AssertionInjector {
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
+        // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
+        fieldInvariant = type.addField("$invariant", Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
+
         BlockStatement assertionBlock = new BlockStatement();
-        // assign the closure to a local variable and call() it
-        VariableExpression closureVariable = new VariableExpression("$invariantClosure");
-
-        // create a local variable to hold a reference to the newly instantiated closure
-        assertionBlock.addStatement(new ExpressionStatement(
-                new DeclarationExpression(closureVariable,
-                        Token.newSymbol(Types.ASSIGN, -1, -1),
-                        classInvariant)));
-
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(closureVariable, "call", ArgumentListExpression.EMPTY_ARGUMENTS)
+                new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
         ), new ConstantExpression("[invariant]")));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
@@ -145,10 +141,13 @@ class AssertionInjector {
 
     public void generateInvariantAssertionStatement(MethodNode method)  {
 
-        BlockStatement invariantCheck = createAssertionExpression(method, classInvariant, "invariant");
-        BlockStatement methodBlock = (BlockStatement) method.getCode();
+        BlockStatement assertionBlock = new BlockStatement();
+        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
+                new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
+        ), new ConstantExpression("[invariant]")));
 
-        methodBlock.addStatement(invariantCheck);
+        BlockStatement methodBlock = (BlockStatement) method.getCode();
+        methodBlock.addStatement(assertionBlock);
     }
 
     public void generatePreconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
