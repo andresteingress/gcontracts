@@ -123,11 +123,15 @@ class AssertionInjector {
 
         // get the closure annotation
         classInvariant = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+
+        // adding super-calls to invariants of parent classes
+        addCallsToSuperClassInvariants(type, classInvariant);
+
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
         // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
-        fieldInvariant = type.addField("$invariant", Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
+        fieldInvariant = type.addField("$invariant$" + type.getNameWithoutPackage(), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
 
         BlockStatement assertionBlock = new BlockStatement();
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
@@ -137,6 +141,46 @@ class AssertionInjector {
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
             ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
         }
+    }
+
+    /**
+     * Modifies the given <tt>closure</tt> which contains that current class-invariant and adds a super-call the
+     * the class-invariant of the next parent class which has the Invarian annotation.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param closure the current class-invariant as {@link org.codehaus.groovy.ast.expr.ClosureExpression}
+     */
+    public void addCallsToSuperClassInvariants(ClassNode type, ClosureExpression closure)  {
+
+        ClassNode nextClassWithInvariant = getNextClassNodeWithAnnotation(type.getSuperClass(), Invariant.class);
+        if (nextClassWithInvariant == null) return;
+
+        final String fieldName = "$invariant$" + nextClassWithInvariant.getNameWithoutPackage();
+        FieldNode nextClassInvariantField = nextClassWithInvariant.getField(fieldName);
+        if (nextClassInvariantField == null)  {
+            nextClassInvariantField = new FieldNode(fieldName, Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, nextClassWithInvariant, null);
+        }
+
+        BlockStatement blockStatement = (BlockStatement) closure.getCode();
+        ExpressionStatement expressionStatement = (ExpressionStatement) blockStatement.getStatements().get(0);
+
+        Expression expression = expressionStatement.getExpression();
+
+        expressionStatement.setExpression(
+                 new BinaryExpression(
+                         new BooleanExpression(expression),
+                         Token.newSymbol(Types.LOGICAL_AND, -1, -1),
+                         new BooleanExpression(new MethodCallExpression(new PropertyExpression(VariableExpression.THIS_EXPRESSION, fieldName), "call", ArgumentListExpression.EMPTY_ARGUMENTS))));
+    }
+
+    public ClassNode getNextClassNodeWithAnnotation(ClassNode type, Class anno)  {
+        for (AnnotationNode annotation : type.getAnnotations())  {
+            if (annotation.getClassNode().getTypeClass() == anno)  {
+                return type;
+            }
+        }
+
+        if (type.getSuperClass() != null) return getNextClassNodeWithAnnotation(type.getSuperClass(), anno); else return null;
     }
 
     public void generateInvariantAssertionStatement(MethodNode method)  {
