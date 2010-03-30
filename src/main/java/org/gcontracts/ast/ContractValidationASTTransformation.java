@@ -55,7 +55,6 @@ public class ContractValidationASTTransformation implements ASTTransformation {
     public void visit(ASTNode[] nodes, SourceUnit unit) {
         ModuleNode moduleNode = (ModuleNode)nodes[0];
         for (ClassNode classNode : moduleNode.getClasses())
-
             new AssertionInjector(classNode).rewrite();
     }
 }

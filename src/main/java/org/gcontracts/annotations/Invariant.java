@@ -28,7 +28,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Represents a <b>class invariant</b>.
+ * <p>
+ * Represents a <b>class-invariant</b>. The class-invariant defines assertions that must holds during
+ * the entire life-time of this class's instances.
+ * </p>
+ * <p>
+ * Checking the class-invariant is injected at several pointcuts:
+ * <ul>
+ *  <li>after a constructor call</li>
+ *  <li>before a method call</li>
+ *  <li>after a method call</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Whenever a class has a parent which itself specifies a class-invariant, that class-invariant expression is combined
+ * with the actual class's invariant (by using a logical AND).
+ * </p>
  *
  * @author andre.steingress@gmail.com
  */

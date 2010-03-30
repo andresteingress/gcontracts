@@ -28,9 +28,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * <p>
  * Represents a <b>method's postcondition</b>. <p/>A method's postcondition is executed <i>after</i> a method call
  * has finished. A successor's postcondition strengthens the postcondition of its parent class, e.g. if A.someMethod
  * declares a postcondition and B.someMethod overrides the method the postconditions are combined with a boolean AND.
+ * </p>
+ * <p>
+ * Example:
+ *
+ * <code>
+ *   @Ensures({ result -> result != argument1 })
+ *   def T someOperation(def argument1, def argument2)  {
+ *     ...
+ *   }
+ * </code>
+ * </p>
  *
  * @author andre.steingress@gmail.com
  */
