@@ -189,8 +189,13 @@ class AssertionInjector {
                 new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
         ), new ConstantExpression("[invariant]")));
 
-        BlockStatement methodBlock = (BlockStatement) method.getCode();
-        methodBlock.addStatement(assertionBlock);
+        Statement statement = method.getCode();
+        if (statement instanceof BlockStatement)  {
+            ((BlockStatement) statement).addStatement(assertionBlock);
+        } else  {
+            assertionBlock.addStatement(statement);
+            method.setCode(assertionBlock);
+        }
     }
 
     public void generatePreconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
