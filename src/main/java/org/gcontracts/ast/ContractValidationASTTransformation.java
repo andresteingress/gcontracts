@@ -135,7 +135,7 @@ class AssertionInjector {
         BlockStatement assertionBlock = new BlockStatement();
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-        ), new ConstantExpression("[invariant]")));
+        ), new ConstantExpression("[invariant] " + type.getName())));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
             ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
@@ -187,7 +187,7 @@ class AssertionInjector {
         BlockStatement assertionBlock = new BlockStatement();
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-        ), new ConstantExpression("[invariant]")));
+        ), new ConstantExpression("[invariant] " + method.getDeclaringClass().getName())));
 
         Statement statement = method.getCode();
         if (statement instanceof BlockStatement)  {
