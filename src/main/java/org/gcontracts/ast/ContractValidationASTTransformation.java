@@ -37,6 +37,7 @@ import org.gcontracts.annotations.Requires;
 import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -214,11 +215,62 @@ class AssertionInjector {
     public void generatePostconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
 
         // get the closure annotation
-        ClosureExpression closureExpression = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+        final ClosureExpression closureExpression = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
+        final ClassNode declaringClass = method.getDeclaringClass();
+        final ArrayList<ExpressionStatement> oldVariableAssignments = new ArrayList<ExpressionStatement>();
+        final ArrayList<VariableExpression> oldVariableExpressions = new ArrayList<VariableExpression>();
+
+        // create variable assignments for old variables
+        for (final FieldNode fieldNode : declaringClass.getFields())   {
+            final ClassNode fieldType = fieldNode.getType();
+            if (ClassHelper.isNumberType(fieldType) || ClassHelper.isPrimitiveType(fieldType) || fieldType == ClassHelper.BigDecimal_TYPE || fieldType == ClassHelper.BigInteger_TYPE ||
+                    fieldType == ClassHelper.makeCached(Date.class) || fieldType == ClassHelper.makeCached(java.sql.Date.class))  {
+
+                MethodNode cloneMethod = fieldType.getDeclaredMethod("clone", Parameter.EMPTY_ARRAY);
+                // if a clone method is available, the value is cloned
+                if (cloneMethod != null)  {
+                    VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
+                    ExpressionStatement oldVariableAssignment = new ExpressionStatement(
+                        new DeclarationExpression(oldVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        new MethodCallExpression(new FieldExpression(fieldNode), "clone", ArgumentListExpression.EMPTY_ARGUMENTS)));
+
+                    oldVariableExpressions.add(oldVariable);
+                    oldVariableAssignments.add(oldVariableAssignment);
+                } else if (ClassHelper.isPrimitiveType(fieldType)) {
+                    VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
+                    ExpressionStatement oldVariableAssignment = new ExpressionStatement(
+                        new DeclarationExpression(oldVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        new FieldExpression(fieldNode)));
+
+                    oldVariableExpressions.add(oldVariable);
+                    oldVariableAssignments.add(oldVariableAssignment);
+                }
+            }
+        }
+
         BlockStatement methodBlock = (BlockStatement) method.getCode();
+
+        MapExpression oldVariableMap = new MapExpression();
+        // add old variable statements
+        for (int i = 0; i < oldVariableAssignments.size(); i++)  {
+            VariableExpression variable = oldVariableExpressions.get(i);
+
+            methodBlock.getStatements().add(0, oldVariableAssignments.get(i));
+            oldVariableMap.addMapEntryExpression(new MapEntryExpression(new ConstantExpression(variable.getName()), variable));
+        }
+
+        VariableExpression oldVariable = new VariableExpression("old");
+        ExpressionStatement oldVariableStatement = new ExpressionStatement(
+        new DeclarationExpression(oldVariable,
+                Token.newSymbol(Types.ASSIGN, -1, -1),
+                oldVariableMap));
+
+        methodBlock.getStatements().add(oldVariableAssignments.size(), oldVariableStatement);
 
         // if return type is not void, than a "result" variable is provided in the postcondition expression
         List<Statement> statements = methodBlock.getStatements();
@@ -245,7 +297,7 @@ class AssertionInjector {
                 methodBlock.addStatement(postconditionCheck);
                 methodBlock.addStatement(returnStatement);
             } else {
-                postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition");
+                postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new Parameter(ClassHelper.MAP_TYPE, "old"));
                 // postconditionCheck.addStatement(returnStatement);
                 methodBlock.addStatement(postconditionCheck);
             }
