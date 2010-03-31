@@ -36,6 +36,7 @@ import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
 import org.objectweb.asm.Opcodes;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -195,7 +196,7 @@ class AssertionInjector {
         if (statement instanceof BlockStatement)  {
             ((BlockStatement) statement).addStatement(assertionBlock);
         } else  {
-            assertionBlock.addStatement(statement);
+            assertionBlock.getStatements().add(0, statement);
             method.setCode(assertionBlock);
         }
     }
@@ -289,11 +290,15 @@ class AssertionInjector {
 
         if (lastStatement instanceof ReturnStatement)  {
             return (ReturnStatement) lastStatement;
-        } else {
+        } else if (lastStatement instanceof BlockStatement) {
             BlockStatement blockStatement = (BlockStatement) lastStatement;
             List<Statement> statements = blockStatement.getStatements();
 
             return statements.size() > 0 ? getReturnStatement(statements.get(statements.size() - 1)) : null;
+        } else {
+            // the last statement in a Groovy method could also be an expression which result is treated as return value
+            ExpressionStatement expressionStatement = (ExpressionStatement) lastStatement;
+            return new ReturnStatement(expressionStatement);
         }
     }
 
@@ -351,21 +356,28 @@ class VariableGenerator {
         // create variable assignments for old variables
         for (final FieldNode fieldNode : declaringClass.getFields())   {
             final ClassNode fieldType = fieldNode.getType();
-            if (ClassHelper.isNumberType(fieldType) || ClassHelper.isPrimitiveType(fieldType) || fieldType == ClassHelper.BigDecimal_TYPE || fieldType == ClassHelper.BigInteger_TYPE ||
-                    fieldType == ClassHelper.makeCached(Date.class) || fieldType == ClassHelper.makeCached(java.sql.Date.class))  {
 
-                MethodNode cloneMethod = fieldType.getDeclaredMethod("clone", Parameter.EMPTY_ARRAY);
+            if (fieldType.getName().startsWith("java.lang") || ClassHelper.isPrimitiveType(fieldType) || fieldType.getName().startsWith("java.math") ||
+                    fieldType.getName().startsWith("java.util") || fieldType.getName().startsWith("java.sql"))  {
+
+                MethodNode cloneMethod = fieldType.getMethod("clone", Parameter.EMPTY_ARRAY);
                 // if a clone method is available, the value is cloned
-                if (cloneMethod != null)  {
+                if (cloneMethod != null && fieldType.implementsInterface(ClassHelper.make("java.lang.Cloneable")))  {
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
+
+                    final MethodCallExpression methodCall = new MethodCallExpression(new FieldExpression(fieldNode), "clone", ArgumentListExpression.EMPTY_ARGUMENTS);
+                    // return null if field is null
+                    methodCall.setSafe(true);
+
                     ExpressionStatement oldVariableAssignment = new ExpressionStatement(
                         new DeclarationExpression(oldVariable,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
-                        new MethodCallExpression(new FieldExpression(fieldNode), "clone", ArgumentListExpression.EMPTY_ARGUMENTS)));
+                                methodCall));
 
                     oldVariableExpressions.add(oldVariable);
                     oldVariableAssignments.add(oldVariableAssignment);
-                } else if (ClassHelper.isPrimitiveType(fieldType)) {
+
+                } else if (ClassHelper.isPrimitiveType(fieldType) || fieldType.getName().startsWith("java.lang")) {
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
                     ExpressionStatement oldVariableAssignment = new ExpressionStatement(
                         new DeclarationExpression(oldVariable,
