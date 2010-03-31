@@ -37,6 +37,7 @@ import org.gcontracts.annotations.Requires;
 import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -219,6 +220,130 @@ class AssertionInjector {
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
+        // check whether the closure uses a result or old variable
+        boolean usesResultVariable = false;
+        boolean usesOldVariable = false;
+        boolean usesResultVariableFirst = false;
+
+        for (Parameter closureParameter : closureExpression.getParameters())  {
+            if (closureParameter.getName().equals("old"))  {
+                usesOldVariable = true;
+            } else if (closureParameter.getName().equals("result"))  {
+                usesResultVariable = true;
+                usesResultVariableFirst = !usesOldVariable;
+            }
+        }
+
+        MapExpression oldVariableMap = new MapExpression();
+
+        if (usesOldVariable)  oldVariableMap = new VariableGenerator().generateOldVariablesMap(method);
+
+        BlockStatement methodBlock = (BlockStatement) method.getCode();
+
+        // if return type is not void, than a "result" variable is provided in the postcondition expression
+        List<Statement> statements = methodBlock.getStatements();
+        if (statements.size() > 0)  {
+            BlockStatement postconditionCheck = null;
+
+            if (method.getReturnType() != ClassHelper.VOID_TYPE && usesResultVariable)  {
+                Statement lastStatement = statements.get(statements.size() - 1);
+
+                ReturnStatement returnStatement = getReturnStatement(lastStatement);
+
+                // Assign the return statement expression to a local variable of type Object
+                VariableExpression resultVariable = new VariableExpression("result");
+                ExpressionStatement resultVariableStatement = new ExpressionStatement(
+                new DeclarationExpression(resultVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        returnStatement.getExpression()));
+
+                statements.remove(statements.size() - 1);
+
+                if (usesOldVariable && usesResultVariableFirst)  {
+                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")), oldVariableMap);
+                } else if (usesOldVariable && !usesResultVariableFirst)  {
+                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", oldVariableMap, new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));    
+                } else {
+                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
+                }
+
+                postconditionCheck.getStatements().add(0, resultVariableStatement);
+
+                methodBlock.addStatement(postconditionCheck);
+                methodBlock.addStatement(returnStatement);
+            } else {
+
+                if (usesOldVariable)  {
+                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition",  oldVariableMap);
+                } else {
+                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition");
+                }
+
+                // postconditionCheck.addStatement(returnStatement);
+                methodBlock.addStatement(postconditionCheck);
+            }
+        }
+    }
+
+    private ReturnStatement getReturnStatement(Statement lastStatement)  {
+
+        if (lastStatement instanceof ReturnStatement)  {
+            return (ReturnStatement) lastStatement;
+        } else {
+            BlockStatement blockStatement = (BlockStatement) lastStatement;
+            List<Statement> statements = blockStatement.getStatements();
+
+            return statements.size() > 0 ? getReturnStatement(statements.get(statements.size() - 1)) : null;
+        }
+    }
+
+    private BlockStatement createAssertionExpression(MethodNode method, ClosureExpression closureExpression, String constraint, Expression... optionalParameters) {
+        BlockStatement assertionBlock = new BlockStatement();
+        // assign the closure to a local variable and call() it
+        VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
+
+        // create a local variable to hold a reference to the newly instantiated closure
+        assertionBlock.addStatement(new ExpressionStatement(
+                new DeclarationExpression(closureVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        closureExpression)));
+
+        List<Expression> expressions = new ArrayList<Expression>(Arrays.asList(optionalParameters));
+
+        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
+                // new MethodCallExpression(closureVariable, "call", expressions.size() <= 1 ? new ArgumentListExpression(expressions) : new ArgumentListExpression(new ArrayExpression(ClassHelper.DYNAMIC_TYPE, expressions)))
+                new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
+        ), new ConstantExpression("[" + constraint + "] method " + method.getName() + "(" + getMethodParameters(method) + ")")));
+
+        return assertionBlock;
+    }
+
+    private String getMethodParameters(MethodNode method)  {
+        StringBuilder builder = new StringBuilder();
+
+        for (Parameter parameter : method.getParameters())  {
+            if (builder.length() > 0)  {
+                builder.append(", ");
+            }
+            builder.append(parameter.getName()).append(":").append(parameter.getType().getTypeClass().getName());
+        }
+
+        return builder.toString();
+    }
+}
+
+class VariableGenerator {
+
+    /**
+     * Each field of the class is assigned to an old variable before method execution. After method execution
+     * a map with the old variable values is generated, which is than used as parameter in the {@link org.gcontracts.annotations.Ensures}
+     * closure.
+     *
+     * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
+     * @return a {@link org.codehaus.groovy.ast.expr.MapExpression} which holds either none or some old variables
+     */
+    public MapExpression generateOldVariablesMap(MethodNode method) {
+
         final ClassNode declaringClass = method.getDeclaringClass();
         final ArrayList<ExpressionStatement> oldVariableAssignments = new ArrayList<ExpressionStatement>();
         final ArrayList<VariableExpression> oldVariableExpressions = new ArrayList<VariableExpression>();
@@ -255,102 +380,15 @@ class AssertionInjector {
 
         BlockStatement methodBlock = (BlockStatement) method.getCode();
 
-        MapExpression oldVariableMap = new MapExpression();
+        MapExpression oldVariablesMap = new MapExpression();
         // add old variable statements
         for (int i = 0; i < oldVariableAssignments.size(); i++)  {
             VariableExpression variable = oldVariableExpressions.get(i);
 
             methodBlock.getStatements().add(0, oldVariableAssignments.get(i));
-            oldVariableMap.addMapEntryExpression(new MapEntryExpression(new ConstantExpression(variable.getName()), variable));
+            oldVariablesMap.addMapEntryExpression(new MapEntryExpression(new ConstantExpression(variable.getName().substring("$old$".length())), variable));
         }
 
-        VariableExpression oldVariable = new VariableExpression("old");
-        ExpressionStatement oldVariableStatement = new ExpressionStatement(
-        new DeclarationExpression(oldVariable,
-                Token.newSymbol(Types.ASSIGN, -1, -1),
-                oldVariableMap));
-
-        methodBlock.getStatements().add(oldVariableAssignments.size(), oldVariableStatement);
-
-        // if return type is not void, than a "result" variable is provided in the postcondition expression
-        List<Statement> statements = methodBlock.getStatements();
-        if (statements.size() > 0)  {
-            BlockStatement postconditionCheck = null;
-
-            if (method.getReturnType() != ClassHelper.VOID_TYPE)  {
-                Statement lastStatement = statements.get(statements.size() - 1);
-
-                ReturnStatement returnStatement = getReturnStatement(lastStatement);
-
-                // Assign the return statement expression to a local variable of type Object
-                VariableExpression resultVariable = new VariableExpression("result");
-                ExpressionStatement resultVariableStatement = new ExpressionStatement(
-                new DeclarationExpression(resultVariable,
-                        Token.newSymbol(Types.ASSIGN, -1, -1),
-                        returnStatement.getExpression()));
-
-                statements.remove(statements.size() - 1);
-
-                postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new Parameter(ClassHelper.DYNAMIC_TYPE, "result"));
-                postconditionCheck.getStatements().add(0, resultVariableStatement);
-
-                methodBlock.addStatement(postconditionCheck);
-                methodBlock.addStatement(returnStatement);
-            } else {
-                postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new Parameter(ClassHelper.MAP_TYPE, "old"));
-                // postconditionCheck.addStatement(returnStatement);
-                methodBlock.addStatement(postconditionCheck);
-            }
-        }
-    }
-
-    private ReturnStatement getReturnStatement(Statement lastStatement)  {
-
-        if (lastStatement instanceof ReturnStatement)  {
-            return (ReturnStatement) lastStatement;
-        } else {
-            BlockStatement blockStatement = (BlockStatement) lastStatement;
-            List<Statement> statements = blockStatement.getStatements();
-
-            return statements.size() > 0 ? getReturnStatement(statements.get(statements.size() - 1)) : null;
-        }
-    }
-
-    private BlockStatement createAssertionExpression(MethodNode method, ClosureExpression closureExpression, String constraint, Parameter... optionalParameters) {
-        BlockStatement assertionBlock = new BlockStatement();
-        // assign the closure to a local variable and call() it
-        VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
-
-        // create a local variable to hold a reference to the newly instantiated closure
-        assertionBlock.addStatement(new ExpressionStatement(
-                new DeclarationExpression(closureVariable,
-                        Token.newSymbol(Types.ASSIGN, -1, -1),
-                        closureExpression)));
-
-        List<Expression> expressions = new ArrayList<Expression>();
-
-        // add optional parameters first in argument list
-        for (Parameter parameter : optionalParameters)  {
-            expressions.add(new VariableExpression(parameter));
-        }
-
-        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(closureVariable, "call", expressions.size() <= 1 ? new ArgumentListExpression(expressions) : new ArgumentListExpression(new ArrayExpression(ClassHelper.OBJECT_TYPE, expressions)))
-        ), new ConstantExpression("[" + constraint + "] method " + method.getName() + "(" + getMethodParameters(method) + ")")));
-
-        return assertionBlock;
-    }
-
-    private String getMethodParameters(MethodNode method)  {
-        StringBuilder builder = new StringBuilder();
-
-        for (Parameter parameter : method.getParameters())  {
-            if (builder.length() > 0)  {
-                builder.append(", ");
-            }
-            builder.append(parameter.getName()).append(":").append(parameter.getType().getTypeClass().getName());
-        }
-
-        return builder.toString();
+        return oldVariablesMap;
     }
 }
