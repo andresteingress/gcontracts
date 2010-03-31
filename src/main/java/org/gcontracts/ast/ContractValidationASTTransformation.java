@@ -43,10 +43,14 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * <p>
  * Custom AST transformation that removes closure annotations of {@link org.gcontracts.annotations.Invariant},
  * {@link org.gcontracts.annotations.Requires} and {@link org.gcontracts.annotations.Ensures} and adds Java
- * assertions which executing the constraint-code instead. <p/>
+ * assertions which executing the constraint-code instead.
+ * </p>
+ * <p>
  * Whenever a constraint is broken an {@link AssertionError} will be thrown.
+ * </p>
  *
  * @see AssertionError
  *
@@ -55,16 +59,25 @@ import java.util.List;
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
 public class ContractValidationASTTransformation implements ASTTransformation {
 
+    /**
+     * {@link org.codehaus.groovy.transform.ASTTransformation#visit(org.codehaus.groovy.ast.ASTNode[], org.codehaus.groovy.control.SourceUnit)}
+     */
     public void visit(ASTNode[] nodes, SourceUnit unit) {
-        ModuleNode moduleNode = (ModuleNode)nodes[0];
-        for (ClassNode classNode : moduleNode.getClasses())
+        final ModuleNode moduleNode = (ModuleNode)nodes[0];
+
+        for (final ClassNode classNode : moduleNode.getClasses())  {
             new AssertionInjector(classNode).rewrite();
+        }
     }
 }
 
 /**
- * Injects standard Java assertion statements which check the specified pre- and post-conditions and the class
- * invariants.
+ * Injects standard Java assertion statements which check the specified {@link org.gcontracts.annotations.Requires},
+ * {@link org.gcontracts.annotations.Ensures} and {@link org.gcontracts.annotations.Invariant} closure annotations.
+ *
+ * @see org.gcontracts.annotations.Requires
+ * @see org.gcontracts.annotations.Ensures
+ * @see org.gcontracts.annotations.Invariant
  */
 class AssertionInjector {
 
@@ -78,6 +91,10 @@ class AssertionInjector {
         this.classNode = classNode;
     }
 
+    /**
+     * Rewrites the current {@link org.codehaus.groovy.ast.ClassNode} and adds assertions for all supported
+     * assertion types.
+     */
     public void rewrite() {
         new ClassCodeVisitorSupport() {
 
@@ -121,6 +138,13 @@ class AssertionInjector {
         }.visitClass(classNode);
     }
 
+    /**
+     * Reads the {@link org.gcontracts.annotations.Invariant} closure expression and adds a class-invariant to
+     * all declard contructors of that <tt>type</tt>.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param annotation the {@link org.gcontracts.annotations.Invariant} annotation node
+     */
     public void generateInvariantAssertionStatement(ClassNode type, AnnotationNode annotation)  {
 
         // get the closure annotation
@@ -135,7 +159,7 @@ class AssertionInjector {
         // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
         fieldInvariant = type.addField("$invariant$" + type.getNameWithoutPackage(), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
 
-        BlockStatement assertionBlock = new BlockStatement();
+        final BlockStatement assertionBlock = new BlockStatement();
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
         ), new ConstantExpression("[invariant] " + type.getName())));
@@ -154,7 +178,7 @@ class AssertionInjector {
      */
     public void addCallsToSuperClassInvariants(ClassNode type, ClosureExpression closure)  {
 
-        ClassNode nextClassWithInvariant = getNextClassNodeWithAnnotation(type.getSuperClass(), Invariant.class);
+        final ClassNode nextClassWithInvariant = AnnotationUtils.getNextClassNodeWithAnnotation(type.getSuperClass(), Invariant.class);
         if (nextClassWithInvariant == null) return;
 
         final String fieldName = "$invariant$" + nextClassWithInvariant.getNameWithoutPackage();
@@ -163,10 +187,10 @@ class AssertionInjector {
             nextClassInvariantField = new FieldNode(fieldName, Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, nextClassWithInvariant, null);
         }
 
-        BlockStatement blockStatement = (BlockStatement) closure.getCode();
-        ExpressionStatement expressionStatement = (ExpressionStatement) blockStatement.getStatements().get(0);
+        final BlockStatement blockStatement = (BlockStatement) closure.getCode();
+        final ExpressionStatement expressionStatement = (ExpressionStatement) blockStatement.getStatements().get(0);
 
-        Expression expression = expressionStatement.getExpression();
+        final Expression expression = expressionStatement.getExpression();
 
         expressionStatement.setExpression(
                  new BinaryExpression(
@@ -175,24 +199,19 @@ class AssertionInjector {
                          new BooleanExpression(new MethodCallExpression(new PropertyExpression(VariableExpression.THIS_EXPRESSION, fieldName), "call", ArgumentListExpression.EMPTY_ARGUMENTS))));
     }
 
-    public ClassNode getNextClassNodeWithAnnotation(ClassNode type, Class anno)  {
-        for (AnnotationNode annotation : type.getAnnotations())  {
-            if (annotation.getClassNode().getTypeClass() == anno)  {
-                return type;
-            }
-        }
-
-        if (type.getSuperClass() != null) return getNextClassNodeWithAnnotation(type.getSuperClass(), anno); else return null;
-    }
-
+    /**
+     * Adds the current class-invariant to the given <tt>method</tt>.
+     *
+     * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
+     */
     public void generateInvariantAssertionStatement(MethodNode method)  {
 
-        BlockStatement assertionBlock = new BlockStatement();
+        final BlockStatement assertionBlock = new BlockStatement();
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
         ), new ConstantExpression("[invariant] " + method.getDeclaringClass().getName())));
 
-        Statement statement = method.getCode();
+        final Statement statement = method.getCode();
         if (statement instanceof BlockStatement)  {
             ((BlockStatement) statement).addStatement(assertionBlock);
         } else  {
@@ -201,19 +220,33 @@ class AssertionInjector {
         }
     }
 
+    /**
+     * Injects a precondition assertion statement in the given <tt>method</tt>, based on the given <tt>annotation</tt> of
+     * type {@link org.gcontracts.annotations.Requires}.
+     *
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} for assertion injection
+     * @param annotation the {@link org.gcontracts.annotations.Requires} annotation
+     */
     public void generatePreconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
 
         // get the closure annotation
-        ClosureExpression closureExpression = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+        final ClosureExpression closureExpression = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
-        BlockStatement preconditionCheck = createAssertionExpression(method, closureExpression, "precondition");
+        final BlockStatement preconditionCheck = createAssertionExpression(method, closureExpression, "precondition");
         preconditionCheck.addStatement(method.getCode());
 
         method.setCode(preconditionCheck);
     }
 
+    /**
+     * Injects a postcondition assertion statement in the given <tt>method</tt>, based on the given <tt>annotation</tt> of
+     * type {@link org.gcontracts.annotations.Ensures}.
+     *
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} for assertion injection
+     * @param annotation the {@link org.gcontracts.annotations.Ensures} annotation
+     */
     public void generatePostconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
 
         // get the closure annotation
@@ -239,10 +272,10 @@ class AssertionInjector {
 
         if (usesOldVariable)  oldVariableMap = new VariableGenerator().generateOldVariablesMap(method);
 
-        BlockStatement methodBlock = (BlockStatement) method.getCode();
+        final BlockStatement methodBlock = (BlockStatement) method.getCode();
 
         // if return type is not void, than a "result" variable is provided in the postcondition expression
-        List<Statement> statements = methodBlock.getStatements();
+        final List<Statement> statements = methodBlock.getStatements();
         if (statements.size() > 0)  {
             BlockStatement postconditionCheck = null;
 
@@ -280,12 +313,17 @@ class AssertionInjector {
                     postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition");
                 }
 
-                // postconditionCheck.addStatement(returnStatement);
                 methodBlock.addStatement(postconditionCheck);
             }
         }
     }
 
+    /**
+     * Gets a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} from the given {@link org.codehaus.groovy.ast.stmt.Statement}.
+     *
+     * @param lastStatement the last {@link org.codehaus.groovy.ast.stmt.Statement} of some method code block
+     * @return a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} or <tt>null</tt>
+     */
     private ReturnStatement getReturnStatement(Statement lastStatement)  {
 
         if (lastStatement instanceof ReturnStatement)  {
@@ -302,10 +340,21 @@ class AssertionInjector {
         }
     }
 
+    /**
+     * Reusable method for creating assert statements for the given <tt>closureExpression</tt>, injected in the
+     * given <tt>method</tt> and with optional closure parameters.
+     *
+     * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
+     * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
+     * @param constraint the name of the constraint, used for assertion messages
+     * @param optionalParameters expressions to be used as closure parameters
+     *
+     * @return a new {@link org.codehaus.groovy.ast.stmt.BlockStatement} which holds the assertion
+     */
     private BlockStatement createAssertionExpression(MethodNode method, ClosureExpression closureExpression, String constraint, Expression... optionalParameters) {
-        BlockStatement assertionBlock = new BlockStatement();
+        final BlockStatement assertionBlock = new BlockStatement();
         // assign the closure to a local variable and call() it
-        VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
+        final VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
 
         // create a local variable to hold a reference to the newly instantiated closure
         assertionBlock.addStatement(new ExpressionStatement(
@@ -313,18 +362,23 @@ class AssertionInjector {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         closureExpression)));
 
-        List<Expression> expressions = new ArrayList<Expression>(Arrays.asList(optionalParameters));
+        final List<Expression> expressions = new ArrayList<Expression>(Arrays.asList(optionalParameters));
 
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
-                // new MethodCallExpression(closureVariable, "call", expressions.size() <= 1 ? new ArgumentListExpression(expressions) : new ArgumentListExpression(new ArrayExpression(ClassHelper.DYNAMIC_TYPE, expressions)))
                 new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
         ), new ConstantExpression("[" + constraint + "] method " + method.getName() + "(" + getMethodParameters(method) + ")")));
 
         return assertionBlock;
     }
 
+    /**
+     * Creates a representative {@link String} of the given {@link org.codehaus.groovy.ast.MethodNode}.
+     *
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to create the representation
+     * @return a {@link String} representation of the given <tt>method</tt>
+     */
     private String getMethodParameters(MethodNode method)  {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
 
         for (Parameter parameter : method.getParameters())  {
             if (builder.length() > 0)  {
