@@ -21,9 +21,9 @@
     USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====
 
-To download the current version of gcontracts visi: ttp://github.com/andresteingress/gcontracts/downloads
+To download the current version of gcontracts visit: http://github.com/andresteingress/gcontracts/downloads
 
-To fork gcontracts and develop it in your own repository, take a look at http://help.github.com/.
+To fork gcontracts and develop from within your own repository, take a look at http://help.github.com/.
 
 
 
