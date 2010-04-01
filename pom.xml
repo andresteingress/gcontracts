@@ -56,9 +56,8 @@
     </repositories>
 
     <scm>
-        <connection>scm:git:git://github.com/andresteingress/gcontracts.git</connection>
-        <developerConnection>scm:git:git://github.com/andresteingress/gcontracts.git</developerConnection>
-        <url>http://github.com/andresteingress/gcontracts</url>
+        <connection>scm:git:file://Users/andre/Development/gcontracts</connection>
+        <url>scm:git:file://Users/andre/Development/gcontracts</url>
     </scm>
 
     <properties>
