@@ -20,5 +20,12 @@
     WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
     USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====
-In order to pull gcontracts to your environment, take a look at http://help.github.com/.
+
+To download the current version of gcontracts visi: ttp://github.com/andresteingress/gcontracts/downloads
+
+To fork gcontracts and develop it in your own repository, take a look at http://help.github.com/.
+
+
+
+For further information on gcontracts visit http://wiki.github.com/andresteingress/gcontracts/ or http://andresteingress.wordpress.com
 
