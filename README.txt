@@ -1,5 +1,5 @@
 ====
-    Copyright (c) 2010, andre.steingress@gmail.com
+    Copyright (c) 2010, gcontracts.lib@gmail.com
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -20,6 +20,5 @@
     WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
     USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====
-
 In order to pull gcontracts to your environment, take a look at http://help.github.com/.
 
