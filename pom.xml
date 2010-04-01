@@ -4,7 +4,7 @@
     <groupId>org.gcontracts</groupId>
     <artifactId>gcontracts</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <inceptionYear>2010</inceptionYear>
     <name>GContracts - Contract-Oriented Programming with Groovy</name>
     <url>http://github.com/andresteingress/gcontracts</url>
@@ -131,14 +131,21 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.scm</groupId>
+                        <artifactId>maven-scm-api</artifactId>
+                        <version>1.3</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.maven.scm</groupId>
                         <artifactId>maven-scm-provider-gitexe</artifactId>
                         <version>1.3</version>
                     </dependency>
+
                 </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
+                <version>1.3</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.scm</groupId>
