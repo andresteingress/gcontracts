@@ -26,10 +26,18 @@ import java.util.List;
  */
 public final class AssertStatementCreator {
 
+    /**
+     * Reusable method for creating assert statements for the given <tt>invariantField</tt>.
+     *
+     * @param classNode the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param invariantField the {@link org.codehaus.groovy.ast.FieldNode} pointing to the invariant closure field
+     *
+     * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     */
     public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final FieldNode invariantField)  {
         return new AssertStatement(new BooleanExpression(
             new MethodCallExpression(new FieldExpression(invariantField), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-        ), new ConstantExpression("[invariant] Invariant in class " + classNode.getName() + " violated."));
+        ), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated"));
     }
 
     /**
@@ -58,7 +66,7 @@ public final class AssertStatementCreator {
 
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
-        ), new ConstantExpression("[" + constraint + "] In method " + method.getName() + "(" + getMethodParameters(method) + ") violated.")));
+        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameters(method) + ")> violated")));
 
         return assertionBlock;
     }
