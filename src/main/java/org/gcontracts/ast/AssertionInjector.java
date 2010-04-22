@@ -24,7 +24,10 @@ package org.gcontracts.ast;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.*;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.ast.stmt.ReturnStatement;
+import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -33,8 +36,6 @@ import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
 import org.objectweb.asm.Opcodes;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -126,9 +127,8 @@ public class AssertionInjector {
         fieldInvariant = type.addField("$invariant$" + type.getNameWithoutPackage(), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
 
         final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-        ), new ConstantExpression("[invariant] " + type.getName())));
+
+        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, fieldInvariant));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
             ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
@@ -173,9 +173,7 @@ public class AssertionInjector {
     public void generateInvariantAssertionStatement(MethodNode method)  {
 
         final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(new FieldExpression(fieldInvariant), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-        ), new ConstantExpression("[invariant] " + method.getDeclaringClass().getName())));
+        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(method.getDeclaringClass(), fieldInvariant));
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement)  {
@@ -200,7 +198,7 @@ public class AssertionInjector {
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
-        final BlockStatement preconditionCheck = createAssertionExpression(method, closureExpression, "precondition");
+        final BlockStatement preconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "precondition");
         preconditionCheck.addStatement(method.getCode());
 
         method.setCode(preconditionCheck);
@@ -260,11 +258,11 @@ public class AssertionInjector {
                 statements.remove(statements.size() - 1);
 
                 if (usesOldVariable && usesResultVariableFirst)  {
-                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")), oldVariableMap);
+                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")), oldVariableMap);
                 } else if (usesOldVariable && !usesResultVariableFirst)  {
-                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", oldVariableMap, new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
+                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition", oldVariableMap, new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
                 } else {
-                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
+                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
                 }
 
                 postconditionCheck.getStatements().add(0, resultVariableStatement);
@@ -274,9 +272,9 @@ public class AssertionInjector {
             } else {
 
                 if (usesOldVariable)  {
-                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition",  oldVariableMap);
+                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition",  oldVariableMap);
                 } else {
-                    postconditionCheck = createAssertionExpression(method, closureExpression, "postcondition");
+                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition");
                 }
 
                 methodBlock.addStatement(postconditionCheck);
@@ -304,55 +302,5 @@ public class AssertionInjector {
             ExpressionStatement expressionStatement = (ExpressionStatement) lastStatement;
             return new ReturnStatement(expressionStatement);
         }
-    }
-
-    /**
-     * Reusable method for creating assert statements for the given <tt>closureExpression</tt>, injected in the
-     * given <tt>method</tt> and with optional closure parameters.
-     *
-     * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
-     * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
-     * @param constraint the name of the constraint, used for assertion messages
-     * @param optionalParameters expressions to be used as closure parameters
-     *
-     * @return a new {@link org.codehaus.groovy.ast.stmt.BlockStatement} which holds the assertion
-     */
-    private BlockStatement createAssertionExpression(MethodNode method, ClosureExpression closureExpression, String constraint, Expression... optionalParameters) {
-        final BlockStatement assertionBlock = new BlockStatement();
-        // assign the closure to a local variable and call() it
-        final VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
-
-        // create a local variable to hold a reference to the newly instantiated closure
-        assertionBlock.addStatement(new ExpressionStatement(
-                new DeclarationExpression(closureVariable,
-                        Token.newSymbol(Types.ASSIGN, -1, -1),
-                        closureExpression)));
-
-        final List<Expression> expressions = new ArrayList<Expression>(Arrays.asList(optionalParameters));
-
-        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
-        ), new ConstantExpression("[" + constraint + "] method " + method.getName() + "(" + getMethodParameters(method) + ")")));
-
-        return assertionBlock;
-    }
-
-    /**
-     * Creates a representative {@link String} of the given {@link org.codehaus.groovy.ast.MethodNode}.
-     *
-     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to create the representation
-     * @return a {@link String} representation of the given <tt>method</tt>
-     */
-    private String getMethodParameters(MethodNode method)  {
-        final StringBuilder builder = new StringBuilder();
-
-        for (Parameter parameter : method.getParameters())  {
-            if (builder.length() > 0)  {
-                builder.append(", ");
-            }
-            builder.append(parameter.getName()).append(":").append(parameter.getType().getTypeClass().getName());
-        }
-
-        return builder.toString();
     }
 }

@@ -2,7 +2,6 @@ package org.gcontracts.ast;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.SourceUnit;
@@ -44,9 +43,7 @@ public class DynamicSetterAssertionInjector {
                 final BlockStatement setterMethodBlock = new BlockStatement();
 
                 // check invariant before assignment
-                setterMethodBlock.addStatement(new AssertStatement(new BooleanExpression(
-                        new MethodCallExpression(new FieldExpression(invariantField), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-                ), new ConstantExpression("[invariant] " + classNode.getName())));
+                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField));
 
                 // do assignment
                 BinaryExpression fieldAssignment = new BinaryExpression(new FieldExpression(field), Token.newSymbol(Types.ASSIGN, -1, -1), new VariableExpression(parameter));
@@ -54,9 +51,7 @@ public class DynamicSetterAssertionInjector {
 
 
                 // check invariant after assignment
-                setterMethodBlock.addStatement(new AssertStatement(new BooleanExpression(
-                        new MethodCallExpression(new FieldExpression(invariantField), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-                ), new ConstantExpression("[invariant] " + classNode.getName())));
+                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField));
 
                 return setterMethodBlock;
             }
