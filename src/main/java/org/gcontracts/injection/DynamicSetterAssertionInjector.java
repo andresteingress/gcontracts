@@ -9,6 +9,7 @@ import org.codehaus.groovy.runtime.MetaClassHelper;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ast.AssertStatementCreator;
+import org.objectweb.asm.Opcodes;
 
 import java.util.List;
 
@@ -75,11 +76,15 @@ public class DynamicSetterAssertionInjector extends Injector {
             public void visitClass(ClassNode classNode) {
                 super.visitClass(classNode);
 
-                final List<MethodNode> methods = classNode.getMethods();
-                for (MethodNode method : methods)  {
-                    if (method.get)
+                List<ConstructorNode> declaredConstructors = classNode.getDeclaredConstructors();
+                if (declaredConstructors == null || declaredConstructors.isEmpty())  {
+                    // create default constructor with class invariant check
+                    ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField));
+                    constructor.setSynthetic(true);
+                    classNode.addConstructor(constructor);
                 }
             }
+            
         }.visitClass(classNode);
     }
 }
