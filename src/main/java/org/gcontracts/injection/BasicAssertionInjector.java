@@ -20,7 +20,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.ast;
+package org.gcontracts.injection;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
@@ -34,6 +34,9 @@ import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
+import org.gcontracts.ast.AnnotationUtils;
+import org.gcontracts.ast.AssertStatementCreator;
+import org.gcontracts.ast.VariableGenerator;
 import org.objectweb.asm.Opcodes;
 
 import java.util.List;
@@ -46,7 +49,7 @@ import java.util.List;
  * @see org.gcontracts.annotations.Ensures
  * @see org.gcontracts.annotations.Invariant
  */
-public class AssertionInjector {
+public class BasicAssertionInjector extends Injector {
 
     private static final String CLOSURE_ATTRIBUTE_NAME = "value";
 
@@ -54,7 +57,7 @@ public class AssertionInjector {
     private ClosureExpression classInvariant;
     private FieldNode fieldInvariant;
 
-    public AssertionInjector(ClassNode classNode) {
+    public BasicAssertionInjector(ClassNode classNode) {
         this.classNode = classNode;
     }
 
@@ -124,7 +127,7 @@ public class AssertionInjector {
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
         // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
-        fieldInvariant = type.addField("$invariant$" + type.getNameWithoutPackage(), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
+        fieldInvariant = type.addField(getInvariantClosureFieldName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
 
         final BlockStatement assertionBlock = new BlockStatement();
 
@@ -147,8 +150,8 @@ public class AssertionInjector {
         final ClassNode nextClassWithInvariant = AnnotationUtils.getNextClassNodeWithAnnotation(type.getSuperClass(), Invariant.class);
         if (nextClassWithInvariant == null) return;
 
-        final String fieldName = "$invariant$" + nextClassWithInvariant.getNameWithoutPackage();
-        FieldNode nextClassInvariantField = nextClassWithInvariant.getField(fieldName);
+        final String fieldName = getInvariantClosureFieldName(nextClassWithInvariant);
+        FieldNode nextClassInvariantField = getInvariantClosureFieldNode(nextClassWithInvariant);
         if (nextClassInvariantField == null)  {
             nextClassInvariantField = new FieldNode(fieldName, Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, nextClassWithInvariant, null);
         }

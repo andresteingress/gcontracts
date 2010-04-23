@@ -23,22 +23,11 @@
 package org.gcontracts.ast;
 
 import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
-import org.codehaus.groovy.syntax.Token;
-import org.codehaus.groovy.syntax.Types;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
-import org.gcontracts.annotations.Ensures;
-import org.gcontracts.annotations.Invariant;
-import org.gcontracts.annotations.Requires;
-import org.objectweb.asm.Opcodes;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.gcontracts.injection.BasicAssertionInjector;
 
 /**
  * <p>
@@ -64,7 +53,7 @@ public class ContractValidationASTTransformation implements ASTTransformation {
         final ModuleNode moduleNode = (ModuleNode)nodes[0];
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
-            new AssertionInjector(classNode).rewrite();
+            new BasicAssertionInjector(classNode).rewrite();
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.gcontracts.ast;
+package org.gcontracts.injection;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
@@ -8,6 +8,9 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.runtime.MetaClassHelper;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.gcontracts.ast.AssertStatementCreator;
+
+import java.util.List;
 
 /**
  * Assertion injector for injecting class invariants in Groovy generated setter methods.<p/>
@@ -18,7 +21,7 @@ import org.codehaus.groovy.syntax.Types;
  *
  * @author andre.steingress@gmail.com
  */
-public class DynamicSetterAssertionInjector {
+public class DynamicSetterAssertionInjector extends Injector {
 
     private final ClassNode classNode;
 
@@ -29,7 +32,7 @@ public class DynamicSetterAssertionInjector {
     public void rewrite()  {
 
         // if a class invariant is available visit all property nodes else skip this class
-        final FieldNode invariantField = classNode.getField("$invariant$" + classNode.getNameWithoutPackage());
+        final FieldNode invariantField = getInvariantClosureFieldNode(classNode);
         if (invariantField == null) return;
 
         new ClassCodeVisitorSupport()  {
@@ -68,7 +71,15 @@ public class DynamicSetterAssertionInjector {
                 }
             }
 
+            @Override
+            public void visitClass(ClassNode classNode) {
+                super.visitClass(classNode);
 
+                final List<MethodNode> methods = classNode.getMethods();
+                for (MethodNode method : methods)  {
+                    if (method.get)
+                }
+            }
         }.visitClass(classNode);
     }
 }
