@@ -56,8 +56,10 @@ public class VariableGenerator {
             final ClassNode fieldType = fieldNode.getType();
 
             if (fieldType.getName().startsWith("java.lang") || ClassHelper.isPrimitiveType(fieldType) || fieldType.getName().startsWith("java.math") ||
-                    fieldType.getName().startsWith("java.util") || fieldType.getName().startsWith("java.sql") || fieldType.getName().endsWith("groovy.lang.GString")  ||
-                    fieldType.getName().endsWith("java.lang.String"))  {
+                    fieldType.getName().startsWith("java.util") ||
+                    fieldType.getName().startsWith("java.sql") || 
+                    fieldType.getName().equals("groovy.lang.GString")  ||
+                    fieldType.getName().equals("java.lang.String"))  {
 
                 MethodNode cloneMethod = fieldType.getMethod("clone", Parameter.EMPTY_ARRAY);
                 // if a clone method is available, the value is cloned
@@ -79,8 +81,8 @@ public class VariableGenerator {
                 } else if (ClassHelper.isPrimitiveType(fieldType)
                         || ClassHelper.isNumberType(fieldType)
                         || fieldType.getTypeClass().getName().startsWith("java.math")
-                        || fieldType.getTypeClass().getName().endsWith("groovy.lang.GString")
-                        || fieldType.getName().endsWith("java.lang.String")) {
+                        || fieldType.getTypeClass().getName().equals("groovy.lang.GString")
+                        || fieldType.getName().equals("java.lang.String")) {
 
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
                     ExpressionStatement oldVariableAssignment = new ExpressionStatement(
