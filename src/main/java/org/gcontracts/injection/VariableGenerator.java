@@ -56,7 +56,7 @@ public class VariableGenerator {
             final ClassNode fieldType = fieldNode.getType();
 
             if (fieldType.getName().startsWith("java.lang") || ClassHelper.isPrimitiveType(fieldType) || fieldType.getName().startsWith("java.math") ||
-                    fieldType.getName().startsWith("java.util") || fieldType.getName().startsWith("java.sql"))  {
+                    fieldType.getName().startsWith("java.util") || fieldType.getName().startsWith("java.sql") || fieldType.getName().endsWith("GString"))  {
 
                 MethodNode cloneMethod = fieldType.getMethod("clone", Parameter.EMPTY_ARRAY);
                 // if a clone method is available, the value is cloned
@@ -75,7 +75,11 @@ public class VariableGenerator {
                     oldVariableExpressions.add(oldVariable);
                     oldVariableAssignments.add(oldVariableAssignment);
 
-                } else if (ClassHelper.isPrimitiveType(fieldType) || ClassHelper.isNumberType(fieldType) || fieldType.getTypeClass().getName().startsWith("java.math")) {
+                } else if (ClassHelper.isPrimitiveType(fieldType)
+                        || ClassHelper.isNumberType(fieldType)
+                        || fieldType.getTypeClass().getName().startsWith("java.math")
+                        || fieldType.getTypeClass().getName().endsWith("GString")) {
+
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
                     ExpressionStatement oldVariableAssignment = new ExpressionStatement(
                         new DeclarationExpression(oldVariable,
@@ -85,8 +89,6 @@ public class VariableGenerator {
                     oldVariableExpressions.add(oldVariable);
                     oldVariableAssignments.add(oldVariableAssignment);
                 }
-
-                // throw new RuntimeException("fieldType: " + fieldType + " " + fieldType.getTypeClass());
             }
         }
 
