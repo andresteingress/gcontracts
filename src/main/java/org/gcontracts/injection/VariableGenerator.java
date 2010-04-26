@@ -29,6 +29,7 @@ import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -74,7 +75,7 @@ public class VariableGenerator {
                     oldVariableExpressions.add(oldVariable);
                     oldVariableAssignments.add(oldVariableAssignment);
 
-                } else if (ClassHelper.isPrimitiveType(fieldType) || fieldType.getName().startsWith("java.lang")) {
+                } else if (ClassHelper.isPrimitiveType(fieldType) || ClassHelper.isNumberType(fieldType) || fieldType.getTypeClass().getName().startsWith("java.math")) {
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
                     ExpressionStatement oldVariableAssignment = new ExpressionStatement(
                         new DeclarationExpression(oldVariable,
@@ -84,6 +85,8 @@ public class VariableGenerator {
                     oldVariableExpressions.add(oldVariable);
                     oldVariableAssignments.add(oldVariableAssignment);
                 }
+
+                // throw new RuntimeException("fieldType: " + fieldType + " " + fieldType.getTypeClass());
             }
         }
 
