@@ -28,6 +28,7 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.injection.BasicAssertionInjector;
+import org.gcontracts.injection.DynamicSetterAssertionInjector;
 
 /**
  * <p>
@@ -54,6 +55,7 @@ public class ContractValidationASTTransformation implements ASTTransformation {
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
             new BasicAssertionInjector(classNode).rewrite();
+            new DynamicSetterAssertionInjector(classNode).rewrite();
         }
     }
 }

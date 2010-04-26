@@ -1,4 +1,4 @@
-package org.gcontracts.ast;
+package org.gcontracts.injection;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.FieldNode;
@@ -51,7 +51,7 @@ public final class AssertStatementCreator {
      *
      * @return a new {@link org.codehaus.groovy.ast.stmt.BlockStatement} which holds the assertion
      */
-    public static BlockStatement getAssertBlockStatement(MethodNode method, ClosureExpression closureExpression, String constraint, Expression... optionalParameters) {
+    public static BlockStatement getAssertionBlockStatement(MethodNode method, ClosureExpression closureExpression, String constraint, Expression... optionalParameters) {
         final BlockStatement assertionBlock = new BlockStatement();
         // assign the closure to a local variable and call() it
         final VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
@@ -66,7 +66,7 @@ public final class AssertStatementCreator {
 
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
-        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameters(method) + ")> violated")));
+        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated")));
 
         return assertionBlock;
     }
@@ -77,7 +77,7 @@ public final class AssertStatementCreator {
      * @param method the {@link org.codehaus.groovy.ast.MethodNode} to create the representation
      * @return a {@link String} representation of the given <tt>method</tt>
      */
-    private static String getMethodParameters(MethodNode method)  {
+    private static String getMethodParameterString(MethodNode method)  {
         final StringBuilder builder = new StringBuilder();
 
         for (Parameter parameter : method.getParameters())  {

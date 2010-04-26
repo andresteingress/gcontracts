@@ -1,2 +1,1 @@
 org.gcontracts.ast.ContractValidationASTTransformation
-org.gcontracts.ast.SetterInvariantValidationASTTransformation

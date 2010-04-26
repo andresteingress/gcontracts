@@ -34,9 +34,7 @@ import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
-import org.gcontracts.ast.AnnotationUtils;
-import org.gcontracts.ast.AssertStatementCreator;
-import org.gcontracts.ast.VariableGenerator;
+import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
 import java.util.List;
@@ -201,7 +199,7 @@ public class BasicAssertionInjector extends Injector {
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
-        final BlockStatement preconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "precondition");
+        final BlockStatement preconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "precondition");
         preconditionCheck.addStatement(method.getCode());
 
         method.setCode(preconditionCheck);
@@ -261,11 +259,11 @@ public class BasicAssertionInjector extends Injector {
                 statements.remove(statements.size() - 1);
 
                 if (usesOldVariable && usesResultVariableFirst)  {
-                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")), oldVariableMap);
+                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")), oldVariableMap);
                 } else if (usesOldVariable && !usesResultVariableFirst)  {
-                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition", oldVariableMap, new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
+                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", oldVariableMap, new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
                 } else {
-                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
+                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
                 }
 
                 postconditionCheck.getStatements().add(0, resultVariableStatement);
@@ -275,9 +273,9 @@ public class BasicAssertionInjector extends Injector {
             } else {
 
                 if (usesOldVariable)  {
-                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition",  oldVariableMap);
+                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition",  oldVariableMap);
                 } else {
-                    postconditionCheck = AssertStatementCreator.getAssertBlockStatement(method, closureExpression, "postcondition");
+                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition");
                 }
 
                 methodBlock.addStatement(postconditionCheck);
