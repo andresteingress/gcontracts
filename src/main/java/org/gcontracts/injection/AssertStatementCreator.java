@@ -106,7 +106,7 @@ public final class AssertStatementCreator {
             if (builder.length() > 0)  {
                 builder.append(", ");
             }
-            builder.append(parameter.getName()).append(":").append(parameter.getType().getTypeClass().getName());
+            builder.append(parameter.getName()).append(":").append(parameter.getType().getName());
         }
 
         return builder.toString();
