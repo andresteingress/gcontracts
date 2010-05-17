@@ -58,9 +58,13 @@ public final class AssertStatementCreator {
      * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      */
     public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final FieldNode invariantField, final String closureSourceCode)  {
-        return new AssertStatement(new BooleanExpression(
-            new MethodCallExpression(new FieldExpression(invariantField), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
+        AssertStatement assertStatement = new AssertStatement(new BooleanExpression(
+                new MethodCallExpression(new FieldExpression(invariantField), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
         ), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
+
+        assertStatement.setLineNumber(classNode.getLineNumber());
+
+        return assertStatement;
     }
 
     /**
@@ -88,9 +92,12 @@ public final class AssertStatementCreator {
 
         final List<Expression> expressions = new ArrayList<Expression>(Arrays.asList(optionalParameters));
 
-        assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
+        AssertStatement assertStatement = new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
-        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode))));
+        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
+        assertStatement.setLineNumber(closureExpression.getLineNumber());
+        
+        assertionBlock.addStatement(assertStatement);
 
         return assertionBlock;
     }
