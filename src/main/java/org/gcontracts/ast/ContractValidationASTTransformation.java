@@ -25,10 +25,13 @@ package org.gcontracts.ast;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
+import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.injection.BasicAssertionInjector;
 import org.gcontracts.injection.DynamicSetterAssertionInjector;
+
+import java.lang.reflect.Field;
 
 /**
  * <p>
@@ -53,9 +56,35 @@ public class ContractValidationASTTransformation implements ASTTransformation {
     public void visit(ASTNode[] nodes, SourceUnit unit) {
         final ModuleNode moduleNode = (ModuleNode)nodes[0];
 
+        ReaderSource source = getReaderSource(unit);
+
         for (final ClassNode classNode : moduleNode.getClasses())  {
-            new BasicAssertionInjector(classNode).rewrite();
-            new DynamicSetterAssertionInjector(classNode).rewrite();
+            new BasicAssertionInjector(unit, source, classNode).rewrite();
+            new DynamicSetterAssertionInjector(unit, source, classNode).rewrite();
+        }
+    }
+
+    /**
+     * Reads the protected <tt>source</tt> instance variable of {@link org.codehaus.groovy.control.SourceUnit}.
+     *
+     * @param unit the {@link org.codehaus.groovy.control.SourceUnit} to retrieve the {@link org.codehaus.groovy.control.io.ReaderSource} from
+     * @return the {@link org.codehaus.groovy.control.io.ReaderSource} of the given <tt>unit</tt>.
+     */
+    private ReaderSource getReaderSource(SourceUnit unit)  {
+
+        try {
+            Class sourceUnitClass = unit.getClass();
+
+            while (sourceUnitClass != SourceUnit.class)  {
+                sourceUnitClass = sourceUnitClass.getSuperclass();
+            }
+
+            Field field = sourceUnitClass.getDeclaredField("source");
+            field.setAccessible(true);
+
+            return (ReaderSource) field.get(unit);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

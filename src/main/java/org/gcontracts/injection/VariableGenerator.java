@@ -53,7 +53,7 @@ public class VariableGenerator {
 
         // create variable assignments for old variables
         for (final FieldNode fieldNode : declaringClass.getFields())   {
-            final ClassNode fieldType = fieldNode.getType();
+            final ClassNode fieldType = ClassHelper.getWrapper(fieldNode.getType());
 
             if (fieldType.getName().startsWith("java.lang") || ClassHelper.isPrimitiveType(fieldType) || fieldType.getName().startsWith("java.math") ||
                     fieldType.getName().startsWith("java.util") ||

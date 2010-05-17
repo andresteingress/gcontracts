@@ -53,13 +53,14 @@ public final class AssertStatementCreator {
      *
      * @param classNode the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param invariantField the {@link org.codehaus.groovy.ast.FieldNode} pointing to the invariant closure field
+     * @param closureSourceCode the closure source of the invariant
      *
      * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      */
-    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final FieldNode invariantField)  {
+    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final FieldNode invariantField, final String closureSourceCode)  {
         return new AssertStatement(new BooleanExpression(
             new MethodCallExpression(new FieldExpression(invariantField), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-        ), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated"));
+        ), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
     }
 
     /**
@@ -69,11 +70,12 @@ public final class AssertStatementCreator {
      * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
      * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      * @param constraint the name of the constraint, used for assertion messages
+     * @param closureSourceCode the closure source code of the assertion
      * @param optionalParameters expressions to be used as closure parameters
      *
      * @return a new {@link org.codehaus.groovy.ast.stmt.BlockStatement} which holds the assertion
      */
-    public static BlockStatement getAssertionBlockStatement(MethodNode method, ClosureExpression closureExpression, String constraint, Expression... optionalParameters) {
+    public static BlockStatement getAssertionBlockStatement(MethodNode method, ClosureExpression closureExpression, String constraint, String closureSourceCode, Expression... optionalParameters) {
         final BlockStatement assertionBlock = new BlockStatement();
         // assign the closure to a local variable and call() it
         final VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
@@ -88,7 +90,7 @@ public final class AssertStatementCreator {
 
         assertionBlock.addStatement(new AssertStatement(new BooleanExpression(
                 new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
-        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated")));
+        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode))));
 
         return assertionBlock;
     }

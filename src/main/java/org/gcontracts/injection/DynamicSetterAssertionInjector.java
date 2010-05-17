@@ -27,6 +27,7 @@ import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.SourceUnit;
+import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.runtime.MetaClassHelper;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -45,9 +46,13 @@ import java.util.List;
  */
 public class DynamicSetterAssertionInjector extends Injector {
 
+    private final SourceUnit sourceUnit;
+    private final ReaderSource source;
     private final ClassNode classNode;
 
-    public DynamicSetterAssertionInjector(final ClassNode classNode)  {
+    public DynamicSetterAssertionInjector(final SourceUnit sourceUnit, final ReaderSource source, final ClassNode classNode)  {
+        this.sourceUnit = sourceUnit;
+        this.source = source;
         this.classNode = classNode;
     }
 
@@ -56,6 +61,8 @@ public class DynamicSetterAssertionInjector extends Injector {
         // if a class invariant is available visit all property nodes else skip this class
         final FieldNode invariantField = getInvariantClosureFieldNode(classNode);
         if (invariantField == null) return;
+
+        final String closureSourceCode = convertClosureExpressionToSourceCode((ClosureExpression) invariantField.getInitialValueExpression(), source);
 
         new ClassCodeVisitorSupport()  {
 
@@ -68,7 +75,8 @@ public class DynamicSetterAssertionInjector extends Injector {
                 final BlockStatement setterMethodBlock = new BlockStatement();
 
                 // check invariant before assignment
-                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField));
+
+                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField, closureSourceCode));
 
                 // do assignment
                 BinaryExpression fieldAssignment = new BinaryExpression(new FieldExpression(field), Token.newSymbol(Types.ASSIGN, -1, -1), new VariableExpression(parameter));
@@ -76,7 +84,7 @@ public class DynamicSetterAssertionInjector extends Injector {
 
 
                 // check invariant after assignment
-                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField));
+                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField, closureSourceCode));
 
                 return setterMethodBlock;
             }
@@ -100,7 +108,7 @@ public class DynamicSetterAssertionInjector extends Injector {
                 List<ConstructorNode> declaredConstructors = classNode.getDeclaredConstructors();
                 if (declaredConstructors == null || declaredConstructors.isEmpty())  {
                     // create default constructor with class invariant check
-                    ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField));
+                    ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField, closureSourceCode));
                     constructor.setSynthetic(true);
                     classNode.addConstructor(constructor);
                 }

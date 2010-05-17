@@ -24,6 +24,8 @@ package org.gcontracts.injection;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.FieldNode;
+import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.control.io.ReaderSource;
 
 /**
  * Implemented by components that rewrite {@link org.codehaus.groovy.ast.ClassNode} instances.
@@ -58,4 +60,45 @@ public abstract class Injector {
     public FieldNode getInvariantClosureFieldNode(final ClassNode classNode)  {
         return classNode.getField(getInvariantClosureFieldName(classNode));
     }
+
+    /**
+     * Converts a {@link org.codehaus.groovy.ast.expr.ClosureExpression} into a String source.
+     *
+     * @param closureExpression the {@link org.codehaus.groovy.ast.expr.ClosureExpression} for retrieving the source-code from
+     * @param source the {@link org.codehaus.groovy.control.io.ReaderSource} if the current source unit
+     * @return the source the closure was created from
+     */
+    protected String convertClosureExpressionToSourceCode(ClosureExpression closureExpression, ReaderSource source) {
+
+        if (source == null) {
+            return "";
+        }
+
+        final int lineNumberStart = closureExpression.getLineNumber();
+        final int lineNumberEnd   = closureExpression.getLastLineNumber();
+
+        final StringBuilder builder = new StringBuilder();
+
+        for (int i = lineNumberStart; i <= lineNumberEnd; i++)  {
+            String line = source.getLine(i, null);
+            if (line == null) return "";
+
+            if (i == lineNumberStart && i != lineNumberEnd)  {
+                builder.append(line.substring(closureExpression.getColumnNumber() - 1));
+            } else if (i == lineNumberStart && i == lineNumberEnd)  {
+                builder.append(line.substring(closureExpression.getColumnNumber() - 1, closureExpression.getLastColumnNumber() - 1));
+            } else if (i == lineNumberEnd)  {
+                builder.append(line.substring(0, closureExpression.getLastColumnNumber() - 1));
+            } else {
+                builder.append(line);
+            }
+
+            builder.append('\n');
+        }
+
+        String closureSource = builder.toString().trim();
+        if (!closureSource.startsWith("{")) return "";
+
+        return closureSource;
+     }
 }
