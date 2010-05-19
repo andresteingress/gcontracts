@@ -102,7 +102,7 @@ public class BasicAssertionInjector extends Injector {
 
                 // If there is a class invariant we will append the check to this invariant
                 // after each method call
-                if (classInvariant != null)  {
+                if (classInvariant != null && isClassInvariantCandidate(method))  {
                     generateInvariantAssertionStatement(method);
                 }
             }
@@ -139,7 +139,9 @@ public class BasicAssertionInjector extends Injector {
         assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, fieldInvariant, convertClosureExpressionToSourceCode(classInvariant, source)));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
-            ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
+            if (isClassInvariantCandidate(constructor))  {
+                ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
+            }
         }
     }
 

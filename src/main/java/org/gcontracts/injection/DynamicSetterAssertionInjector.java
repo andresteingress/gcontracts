@@ -95,7 +95,7 @@ public class DynamicSetterAssertionInjector extends Injector {
                 final Statement setterBlock = node.getSetterBlock();
                 final Parameter parameter = new Parameter(node.getType(), "value");
 
-                if (setterBlock == null && classNode.getMethod(setterName, new Parameter[]{ parameter } ) == null) {
+                if (isClassInvariantCandidate(node) && (setterBlock == null && classNode.getMethod(setterName, new Parameter[]{ parameter } ) == null)) {
                     final Statement setterBlockStatement = createSetterBlock(node, node.getField(), parameter);
                     node.setSetterBlock(setterBlockStatement);
                 }

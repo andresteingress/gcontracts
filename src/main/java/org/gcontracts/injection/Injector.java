@@ -22,8 +22,7 @@
  */
 package org.gcontracts.injection;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.FieldNode;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.control.io.ReaderSource;
 
@@ -59,6 +58,39 @@ public abstract class Injector {
      */
     public FieldNode getInvariantClosureFieldNode(final ClassNode classNode)  {
         return classNode.getField(getInvariantClosureFieldName(classNode));
+    }
+
+    /**
+     * Decides whether the given <tt>constructorNode</tt> is a candidate for class invariant injection.
+     *
+     * @param constructorNode the {@link org.codehaus.groovy.ast.ConstructorNode} to check
+     * @return whether the <tt>constructorNode</tt> is a candidate for injecting the class invariant or not
+     */
+    protected boolean isClassInvariantCandidate(final ConstructorNode constructorNode)  {
+        return constructorNode != null &&
+                constructorNode.isPublic() && !constructorNode.isStatic() && !constructorNode.isStaticConstructor();
+    }
+
+    /**
+     * Decides whether the given <tt>methodNode</tt> is a candidate for class invariant injection.
+     *
+     * @param methodNode the {@link org.codehaus.groovy.ast.MethodNode} to check
+     * @return whether the <tt>methodNode</tt> is a candidate for injecting the class invariant or not
+     */
+    protected boolean isClassInvariantCandidate(final MethodNode methodNode)  {
+        return methodNode != null &&
+                methodNode.isPublic() && !methodNode.isStatic() && !methodNode.isStaticConstructor() && !methodNode.isAbstract();
+    }
+
+    /**
+     * Decides whether the given <tt>propertyNode</tt> is a candidate for class invariant injection.
+     *
+     * @param propertyNode the {@link org.codehaus.groovy.ast.PropertyNode} to check
+     * @return whether the <tt>propertyNode</tt> is a candidate for injecting the class invariant or not
+     */
+    protected boolean isClassInvariantCandidate(final PropertyNode propertyNode)  {
+        return propertyNode != null &&
+                propertyNode.isPublic() && !propertyNode.isStatic() && !propertyNode.isInStaticContext() && !propertyNode.isClosureSharedVariable();
     }
 
     /**
