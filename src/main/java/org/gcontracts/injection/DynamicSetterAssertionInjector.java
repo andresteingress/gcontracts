@@ -62,7 +62,8 @@ public class DynamicSetterAssertionInjector extends Injector {
         final FieldNode invariantField = getInvariantClosureFieldNode(classNode);
         if (invariantField == null) return;
 
-        final String closureSourceCode = convertClosureExpressionToSourceCode((ClosureExpression) invariantField.getInitialValueExpression(), source);
+        final ClosureExpression closureExpression = (ClosureExpression) invariantField.getInitialValueExpression();
+        final String closureSourceCode = convertClosureExpressionToSourceCode(closureExpression, source);
 
         new ClassCodeVisitorSupport()  {
 
@@ -76,7 +77,7 @@ public class DynamicSetterAssertionInjector extends Injector {
 
                 // check invariant before assignment
 
-                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField, closureSourceCode));
+                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, closureExpression, closureSourceCode));
 
                 // do assignment
                 BinaryExpression fieldAssignment = new BinaryExpression(new FieldExpression(field), Token.newSymbol(Types.ASSIGN, -1, -1), new VariableExpression(parameter));
@@ -84,7 +85,7 @@ public class DynamicSetterAssertionInjector extends Injector {
 
 
                 // check invariant after assignment
-                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField, closureSourceCode));
+                setterMethodBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(classNode, closureExpression, closureSourceCode));
 
                 return setterMethodBlock;
             }
@@ -108,7 +109,7 @@ public class DynamicSetterAssertionInjector extends Injector {
                 List<ConstructorNode> declaredConstructors = classNode.getDeclaredConstructors();
                 if (declaredConstructors == null || declaredConstructors.isEmpty())  {
                     // create default constructor with class invariant check
-                    ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, AssertStatementCreator.getInvariantAssertionStatement(classNode, invariantField, closureSourceCode));
+                    ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, AssertStatementCreator.getInvariantAssertionStatement(classNode, closureExpression, closureSourceCode));
                     constructor.setSynthetic(true);
                     classNode.addConstructor(constructor);
                 }

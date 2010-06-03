@@ -22,6 +22,7 @@
  */
 package org.gcontracts.injection;
 
+import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.FieldNode;
 import org.codehaus.groovy.ast.MethodNode;
@@ -30,8 +31,10 @@ import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.codehaus.groovy.transform.powerassert.AssertionRewriter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,16 +55,16 @@ public final class AssertStatementCreator {
      * Reusable method for creating assert statements for the given <tt>invariantField</tt>.
      *
      * @param classNode the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param invariantField the {@link org.codehaus.groovy.ast.FieldNode} pointing to the invariant closure field
+     * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      * @param closureSourceCode the closure source of the invariant
      *
      * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      */
-    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final FieldNode invariantField, final String closureSourceCode)  {
-        AssertStatement assertStatement = new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(new FieldExpression(invariantField), "call", ArgumentListExpression.EMPTY_ARGUMENTS)
-        ), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
+    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final ClosureExpression closureExpression, final String closureSourceCode)  {
+        final Expression expression = getFirstExpression(closureExpression);
+        if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
         assertStatement.setLineNumber(classNode.getLineNumber());
 
         return assertStatement;
@@ -75,30 +78,18 @@ public final class AssertStatementCreator {
      * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      * @param constraint the name of the constraint, used for assertion messages
      * @param closureSourceCode the closure source code of the assertion
-     * @param optionalParameters expressions to be used as closure parameters
      *
      * @return a new {@link org.codehaus.groovy.ast.stmt.BlockStatement} which holds the assertion
      */
-    public static BlockStatement getAssertionBlockStatement(MethodNode method, ClosureExpression closureExpression, String constraint, String closureSourceCode, Expression... optionalParameters) {
+    public static BlockStatement getAssertionBlockStatement(MethodNode method, ClosureExpression closureExpression, String constraint, String closureSourceCode) {
         final BlockStatement assertionBlock = new BlockStatement();
-        // assign the closure to a local variable and call() it
-        final VariableExpression closureVariable = new VariableExpression("$" + constraint + "Closure");
 
-        // create a local variable to hold a reference to the newly instantiated closure
-        assertionBlock.addStatement(new ExpressionStatement(
-                new DeclarationExpression(closureVariable,
-                        Token.newSymbol(Types.ASSIGN, -1, -1),
-                        closureExpression)));
+        final Expression expression = getFirstExpression(closureExpression);
+        if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
-        final List<Expression> expressions = new ArrayList<Expression>(Arrays.asList(optionalParameters));
-
-        AssertStatement assertStatement = new AssertStatement(new BooleanExpression(
-                new MethodCallExpression(closureVariable, "call", new ArgumentListExpression(expressions))
-        ), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
         assertStatement.setLineNumber(closureExpression.getLineNumber());
-        
         assertionBlock.addStatement(assertStatement);
-
         return assertionBlock;
     }
 
@@ -119,6 +110,25 @@ public final class AssertStatementCreator {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * Returns the first {@link Expression} in the given {@link org.codehaus.groovy.ast.expr.ClosureExpression}.
+     *
+     * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
+     * @return the first {@link org.codehaus.groovy.ast.expr.Expression} found in the given {@link org.codehaus.groovy.ast.expr.ClosureExpression}
+     */
+    private static Expression getFirstExpression(ClosureExpression closureExpression)  {
+        final BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
+        final List<Statement> statementList = closureBlockStatement.getStatements();
+
+        for (Statement stmt : statementList)  {
+            if (stmt instanceof ExpressionStatement)  {
+                return ((ExpressionStatement) stmt).getExpression();
+            }
+        }
+
+        return null;
     }
 
 }

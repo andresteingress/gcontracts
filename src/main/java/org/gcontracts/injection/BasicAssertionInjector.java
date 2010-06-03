@@ -136,7 +136,7 @@ public class BasicAssertionInjector extends Injector {
 
         final BlockStatement assertionBlock = new BlockStatement();
 
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, fieldInvariant, convertClosureExpressionToSourceCode(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, classInvariant, convertClosureExpressionToSourceCode(classInvariant, source)));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
             if (isClassInvariantCandidate(constructor))  {
@@ -183,7 +183,7 @@ public class BasicAssertionInjector extends Injector {
     public void generateInvariantAssertionStatement(MethodNode method)  {
 
         final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(method.getDeclaringClass(), fieldInvariant, convertClosureExpressionToSourceCode(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant, convertClosureExpressionToSourceCode(classInvariant, source)));
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement)  {
@@ -258,6 +258,10 @@ public class BasicAssertionInjector extends Injector {
 
                 ReturnStatement returnStatement = getReturnStatement(lastStatement);
 
+                statements.remove(statements.size() - 1);
+
+                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source));
+
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression resultVariable = new VariableExpression("result");
                 ExpressionStatement resultVariableStatement = new ExpressionStatement(
@@ -265,27 +269,31 @@ public class BasicAssertionInjector extends Injector {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         returnStatement.getExpression()));
 
-                statements.remove(statements.size() - 1);
-
-                if (usesOldVariable && usesResultVariableFirst)  {
-                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source), new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")), oldVariableMap);
-                } else if (usesOldVariable && !usesResultVariableFirst)  {
-                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source), oldVariableMap, new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
-                } else {
-                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source), new VariableExpression(new Parameter(ClassHelper.DYNAMIC_TYPE, "result")));
-                }
-
                 postconditionCheck.getStatements().add(0, resultVariableStatement);
 
+                // Assign the return statement expression to a local variable of type Object
+                VariableExpression oldVariable = new VariableExpression("old");
+                ExpressionStatement oldVariabeStatement = new ExpressionStatement(
+                new DeclarationExpression(oldVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        oldVariableMap));
+
+                postconditionCheck.getStatements().add(0, oldVariabeStatement);
+                
                 methodBlock.addStatement(postconditionCheck);
                 methodBlock.addStatement(returnStatement);
             } else {
 
-                if (usesOldVariable)  {
-                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source),  oldVariableMap);
-                } else {
-                    postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source));
-                }
+                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source));
+
+                // Assign the return statement expression to a local variable of type Object
+                VariableExpression oldVariable = new VariableExpression("old");
+                ExpressionStatement oldVariabeStatement = new ExpressionStatement(
+                new DeclarationExpression(oldVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        oldVariableMap));
+
+                postconditionCheck.getStatements().add(0, oldVariabeStatement);
 
                 methodBlock.addStatement(postconditionCheck);
             }
