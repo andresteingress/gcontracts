@@ -102,7 +102,7 @@ public class BasicAssertionInjector extends Injector {
 
                 // If there is a class invariant we will append the check to this invariant
                 // after each method call
-                if (classInvariant != null && isClassInvariantCandidate(method))  {
+                if (classInvariant != null && CandidateChecks.isClassInvariantCandidate(method))  {
                     generateInvariantAssertionStatement(method);
                 }
             }
@@ -136,10 +136,10 @@ public class BasicAssertionInjector extends Injector {
 
         final BlockStatement assertionBlock = new BlockStatement();
 
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, classInvariant, convertClosureExpressionToSourceCode(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, classInvariant, closureToSourceConverter.convertClosureExpressionToSourceCode(classInvariant, source)));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
-            if (isClassInvariantCandidate(constructor))  {
+            if (CandidateChecks.isClassInvariantCandidate(constructor))  {
                 ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
             }
         }
@@ -183,7 +183,7 @@ public class BasicAssertionInjector extends Injector {
     public void generateInvariantAssertionStatement(MethodNode method)  {
 
         final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant, convertClosureExpressionToSourceCode(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant, closureToSourceConverter.convertClosureExpressionToSourceCode(classInvariant, source)));
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement)  {
@@ -208,7 +208,7 @@ public class BasicAssertionInjector extends Injector {
         // fix compilation with setting value() to java.lang.Object.class
         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
-        final BlockStatement preconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "precondition", convertClosureExpressionToSourceCode(closureExpression, source));
+        final BlockStatement preconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "precondition", closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source));
         preconditionCheck.addStatement(method.getCode());
 
         method.setCode(preconditionCheck);
@@ -260,7 +260,7 @@ public class BasicAssertionInjector extends Injector {
 
                 statements.remove(statements.size() - 1);
 
-                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source));
+                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source));
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression resultVariable = new VariableExpression("result");
@@ -284,7 +284,7 @@ public class BasicAssertionInjector extends Injector {
                 methodBlock.addStatement(returnStatement);
             } else {
 
-                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", convertClosureExpressionToSourceCode(closureExpression, source));
+                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source));
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");

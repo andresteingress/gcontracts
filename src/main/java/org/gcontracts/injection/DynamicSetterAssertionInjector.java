@@ -63,7 +63,7 @@ public class DynamicSetterAssertionInjector extends Injector {
         if (invariantField == null) return;
 
         final ClosureExpression closureExpression = (ClosureExpression) invariantField.getInitialValueExpression();
-        final String closureSourceCode = convertClosureExpressionToSourceCode(closureExpression, source);
+        final String closureSourceCode = closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source);
 
         new ClassCodeVisitorSupport()  {
 
@@ -96,7 +96,7 @@ public class DynamicSetterAssertionInjector extends Injector {
                 final Statement setterBlock = node.getSetterBlock();
                 final Parameter parameter = new Parameter(node.getType(), "value");
 
-                if (isClassInvariantCandidate(node) && (setterBlock == null && classNode.getMethod(setterName, new Parameter[]{ parameter } ) == null)) {
+                if (CandidateChecks.isClassInvariantCandidate(node) && (setterBlock == null && classNode.getMethod(setterName, new Parameter[]{ parameter } ) == null)) {
                     final Statement setterBlockStatement = createSetterBlock(node, node.getField(), parameter);
                     node.setSetterBlock(setterBlockStatement);
                 }

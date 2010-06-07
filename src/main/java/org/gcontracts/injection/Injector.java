@@ -22,9 +22,8 @@
  */
 package org.gcontracts.injection;
 
-import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.ClosureExpression;
-import org.codehaus.groovy.control.io.ReaderSource;
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.FieldNode;
 
 /**
  * Implemented by components that rewrite {@link org.codehaus.groovy.ast.ClassNode} instances.
@@ -36,6 +35,8 @@ import org.codehaus.groovy.control.io.ReaderSource;
 public abstract class Injector {
 
     private static final String INVARIANT_CLOSURE_PREFIX = "$invariant$";
+
+    protected ClosureToSourceConverter closureToSourceConverter = new ClosureToSourceConverter();
 
     /**
      * Rewrites the current {@link org.codehaus.groovy.ast.ClassNode}.
@@ -59,78 +60,4 @@ public abstract class Injector {
     public FieldNode getInvariantClosureFieldNode(final ClassNode classNode)  {
         return classNode.getField(getInvariantClosureFieldName(classNode));
     }
-
-    /**
-     * Decides whether the given <tt>constructorNode</tt> is a candidate for class invariant injection.
-     *
-     * @param constructorNode the {@link org.codehaus.groovy.ast.ConstructorNode} to check
-     * @return whether the <tt>constructorNode</tt> is a candidate for injecting the class invariant or not
-     */
-    protected boolean isClassInvariantCandidate(final ConstructorNode constructorNode)  {
-        return constructorNode != null &&
-                constructorNode.isPublic() && !constructorNode.isStatic() && !constructorNode.isStaticConstructor();
-    }
-
-    /**
-     * Decides whether the given <tt>methodNode</tt> is a candidate for class invariant injection.
-     *
-     * @param methodNode the {@link org.codehaus.groovy.ast.MethodNode} to check
-     * @return whether the <tt>methodNode</tt> is a candidate for injecting the class invariant or not
-     */
-    protected boolean isClassInvariantCandidate(final MethodNode methodNode)  {
-        return methodNode != null &&
-                methodNode.isPublic() && !methodNode.isStatic() && !methodNode.isStaticConstructor() && !methodNode.isAbstract();
-    }
-
-    /**
-     * Decides whether the given <tt>propertyNode</tt> is a candidate for class invariant injection.
-     *
-     * @param propertyNode the {@link org.codehaus.groovy.ast.PropertyNode} to check
-     * @return whether the <tt>propertyNode</tt> is a candidate for injecting the class invariant or not
-     */
-    protected boolean isClassInvariantCandidate(final PropertyNode propertyNode)  {
-        return propertyNode != null &&
-                propertyNode.isPublic() && !propertyNode.isStatic() && !propertyNode.isInStaticContext() && !propertyNode.isClosureSharedVariable();
-    }
-
-    /**
-     * Converts a {@link org.codehaus.groovy.ast.expr.ClosureExpression} into a String source.
-     *
-     * @param closureExpression the {@link org.codehaus.groovy.ast.expr.ClosureExpression} for retrieving the source-code from
-     * @param source the {@link org.codehaus.groovy.control.io.ReaderSource} if the current source unit
-     * @return the source the closure was created from
-     */
-    protected String convertClosureExpressionToSourceCode(ClosureExpression closureExpression, ReaderSource source) {
-
-        if (source == null) {
-            return "";
-        }
-
-        final int lineNumberStart = closureExpression.getLineNumber();
-        final int lineNumberEnd   = closureExpression.getLastLineNumber();
-
-        final StringBuilder builder = new StringBuilder();
-
-        for (int i = lineNumberStart; i <= lineNumberEnd; i++)  {
-            String line = source.getLine(i, null);
-            if (line == null) return "";
-
-            if (i == lineNumberStart && i != lineNumberEnd)  {
-                builder.append(line.substring(closureExpression.getColumnNumber() - 1));
-            } else if (i == lineNumberStart && i == lineNumberEnd)  {
-                builder.append(line.substring(closureExpression.getColumnNumber() - 1, closureExpression.getLastColumnNumber() - 1));
-            } else if (i == lineNumberEnd)  {
-                builder.append(line.substring(0, closureExpression.getLastColumnNumber() - 1));
-            } else {
-                builder.append(line);
-            }
-
-            builder.append('\n');
-        }
-
-        String closureSource = builder.toString().trim();
-        if (!closureSource.startsWith("{")) return "";
-
-        return closureSource;
-     }
 }
