@@ -80,8 +80,8 @@ public class VariableGenerator {
 
                 } else if (ClassHelper.isPrimitiveType(fieldType)
                         || ClassHelper.isNumberType(fieldType)
-                        || fieldType.getTypeClass().getName().startsWith("java.math")
-                        || fieldType.getTypeClass().getName().equals("groovy.lang.GString")
+                        || fieldType.getName().startsWith("java.math")
+                        || fieldType.getName().equals("groovy.lang.GString")
                         || fieldType.getName().equals("java.lang.String")) {
 
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());

@@ -78,7 +78,7 @@ public class BasicAssertionInjector extends Injector {
 
                 List<AnnotationNode> annotations = type.getAnnotations();
                 for (AnnotationNode annotation: annotations)  {
-                    if (annotation.getClassNode().getTypeClass() == Invariant.class)  {
+                    if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {
                         generateInvariantAssertionStatement(type, annotation);
                     }
                 }
@@ -93,9 +93,9 @@ public class BasicAssertionInjector extends Injector {
 
                 List<AnnotationNode> annotations = method.getAnnotations();
                 for (AnnotationNode annotation: annotations)  {
-                    if (annotation.getClassNode().getTypeClass() == Requires.class)  {
+                    if (annotation.getClassNode().getName().equals(Requires.class.getName()))  {
                         generatePreconditionAssertionStatement(method, annotation);
-                    } else if (annotation.getClassNode().getTypeClass() == Ensures.class)  {
+                    } else if (annotation.getClassNode().getName().equals(Ensures.class.getName()))  {
                         generatePostconditionAssertionStatement(method, annotation);
                     }
                 }

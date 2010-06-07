@@ -42,7 +42,7 @@ public class AnnotationUtils {
      */
     public static ClassNode getNextClassNodeWithAnnotation(ClassNode type, Class anno)  {
         for (AnnotationNode annotation : type.getAnnotations())  {
-            if (annotation.getClassNode().getTypeClass() == anno)  {
+            if (annotation.getClassNode().getName().equals(anno.getName()))  {
                 return type;
             }
         }
