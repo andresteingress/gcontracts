@@ -36,6 +36,7 @@ import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
 import org.gcontracts.util.AnnotationUtils;
+import org.gcontracts.visitors.ClassInvariantVisitor;
 import org.objectweb.asm.Opcodes;
 
 import java.util.List;
@@ -57,8 +58,6 @@ public class BasicAssertionInjector extends Injector {
     private final ClassNode classNode;
     
     private ClosureExpression classInvariant;
-    private FieldNode fieldInvariant;
-
 
     public BasicAssertionInjector(final SourceUnit sourceUnit, final ReaderSource source, final ClassNode classNode) {
         this.sourceUnit = sourceUnit;
@@ -76,12 +75,17 @@ public class BasicAssertionInjector extends Injector {
             @Override
             public void visitClass(ClassNode type) {
 
+                final ClassInvariantVisitor classInvariantVisitor = new ClassInvariantVisitor(source);
+
                 boolean found = false;
 
                 List<AnnotationNode> annotations = type.getAnnotations();
                 for (AnnotationNode annotation: annotations)  {
                     if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {
-                        generateInvariantAssertionStatement(type, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
+                        classInvariant = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+
+                        classInvariantVisitor.generateInvariantAssertionStatement(type, classInvariant);
+
                         // fix compilation with setting value() to java.lang.Object.class
                         annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
@@ -90,7 +94,7 @@ public class BasicAssertionInjector extends Injector {
                 }
 
                 if (!found)  {
-                    generateDefaultInvariantAssertionStatement(type);
+                    classInvariant = classInvariantVisitor.generateDefaultInvariantAssertionStatement(type);
                 }
 
                 super.visitClass(type);
@@ -100,6 +104,8 @@ public class BasicAssertionInjector extends Injector {
             public void visitMethod(MethodNode method) {
 
                 super.visitMethod(method);
+
+                final ClassInvariantVisitor classInvariantVisitor = new ClassInvariantVisitor(source);
 
                 List<AnnotationNode> annotations = method.getAnnotations();
                 for (AnnotationNode annotation: annotations)  {
@@ -113,7 +119,7 @@ public class BasicAssertionInjector extends Injector {
                 // If there is a class invariant we will append the check to this invariant
                 // after each method call
                 if (CandidateChecks.isClassInvariantCandidate(method))  {
-                    generateInvariantAssertionStatement(method);
+                    classInvariantVisitor.generateInvariantAssertionStatement(method, classInvariant);
                 }
             }
 
@@ -121,99 +127,6 @@ public class BasicAssertionInjector extends Injector {
                 return null;
             }
         }.visitClass(classNode);
-    }
-
-    /**
-     * Reads the {@link org.gcontracts.annotations.Invariant} closure expression and adds a class-invariant to
-     * all declard contructors of that <tt>type</tt>.
-     *
-     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param closureExpression the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
-     */
-    public void generateInvariantAssertionStatement(ClassNode type, ClosureExpression closureExpression)  {
-
-        classInvariant = closureExpression;
-
-        // adding super-calls to invariants of parent classes
-        addCallsToSuperClassInvariants(type, classInvariant);
-
-        // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
-        fieldInvariant = type.addField(getInvariantClosureFieldName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
-
-        final BlockStatement assertionBlock = new BlockStatement();
-
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, classInvariant, closureToSourceConverter.convertClosureExpressionToSourceCode(classInvariant, source)));
-
-        for (ConstructorNode constructor : type.getDeclaredConstructors())  {
-            if (CandidateChecks.isClassInvariantCandidate(constructor))  {
-                ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
-            }
-        }
-    }
-
-    /**
-     * Generates a default class invariant always being <tt>true</tt>. This is needed in order to allow class invariant
-     * inheritance over an inheritance path where only some classes are annotated with <code>@Invariant</code>.
-     *
-     * @param type the current {@link org.codehaus.groovy.ast.ClassNode} to be extended by a default class invariant
-     */
-    public void generateDefaultInvariantAssertionStatement(ClassNode type) {
-        BlockStatement closureBlockStatement = new BlockStatement();
-        closureBlockStatement.addStatement(new ExpressionStatement(new BooleanExpression(ConstantExpression.TRUE)));
-
-        ClosureExpression closureExpression = new ClosureExpression(null, closureBlockStatement);
-        closureExpression.setVariableScope(new VariableScope());
-
-        generateInvariantAssertionStatement(type, closureExpression);
-    }
-
-    /**
-     * Modifies the given <tt>closure</tt> which contains that current class-invariant and adds a super-call the
-     * the class-invariant of the next parent class which has the Invarian annotation.
-     *
-     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param closure the current class-invariant as {@link org.codehaus.groovy.ast.expr.ClosureExpression}
-     */
-    public void addCallsToSuperClassInvariants(ClassNode type, ClosureExpression closure)  {
-
-        final ClassNode nextClassWithInvariant = AnnotationUtils.getNextClassNodeWithAnnotation(type.getSuperClass(), Invariant.class);
-        if (nextClassWithInvariant == null) return;
-
-        final String fieldName = getInvariantClosureFieldName(nextClassWithInvariant);
-        FieldNode nextClassInvariantField = getInvariantClosureFieldNode(nextClassWithInvariant);
-        if (nextClassInvariantField == null)  {
-            nextClassInvariantField = new FieldNode(fieldName, Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, nextClassWithInvariant, null);
-        }
-
-        final BlockStatement blockStatement = (BlockStatement) closure.getCode();
-        final ExpressionStatement expressionStatement = (ExpressionStatement) blockStatement.getStatements().get(0);
-
-        final Expression expression = expressionStatement.getExpression();
-
-        expressionStatement.setExpression(
-                 new BinaryExpression(
-                         new BooleanExpression(expression),
-                         Token.newSymbol(Types.LOGICAL_AND, -1, -1),
-                         new BooleanExpression(new MethodCallExpression(new PropertyExpression(VariableExpression.THIS_EXPRESSION, fieldName), "call", ArgumentListExpression.EMPTY_ARGUMENTS))));
-    }
-
-    /**
-     * Adds the current class-invariant to the given <tt>method</tt>.
-     *
-     * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
-     */
-    public void generateInvariantAssertionStatement(MethodNode method)  {
-
-        final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant, closureToSourceConverter.convertClosureExpressionToSourceCode(classInvariant, source)));
-
-        final Statement statement = method.getCode();
-        if (statement instanceof BlockStatement)  {
-            ((BlockStatement) statement).addStatement(assertionBlock);
-        } else  {
-            assertionBlock.getStatements().add(0, statement);
-            method.setCode(assertionBlock);
-        }
     }
 
     /**
