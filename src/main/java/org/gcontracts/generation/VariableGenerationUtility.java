@@ -20,7 +20,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.injection;
+package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
@@ -35,7 +35,7 @@ import java.util.ArrayList;
 /**
  * @author andre.steingress@gmail.com
  */
-public class VariableGenerator {
+public class VariableGenerationUtility {
 
     /**
      * Each field of the class is assigned to an old variable before method execution. After method execution

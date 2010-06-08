@@ -1,4 +1,4 @@
-package org.gcontracts.injection;
+package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.MethodNode;

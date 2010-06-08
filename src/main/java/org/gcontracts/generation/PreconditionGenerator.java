@@ -1,20 +1,17 @@
-package org.gcontracts.visitors;
+package org.gcontracts.generation;
 
-import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.expr.ClassExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.gcontracts.injection.AssertStatementCreator;
+import org.gcontracts.util.ClosureToSourceConverter;
 
 /**
  * @author andre.steingress@gmail.com
  */
-public class PreconditionVisitor extends BaseVisitor {
+public class PreconditionGenerator extends BaseGenerator {
 
-    public PreconditionVisitor(final ReaderSource source) {
+    public PreconditionGenerator(final ReaderSource source) {
         super(source);
     }
 
@@ -27,7 +24,7 @@ public class PreconditionVisitor extends BaseVisitor {
      */
     public void generatePreconditionAssertionStatement(MethodNode method, ClosureExpression closureExpression)  {
 
-        final BlockStatement preconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "precondition", closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source));
+        final BlockStatement preconditionCheck = AssertStatementCreationUtility.getAssertionBlockStatement(method, closureExpression, "precondition", ClosureToSourceConverter.convert(closureExpression, source));
         preconditionCheck.addStatement(method.getCode());
 
         method.setCode(preconditionCheck);

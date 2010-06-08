@@ -1,6 +1,5 @@
-package org.gcontracts.visitors;
+package org.gcontracts.generation;
 
-import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.Parameter;
@@ -12,17 +11,16 @@ import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.gcontracts.injection.AssertStatementCreator;
-import org.gcontracts.injection.VariableGenerator;
+import org.gcontracts.util.ClosureToSourceConverter;
 
 import java.util.List;
 
 /**
  * @author andre.steingress@gmail.com
  */
-public class PostconditionVisitor extends BaseVisitor {
+public class PostconditionGenerator extends BaseGenerator {
 
-    public PostconditionVisitor(final ReaderSource source) {
+    public PostconditionGenerator(final ReaderSource source) {
         super(source);
     }
 
@@ -51,7 +49,7 @@ public class PostconditionVisitor extends BaseVisitor {
 
         MapExpression oldVariableMap = new MapExpression();
 
-        if (usesOldVariable)  oldVariableMap = new VariableGenerator().generateOldVariablesMap(method);
+        if (usesOldVariable)  oldVariableMap = new VariableGenerationUtility().generateOldVariablesMap(method);
 
         final BlockStatement methodBlock = (BlockStatement) method.getCode();
 
@@ -67,7 +65,7 @@ public class PostconditionVisitor extends BaseVisitor {
 
                 statements.remove(statements.size() - 1);
 
-                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source));
+                postconditionCheck = AssertStatementCreationUtility.getAssertionBlockStatement(method, closureExpression, "postcondition", ClosureToSourceConverter.convert(closureExpression, source));
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression resultVariable = new VariableExpression("result");
@@ -91,7 +89,7 @@ public class PostconditionVisitor extends BaseVisitor {
                 methodBlock.addStatement(returnStatement);
             } else {
 
-                postconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "postcondition", closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source));
+                postconditionCheck = AssertStatementCreationUtility.getAssertionBlockStatement(method, closureExpression, "postcondition", ClosureToSourceConverter.convert(closureExpression, source));
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");

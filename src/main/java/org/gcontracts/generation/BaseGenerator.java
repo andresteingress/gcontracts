@@ -1,23 +1,20 @@
-package org.gcontracts.visitors;
+package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.FieldNode;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.gcontracts.injection.ClosureToSourceConverter;
 
 /**
  * @author andre.steingress@gmail.com
  */
-public abstract class BaseVisitor {
+public abstract class BaseGenerator {
 
     public static final String INVARIANT_CLOSURE_PREFIX = "$invariant$";
 
     protected final ReaderSource source;
-    protected final ClosureToSourceConverter closureToSourceConverter;
 
-    public BaseVisitor(final ReaderSource source)  {
+    public BaseGenerator(final ReaderSource source)  {
         this.source = source;
-        this.closureToSourceConverter = new ClosureToSourceConverter();
     }
 
     /**
@@ -25,7 +22,7 @@ public abstract class BaseVisitor {
      *
      * @return the field name of the invariant closure field of the given <tt>classNode</tt>
      */
-    public String getInvariantClosureFieldName(final ClassNode classNode)  {
+    public static String getInvariantClosureFieldName(final ClassNode classNode)  {
         return INVARIANT_CLOSURE_PREFIX + classNode.getNameWithoutPackage();
     }
 
@@ -34,7 +31,7 @@ public abstract class BaseVisitor {
      *
      * @return the {@link org.codehaus.groovy.ast.FieldNode} which contains the invariant closure of the given <tt>classNode</tt>
      */
-    public FieldNode getInvariantClosureFieldNode(final ClassNode classNode)  {
+    public static FieldNode getInvariantClosureFieldNode(final ClassNode classNode)  {
         return classNode.getField(getInvariantClosureFieldName(classNode));
     }
 }

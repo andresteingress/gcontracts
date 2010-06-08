@@ -1,4 +1,4 @@
-package org.gcontracts.visitors;
+package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
@@ -9,17 +9,16 @@ import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.Invariant;
-import org.gcontracts.injection.AssertStatementCreator;
-import org.gcontracts.injection.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
+import org.gcontracts.util.ClosureToSourceConverter;
 import org.objectweb.asm.Opcodes;
 
 /**
  * @author andre.steingress@gmail.com
  */
-public class ClassInvariantVisitor extends BaseVisitor {
+public class ClassInvariantGenerator extends BaseGenerator {
 
-    public ClassInvariantVisitor(final ReaderSource source) {
+    public ClassInvariantGenerator(final ReaderSource source) {
         super(source);
     }
 
@@ -41,7 +40,7 @@ public class ClassInvariantVisitor extends BaseVisitor {
 
         final BlockStatement assertionBlock = new BlockStatement();
 
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(type, classInvariant, closureToSourceConverter.convertClosureExpressionToSourceCode(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant, ClosureToSourceConverter.convert(classInvariant, source)));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
             if (CandidateChecks.isClassInvariantCandidate(constructor))  {
@@ -110,7 +109,7 @@ public class ClassInvariantVisitor extends BaseVisitor {
     public void generateInvariantAssertionStatement(MethodNode method, ClosureExpression classInvariant)  {
 
         final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(AssertStatementCreator.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant, closureToSourceConverter.convertClosureExpressionToSourceCode(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant, ClosureToSourceConverter.convert(classInvariant, source)));
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement)  {

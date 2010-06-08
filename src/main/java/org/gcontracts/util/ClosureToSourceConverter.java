@@ -1,4 +1,4 @@
-package org.gcontracts.injection;
+package org.gcontracts.util;
 
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.control.io.ReaderSource;
@@ -15,7 +15,7 @@ public class ClosureToSourceConverter {
      * @param source the {@link org.codehaus.groovy.control.io.ReaderSource} if the current source unit
      * @return the source the closure was created from
      */
-    public String convertClosureExpressionToSourceCode(ClosureExpression closureExpression, ReaderSource source) {
+    public static String convert(ClosureExpression closureExpression, ReaderSource source) {
 
         if (source == null) {
             return "";

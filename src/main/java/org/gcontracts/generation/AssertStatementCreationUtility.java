@@ -20,7 +20,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.injection;
+package org.gcontracts.generation;
 
 import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.ClassNode;
@@ -49,7 +49,7 @@ import java.util.List;
  *
  * @author andre.steingress@gmail.com
  */
-public final class AssertStatementCreator {
+public final class AssertStatementCreationUtility {
 
     /**
      * Reusable method for creating assert statements for the given <tt>invariantField</tt>.

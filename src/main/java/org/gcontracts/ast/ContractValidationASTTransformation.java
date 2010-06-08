@@ -28,8 +28,8 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
-import org.gcontracts.injection.BasicAssertionInjector;
-import org.gcontracts.injection.DynamicSetterAssertionInjector;
+import org.gcontracts.ast.visitor.ContractsVisitor;
+import org.gcontracts.ast.visitor.DynamicSetterInjectionVisitor;
 
 import java.lang.reflect.Field;
 
@@ -59,8 +59,8 @@ public class ContractValidationASTTransformation implements ASTTransformation {
         ReaderSource source = getReaderSource(unit);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
-            new BasicAssertionInjector(unit, source, classNode).rewrite();
-            new DynamicSetterAssertionInjector(unit, source, classNode).rewrite();
+            new ContractsVisitor(unit, source).visitClass(classNode);
+            new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
         }
     }
 
