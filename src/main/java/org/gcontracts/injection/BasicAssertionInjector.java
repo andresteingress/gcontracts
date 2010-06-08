@@ -37,6 +37,7 @@ import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.visitors.ClassInvariantVisitor;
+import org.gcontracts.visitors.PreconditionVisitor;
 import org.objectweb.asm.Opcodes;
 
 import java.util.List;
@@ -106,11 +107,15 @@ public class BasicAssertionInjector extends Injector {
                 super.visitMethod(method);
 
                 final ClassInvariantVisitor classInvariantVisitor = new ClassInvariantVisitor(source);
+                final PreconditionVisitor preconditionVisitor = new PreconditionVisitor(source);
 
                 List<AnnotationNode> annotations = method.getAnnotations();
                 for (AnnotationNode annotation: annotations)  {
                     if (annotation.getClassNode().getName().equals(Requires.class.getName()))  {
-                        generatePreconditionAssertionStatement(method, annotation);
+                        preconditionVisitor.generatePreconditionAssertionStatement(method, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
+
+                        // fix compilation with setting value() to java.lang.Object.class
+                        annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
                     } else if (annotation.getClassNode().getName().equals(Ensures.class.getName()))  {
                         generatePostconditionAssertionStatement(method, annotation);
                     }
@@ -127,26 +132,6 @@ public class BasicAssertionInjector extends Injector {
                 return null;
             }
         }.visitClass(classNode);
-    }
-
-    /**
-     * Injects a precondition assertion statement in the given <tt>method</tt>, based on the given <tt>annotation</tt> of
-     * type {@link org.gcontracts.annotations.Requires}.
-     *
-     * @param method the {@link org.codehaus.groovy.ast.MethodNode} for assertion injection
-     * @param annotation the {@link org.gcontracts.annotations.Requires} annotation
-     */
-    public void generatePreconditionAssertionStatement(MethodNode method, AnnotationNode annotation)  {
-
-        // get the closure annotation
-        final ClosureExpression closureExpression = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
-        // fix compilation with setting value() to java.lang.Object.class
-        annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
-
-        final BlockStatement preconditionCheck = AssertStatementCreator.getAssertionBlockStatement(method, closureExpression, "precondition", closureToSourceConverter.convertClosureExpressionToSourceCode(closureExpression, source));
-        preconditionCheck.addStatement(method.getCode());
-
-        method.setCode(preconditionCheck);
     }
 
     /**
