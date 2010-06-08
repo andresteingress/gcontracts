@@ -76,11 +76,21 @@ public class BasicAssertionInjector extends Injector {
             @Override
             public void visitClass(ClassNode type) {
 
+                boolean found = false;
+
                 List<AnnotationNode> annotations = type.getAnnotations();
                 for (AnnotationNode annotation: annotations)  {
                     if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {
-                        generateInvariantAssertionStatement(type, annotation);
+                        generateInvariantAssertionStatement(type, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
+                        // fix compilation with setting value() to java.lang.Object.class
+                        annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
+
+                        found = true;
                     }
+                }
+
+                if (!found)  {
+                    generateDefaultInvariantAssertionStatement(type);
                 }
 
                 super.visitClass(type);
@@ -102,7 +112,7 @@ public class BasicAssertionInjector extends Injector {
 
                 // If there is a class invariant we will append the check to this invariant
                 // after each method call
-                if (classInvariant != null && CandidateChecks.isClassInvariantCandidate(method))  {
+                if (CandidateChecks.isClassInvariantCandidate(method))  {
                     generateInvariantAssertionStatement(method);
                 }
             }
@@ -118,18 +128,14 @@ public class BasicAssertionInjector extends Injector {
      * all declard contructors of that <tt>type</tt>.
      *
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param annotation the {@link org.gcontracts.annotations.Invariant} annotation node
+     * @param closureExpression the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
      */
-    public void generateInvariantAssertionStatement(ClassNode type, AnnotationNode annotation)  {
+    public void generateInvariantAssertionStatement(ClassNode type, ClosureExpression closureExpression)  {
 
-        // get the closure annotation
-        classInvariant = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
+        classInvariant = closureExpression;
 
         // adding super-calls to invariants of parent classes
         addCallsToSuperClassInvariants(type, classInvariant);
-
-        // fix compilation with setting value() to java.lang.Object.class
-        annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
 
         // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
         fieldInvariant = type.addField(getInvariantClosureFieldName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
@@ -143,6 +149,22 @@ public class BasicAssertionInjector extends Injector {
                 ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
             }
         }
+    }
+
+    /**
+     * Generates a default class invariant always being <tt>true</tt>. This is needed in order to allow class invariant
+     * inheritance over an inheritance path where only some classes are annotated with <code>@Invariant</code>.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode} to be extended by a default class invariant
+     */
+    public void generateDefaultInvariantAssertionStatement(ClassNode type) {
+        BlockStatement closureBlockStatement = new BlockStatement();
+        closureBlockStatement.addStatement(new ExpressionStatement(new BooleanExpression(ConstantExpression.TRUE)));
+
+        ClosureExpression closureExpression = new ClosureExpression(null, closureBlockStatement);
+        closureExpression.setVariableScope(new VariableScope());
+
+        generateInvariantAssertionStatement(type, closureExpression);
     }
 
     /**
