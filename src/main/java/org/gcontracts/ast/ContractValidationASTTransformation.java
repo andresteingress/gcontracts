@@ -48,7 +48,7 @@ import java.lang.reflect.Field;
  * @author andre.steingress@gmail.com
  */
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-public class ContractValidationASTTransformation implements ASTTransformation {
+public class ContractValidationASTTransformation extends BaseASTTransformation {
 
     /**
      * {@link org.codehaus.groovy.transform.ASTTransformation#visit(org.codehaus.groovy.ast.ASTNode[], org.codehaus.groovy.control.SourceUnit)}
@@ -61,30 +61,6 @@ public class ContractValidationASTTransformation implements ASTTransformation {
         for (final ClassNode classNode : moduleNode.getClasses())  {
             new ContractsVisitor(unit, source).visitClass(classNode);
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
-        }
-    }
-
-    /**
-     * Reads the protected <tt>source</tt> instance variable of {@link org.codehaus.groovy.control.SourceUnit}.
-     *
-     * @param unit the {@link org.codehaus.groovy.control.SourceUnit} to retrieve the {@link org.codehaus.groovy.control.io.ReaderSource} from
-     * @return the {@link org.codehaus.groovy.control.io.ReaderSource} of the given <tt>unit</tt>.
-     */
-    private ReaderSource getReaderSource(SourceUnit unit)  {
-
-        try {
-            Class sourceUnitClass = unit.getClass();
-
-            while (sourceUnitClass != SourceUnit.class)  {
-                sourceUnitClass = sourceUnitClass.getSuperclass();
-            }
-
-            Field field = sourceUnitClass.getDeclaredField("source");
-            field.setAccessible(true);
-
-            return (ReaderSource) field.get(unit);
-        } catch (Exception e) {
-            return null;
         }
     }
 }

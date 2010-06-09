@@ -1,17 +1,18 @@
 package org.gcontracts.ast.visitor;
 
-import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.ClassExpression;
+import org.codehaus.groovy.ast.AnnotationNode;
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
-import org.gcontracts.generation.PostconditionGenerator;
-import org.gcontracts.generation.PreconditionGenerator;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.ClassInvariantGenerator;
+import org.gcontracts.generation.PostconditionGenerator;
+import org.gcontracts.generation.PreconditionGenerator;
 
 import java.util.List;
 
@@ -40,9 +41,6 @@ public class ContractsVisitor extends BaseVisitor {
 
                 classInvariantGenerator.generateInvariantAssertionStatement(type, classInvariant);
 
-                // fix compilation with setting value() to java.lang.Object.class
-                annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
-
                 found = true;
             }
         }
@@ -67,14 +65,8 @@ public class ContractsVisitor extends BaseVisitor {
         for (AnnotationNode annotation: annotations)  {
             if (annotation.getClassNode().getName().equals(Requires.class.getName()))  {
                 preconditionGenerator.generatePreconditionAssertionStatement(method, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
-
-                // fix compilation with setting value() to java.lang.Object.class
-                annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
             } else if (annotation.getClassNode().getName().equals(Ensures.class.getName()))  {
                 postconditionGenerator.generatePostconditionAssertionStatement(method, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
-
-                // fix compilation with setting value() to java.lang.Object.class
-                annotation.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(ClassHelper.OBJECT_TYPE));
             }
         }
 
