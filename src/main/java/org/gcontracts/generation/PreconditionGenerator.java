@@ -30,7 +30,7 @@ public class PreconditionGenerator extends BaseGenerator {
 
         final BlockStatement modifiedMethodCode = new BlockStatement();
         final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, closureExpression);
-        final ExpressionStatement expressionStatement = new ExpressionStatement(AssertStatementCreationUtility.getDeclarationExpression("precondition", method, assertStatement));
+        final ExpressionStatement expressionStatement = new ExpressionStatement(AssertStatementCreationUtility.getDeclarationExpression("precondition", method, assertStatement, false, false));
         final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(method, assertStatement);
 
         if (methodCallToSuperPrecondition != null) AssertStatementCreationUtility.addToAssertStatement(assertStatement, methodCallToSuperPrecondition, Token.newSymbol(Types.LOGICAL_OR, -1, -1));

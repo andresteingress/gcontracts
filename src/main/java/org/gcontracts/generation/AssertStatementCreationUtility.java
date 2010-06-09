@@ -29,11 +29,13 @@ import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.codehaus.groovy.transform.powerassert.AssertionRewriter;
+import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Requires;
 import org.gcontracts.util.AnnotationUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,7 +61,7 @@ public final class AssertStatementCreationUtility {
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated"));
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[invariant] in class <" + classNode.getName() + "> violated"));
         assertStatement.setLineNumber(classNode.getLineNumber());
 
         return assertStatement;
@@ -80,7 +82,7 @@ public final class AssertStatementCreationUtility {
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[" + assertionType + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated"));
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[" + assertionType + "] in method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated"));
         assertStatement.setLineNumber(closureExpression.getLineNumber());
 
         return assertStatement;
@@ -96,7 +98,7 @@ public final class AssertStatementCreationUtility {
      * 
      * @return
      */
-    public static DeclarationExpression getDeclarationExpression(final String assertionType, final MethodNode method, final AssertStatement assertStatement)  {
+    public static DeclarationExpression getDeclarationExpression(final String assertionType, final MethodNode method, final AssertStatement assertStatement, boolean withOldVariable, boolean withResultVariable)  {
 
         // creates a new closure with all method parameters as closure parameters -> this is needed in descendants
         // e.g. when renaming of method parameter happens during redefinition of a method ...
@@ -107,12 +109,18 @@ public final class AssertStatementCreationUtility {
         newAssertStatement.setColumnNumber(assertStatement.getColumnNumber());
         newAssertStatement.setLastColumnNumber(assertStatement.getLastColumnNumber());
         newAssertStatement.setLastLineNumber(assertStatement.getLastLineNumber());
-        newAssertStatement.setMessageExpression(new ConstantExpression("[inherited]" + ((ConstantExpression) assertStatement.getMessageExpression()).getText()));
+        newAssertStatement.setMessageExpression(new ConstantExpression(((ConstantExpression) assertStatement.getMessageExpression()).getText().replaceFirst(assertionType, "inherited " + assertionType)));
 
         closureBlockStatement.addStatement(newAssertStatement);
         closureBlockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
 
-        final ClosureExpression closureExpression = new ClosureExpression(method.getParameters(), closureBlockStatement);
+        final ArrayList<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.addAll(Arrays.asList(method.getParameters()));
+
+        if (withOldVariable) parameters.add(new Parameter(ClassHelper.OBJECT_TYPE, "old"));
+        if (withResultVariable) parameters.add(new Parameter(method.getReturnType(), "result"));
+
+        final ClosureExpression closureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), closureBlockStatement);
         closureExpression.setVariableScope(new VariableScope(method.getVariableScope()));
         closureExpression.setSynthetic(true);
         closureExpression.setLineNumber(assertStatement.getLineNumber());
@@ -139,6 +147,30 @@ public final class AssertStatementCreationUtility {
         }
 
         final MethodCallExpression methodCallExpression = new MethodCallExpression(closureExpressionOfSuperPrecondition, "call", new ArgumentListExpression(new ListExpression(closureVariables)));
+        methodCallExpression.setLineNumber(assertStatement.getLineNumber());
+        methodCallExpression.setSynthetic(true);
+
+        return methodCallExpression;
+    }
+
+    public static MethodCallExpression getMethodCallExpressionToSuperClassPostcondition(final MethodNode methodNode, final AssertStatement assertStatement, boolean withOldVariable, boolean withResultVariable)  {
+
+        final MethodNode nextMethodNode = AnnotationUtils.getMethodNodeInHierarchyWithAnnotation(methodNode, Ensures.class);
+        if (nextMethodNode == null) return null;
+
+        BlockStatement methodBlockStatement = (BlockStatement) nextMethodNode.getCode();
+        final ClosureExpression closureExpressionOfSuperPostcondition = getAssertionClosureExpression("postcondition", methodBlockStatement);
+        if (closureExpressionOfSuperPostcondition == null) return null;
+
+        final List<Expression> closureVariables = new ArrayList<Expression>();
+        for (final Parameter param : methodNode.getParameters())  {
+            closureVariables.add(new VariableExpression(param));
+        }
+
+        if (withOldVariable) closureVariables.add(new VariableExpression("old"));
+        if (withResultVariable) closureVariables.add(new VariableExpression("result"));
+
+        final MethodCallExpression methodCallExpression = new MethodCallExpression(closureExpressionOfSuperPostcondition, "call", new ArgumentListExpression(new ListExpression(closureVariables)));
         methodCallExpression.setLineNumber(assertStatement.getLineNumber());
         methodCallExpression.setSynthetic(true);
 
