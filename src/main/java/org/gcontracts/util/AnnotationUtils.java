@@ -24,6 +24,8 @@ package org.gcontracts.util;
 
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.MethodNode;
+import org.gcontracts.generation.CandidateChecks;
 
 /**
  * Helper methods for reading/getting {@link org.codehaus.groovy.ast.AnnotationNode} instances.
@@ -40,13 +42,30 @@ public class AnnotationUtils {
      * @param anno the annotation to watch out for
      * @return the next {@link org.codehaus.groovy.ast.ClassNode} in the inheritance line, or <tt>null</tt>
      */
-    public static ClassNode getNextClassNodeWithAnnotation(ClassNode type, Class anno)  {
+    public static ClassNode getClassNodeInHierarchyWithAnnotation(ClassNode type, Class anno)  {
         for (AnnotationNode annotation : type.getAnnotations())  {
             if (annotation.getClassNode().getName().equals(anno.getName()))  {
                 return type;
             }
         }
 
-        if (type.getSuperClass() != null) return getNextClassNodeWithAnnotation(type.getSuperClass(), anno); else return null;
+        if (type.getSuperClass() != null) return getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), anno); else return null;
+    }
+
+    public static MethodNode getMethodNodeInHierarchyWithAnnotation(MethodNode methodNode, Class anno)  {
+        final ClassNode type = methodNode.getDeclaringClass();
+        if (type.getSuperClass() == null) return null;
+
+        final ClassNode superClass = type.getSuperClass();
+        final MethodNode superMethod = superClass.getMethod(methodNode.getName(), methodNode.getParameters());
+        if (superMethod == null) return null;
+
+        for (AnnotationNode annotation : superMethod.getAnnotations())  {
+            if (annotation.getClassNode().getName().equals(anno.getName()))  {
+                return superMethod;
+            }
+        }
+        
+        return getMethodNodeInHierarchyWithAnnotation(superMethod, anno);
     }
 }

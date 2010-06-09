@@ -3,7 +3,10 @@ package org.gcontracts.generation;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.Parameter;
-import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.expr.DeclarationExpression;
+import org.codehaus.groovy.ast.expr.MapExpression;
+import org.codehaus.groovy.ast.expr.VariableExpression;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
@@ -11,7 +14,6 @@ import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.gcontracts.util.ClosureToSourceConverter;
 
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class PostconditionGenerator extends BaseGenerator {
         // if return type is not void, than a "result" variable is provided in the postcondition expression
         final List<Statement> statements = methodBlock.getStatements();
         if (statements.size() > 0)  {
-            BlockStatement postconditionCheck = null;
+            BlockStatement postconditionCheck = new BlockStatement();
 
             if (method.getReturnType() != ClassHelper.VOID_TYPE && usesResultVariable)  {
                 Statement lastStatement = statements.get(statements.size() - 1);
@@ -65,7 +67,7 @@ public class PostconditionGenerator extends BaseGenerator {
 
                 statements.remove(statements.size() - 1);
 
-                postconditionCheck = AssertStatementCreationUtility.getAssertionBlockStatement(method, closureExpression, "postcondition", ClosureToSourceConverter.convert(closureExpression, source));
+                postconditionCheck.addStatement(AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression));
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression resultVariable = new VariableExpression("result");
@@ -89,7 +91,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 methodBlock.addStatement(returnStatement);
             } else {
 
-                postconditionCheck = AssertStatementCreationUtility.getAssertionBlockStatement(method, closureExpression, "postcondition", ClosureToSourceConverter.convert(closureExpression, source));
+                postconditionCheck.addStatement(AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression));
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");

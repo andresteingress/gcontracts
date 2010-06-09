@@ -23,18 +23,14 @@
 package org.gcontracts.generation;
 
 import org.codehaus.groovy.GroovyBugError;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.FieldNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.AssertStatement;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.codehaus.groovy.transform.powerassert.AssertionRewriter;
+import org.gcontracts.annotations.Requires;
+import org.gcontracts.util.AnnotationUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,15 +52,14 @@ public final class AssertStatementCreationUtility {
      *
      * @param classNode the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
-     * @param closureSourceCode the closure source of the invariant
      *
      * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      */
-    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final ClosureExpression closureExpression, final String closureSourceCode)  {
+    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final ClosureExpression closureExpression)  {
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[invariant] Invariant in class <" + classNode.getName() + "> violated"));
         assertStatement.setLineNumber(classNode.getLineNumber());
 
         return assertStatement;
@@ -74,23 +69,93 @@ public final class AssertStatementCreationUtility {
      * Reusable method for creating assert statements for the given <tt>closureExpression</tt>, injected in the
      * given <tt>method</tt> and with optional closure parameters.
      *
+     * @param assertionType the name of the constraint, used for assertion messages
      * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
      * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
-     * @param constraint the name of the constraint, used for assertion messages
-     * @param closureSourceCode the closure source code of the assertion
      *
      * @return a new {@link org.codehaus.groovy.ast.stmt.BlockStatement} which holds the assertion
      */
-    public static BlockStatement getAssertionBlockStatement(MethodNode method, ClosureExpression closureExpression, String constraint, String closureSourceCode) {
-        final BlockStatement assertionBlock = new BlockStatement();
+    public static AssertStatement getAssertionStatement(final String assertionType, MethodNode method, ClosureExpression closureExpression) {
 
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[" + constraint + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated" + (closureSourceCode.isEmpty() ? "" : ": " + closureSourceCode)));
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[" + assertionType + "] In method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated"));
         assertStatement.setLineNumber(closureExpression.getLineNumber());
-        assertionBlock.addStatement(assertStatement);
-        return assertionBlock;
+
+        return assertStatement;
+    }
+
+    /**
+     * Creates a {@link org.codehaus.groovy.ast.expr.DeclarationExpression} which wraps the given {@link org.codehaus.groovy.ast.stmt.AssertStatement} into
+     * a closure with according parameters. This helper variable is needed in descendants to check for inherited assertions.
+     *
+     * @param assertionType
+     * @param method
+     * @param assertStatement
+     * 
+     * @return
+     */
+    public static DeclarationExpression getDeclarationExpression(final String assertionType, final MethodNode method, final AssertStatement assertStatement)  {
+
+        // creates a new closure with all method parameters as closure parameters -> this is needed in descendants
+        // e.g. when renaming of method parameter happens during redefinition of a method ...
+        final BlockStatement closureBlockStatement = new BlockStatement();
+
+        final AssertStatement newAssertStatement = new AssertStatement(assertStatement.getBooleanExpression());
+        newAssertStatement.setLineNumber(assertStatement.getLineNumber());
+        newAssertStatement.setColumnNumber(assertStatement.getColumnNumber());
+        newAssertStatement.setLastColumnNumber(assertStatement.getLastColumnNumber());
+        newAssertStatement.setLastLineNumber(assertStatement.getLastLineNumber());
+        newAssertStatement.setMessageExpression(new ConstantExpression("[inherited]" + ((ConstantExpression) assertStatement.getMessageExpression()).getText()));
+
+        closureBlockStatement.addStatement(newAssertStatement);
+        closureBlockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
+
+        final ClosureExpression closureExpression = new ClosureExpression(method.getParameters(), closureBlockStatement);
+        closureExpression.setVariableScope(new VariableScope(method.getVariableScope()));
+        closureExpression.setSynthetic(true);
+        closureExpression.setLineNumber(assertStatement.getLineNumber());
+        
+        final DeclarationExpression declarationExpression = new DeclarationExpression(new VariableExpression("$" + assertionType + "$"), Token.newSymbol(Types.ASSIGN, -1, -1), closureExpression);
+        declarationExpression.setSynthetic(true);
+        declarationExpression.setLineNumber(assertStatement.getLineNumber());
+
+        return declarationExpression;
+    }
+
+    public static MethodCallExpression getMethodCallExpressionToSuperClassPrecondition(final MethodNode methodNode, final AssertStatement assertStatement)  {
+
+        final MethodNode nextMethodNode = AnnotationUtils.getMethodNodeInHierarchyWithAnnotation(methodNode, Requires.class);
+        if (nextMethodNode == null) return null;
+
+        BlockStatement methodBlockStatement = (BlockStatement) nextMethodNode.getCode();
+        final ClosureExpression closureExpressionOfSuperPrecondition = getAssertionClosureExpression("precondition", methodBlockStatement);
+        if (closureExpressionOfSuperPrecondition == null) return null;
+
+        final List<Expression> closureVariables = new ArrayList<Expression>();
+        for (final Parameter param : methodNode.getParameters())  {
+            closureVariables.add(new VariableExpression(param));
+        }
+
+        final MethodCallExpression methodCallExpression = new MethodCallExpression(closureExpressionOfSuperPrecondition, "call", new ArgumentListExpression(new ListExpression(closureVariables)));
+        methodCallExpression.setLineNumber(assertStatement.getLineNumber());
+        methodCallExpression.setSynthetic(true);
+
+        return methodCallExpression;
+    }
+
+    public static void addToAssertStatement(final AssertStatement assertStatement, final Expression expressionToAdd, final Token booleanOperator)  {
+
+        final BooleanExpression booleanExpressionLeft = assertStatement.getBooleanExpression();
+        final BinaryExpression binaryExpression = new BinaryExpression(
+                booleanExpressionLeft.getExpression(),
+                booleanOperator,
+                expressionToAdd
+        );
+        final BooleanExpression newBooleanExpression = new BooleanExpression(binaryExpression);
+
+        assertStatement.setBooleanExpression(newBooleanExpression);
     }
 
     /**
@@ -131,4 +196,19 @@ public final class AssertStatementCreationUtility {
         return null;
     }
 
+    private static ClosureExpression getAssertionClosureExpression(final String assertionType, final BlockStatement methodBlockStatement)  {
+
+        for (Statement statement : methodBlockStatement.getStatements())  {
+            if (statement instanceof ExpressionStatement
+                    && ((ExpressionStatement) statement).getExpression() instanceof DeclarationExpression
+                    && ((DeclarationExpression) ((ExpressionStatement) statement).getExpression()).getLeftExpression() instanceof VariableExpression
+                    && ((VariableExpression) ((DeclarationExpression) ((ExpressionStatement) statement).getExpression()).getLeftExpression()).getName().equals("$" + assertionType + "$"))  {
+
+
+                return (ClosureExpression) ((DeclarationExpression) ((ExpressionStatement) statement).getExpression()).getRightExpression();
+            }
+        }
+
+        return null;
+    }
 }

@@ -2,9 +2,13 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.expr.MethodCallExpression;
+import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.gcontracts.util.ClosureToSourceConverter;
+import org.codehaus.groovy.syntax.Token;
+import org.codehaus.groovy.syntax.Types;
 
 /**
  * @author andre.steingress@gmail.com
@@ -24,9 +28,21 @@ public class PreconditionGenerator extends BaseGenerator {
      */
     public void generatePreconditionAssertionStatement(MethodNode method, ClosureExpression closureExpression)  {
 
-        final BlockStatement preconditionCheck = AssertStatementCreationUtility.getAssertionBlockStatement(method, closureExpression, "precondition", ClosureToSourceConverter.convert(closureExpression, source));
-        preconditionCheck.addStatement(method.getCode());
+        final BlockStatement modifiedMethodCode = new BlockStatement();
+        final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, closureExpression);
+        final ExpressionStatement expressionStatement = new ExpressionStatement(AssertStatementCreationUtility.getDeclarationExpression("precondition", method, assertStatement));
+        final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(method, assertStatement);
 
-        method.setCode(preconditionCheck);
+        if (methodCallToSuperPrecondition != null) AssertStatementCreationUtility.addToAssertStatement(assertStatement, methodCallToSuperPrecondition, Token.newSymbol(Types.LOGICAL_OR, -1, -1));
+
+        assertStatement.setLineNumber(closureExpression.getLineNumber());
+        expressionStatement.setLineNumber(closureExpression.getLineNumber());
+
+        modifiedMethodCode.addStatement(assertStatement);
+        modifiedMethodCode.addStatement(expressionStatement);
+
+        modifiedMethodCode.addStatement(method.getCode());
+
+        method.setCode(modifiedMethodCode);
     }
 }

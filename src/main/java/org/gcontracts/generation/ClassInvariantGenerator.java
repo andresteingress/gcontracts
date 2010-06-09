@@ -10,7 +10,6 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.util.AnnotationUtils;
-import org.gcontracts.util.ClosureToSourceConverter;
 import org.objectweb.asm.Opcodes;
 
 /**
@@ -40,7 +39,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
         final BlockStatement assertionBlock = new BlockStatement();
 
-        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant, ClosureToSourceConverter.convert(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant));
 
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
             if (CandidateChecks.isClassInvariantCandidate(constructor))  {
@@ -79,7 +78,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
      */
     public void addCallsToSuperClassInvariants(ClassNode type, ClosureExpression closure)  {
 
-        final ClassNode nextClassWithInvariant = AnnotationUtils.getNextClassNodeWithAnnotation(type.getSuperClass(), Invariant.class);
+        final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
         if (nextClassWithInvariant == null) return;
 
         final String fieldName = getInvariantClosureFieldName(nextClassWithInvariant);
@@ -109,7 +108,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
     public void generateInvariantAssertionStatement(MethodNode method, ClosureExpression classInvariant)  {
 
         final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant, ClosureToSourceConverter.convert(classInvariant, source)));
+        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant));
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement)  {
