@@ -50,7 +50,7 @@ import java.lang.annotation.Target;
  *
  * @author andre.steingress@gmail.com
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Ensures {
     public abstract Class value();
