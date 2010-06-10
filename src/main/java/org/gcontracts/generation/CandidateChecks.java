@@ -45,7 +45,7 @@ public class CandidateChecks {
      */
     public static boolean isClassInvariantCandidate(final ConstructorNode constructorNode)  {
         return constructorNode != null &&
-                constructorNode.isPublic() && !constructorNode.isStatic() && !constructorNode.isStaticConstructor();
+                constructorNode.isPublic() && !constructorNode.isStatic();
     }
 
     /**
@@ -56,7 +56,7 @@ public class CandidateChecks {
      */
     public static boolean isClassInvariantCandidate(final MethodNode methodNode)  {
         return methodNode != null &&
-                methodNode.isPublic() && !methodNode.isStatic() && !methodNode.isStaticConstructor() && !methodNode.isAbstract();
+                methodNode.isPublic() && !methodNode.isStatic() && !methodNode.isAbstract();
     }
 
     /**
@@ -78,7 +78,7 @@ public class CandidateChecks {
      * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for pre- or postconditions 
      */
     public static boolean isPreOrPostconditionCandidate(final ClassNode type, final MethodNode method)  {
-        if (method.isSynthetic() || method.isStatic() || method.isStaticConstructor() || method.isAbstract() || !method.isPublic()) return false;
+        if (method.isSynthetic() || method.isStatic() || method.isAbstract() || !method.isPublic()) return false;
         if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
         if (method.getDeclaringClass() != type) return false;
 
