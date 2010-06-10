@@ -12,6 +12,10 @@ import org.codehaus.groovy.syntax.Types;
 import java.util.List;
 
 /**
+ * <p>
+ * Code generator for postconditions.
+ * </p>
+ *
  * @author andre.steingress@gmail.com
  */
 public class PostconditionGenerator extends BaseGenerator {

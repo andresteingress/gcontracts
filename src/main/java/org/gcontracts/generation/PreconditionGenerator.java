@@ -11,6 +11,8 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 
 /**
+ * Code generator for preconditions.
+ *
  * @author andre.steingress@gmail.com
  */
 public class PreconditionGenerator extends BaseGenerator {

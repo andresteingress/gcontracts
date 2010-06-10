@@ -13,6 +13,10 @@ import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
 /**
+ * <p>
+ * Code generator for class invariants.
+ * </p>
+ *
  * @author andre.steingress@gmail.com
  */
 public class ClassInvariantGenerator extends BaseGenerator {

@@ -10,6 +10,13 @@ import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.ast.visitor.ContractsErasingVisitor;
 
 /**
+ * <p>
+ * Custom AST transformation that erases all closure annotation parameters.
+ * </p>
+ *
+ * @see org.gcontracts.ast.BaseASTTransformation
+ * @see org.codehaus.groovy.transform.ASTTransformation
+ *
  * @author andre.steingress@gmail.com
  */
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)

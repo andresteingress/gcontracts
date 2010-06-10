@@ -29,8 +29,11 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * Represents a <b>class-invariant</b>. The class-invariant defines assertions that must holds during
- * the entire life-time of this class's instances.
+ * Represents a <b>class-invariant</b>.
+ * </p>
+ *
+ * <p>
+ * The class-invariant defines assertions that must holds during the entire life-time of this class's instances.
  * </p>
  * <p>
  * Checking the class-invariant is injected at several pointcuts:

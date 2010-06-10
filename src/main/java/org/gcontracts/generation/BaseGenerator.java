@@ -5,6 +5,10 @@ import org.codehaus.groovy.ast.FieldNode;
 import org.codehaus.groovy.control.io.ReaderSource;
 
 /**
+ * <p>
+ * Base class for GContracts code generators.
+ * </p>
+ *
  * @author andre.steingress@gmail.com
  */
 public abstract class BaseGenerator {

@@ -20,6 +20,12 @@ import org.objectweb.asm.Opcodes;
 import java.util.List;
 
 /**
+ * <p>
+ * Implements contract support for setter methods in Groovy properties and public default constructors.
+ * </p>
+ *
+ * @see org.gcontracts.ast.visitor.BaseVisitor
+ *
  * @author andre.steingress@gmail.com
  */
 public class DynamicSetterInjectionVisitor extends BaseVisitor {

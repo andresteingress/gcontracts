@@ -5,6 +5,11 @@ import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.PropertyNode;
 
 /**
+ * <p>
+ * Functions in this class are used to determine whether a certain AST node fulfills certain assertion
+ * requirements. E.g. whether a class node is a class invariant candidate or not.
+ * </p>
+ *
  * @author andre.steingress@gmail.com
  */
 public class CandidateChecks {

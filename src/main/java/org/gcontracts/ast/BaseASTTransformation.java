@@ -7,6 +7,10 @@ import org.codehaus.groovy.transform.ASTTransformation;
 import java.lang.reflect.Field;
 
 /**
+ * base AST transformation encapsulating all common helper methods and implementing {@link org.codehaus.groovy.transform.ASTTransformation}.
+ *
+ * @see org.codehaus.groovy.transform.ASTTransformation
+ *
  * @author andre.steingress@gmail.com
  */
 public abstract class BaseASTTransformation implements ASTTransformation {

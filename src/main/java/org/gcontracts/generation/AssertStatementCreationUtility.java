@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Central place to create {@link org.codehaus.groovy.ast.stmt.AssertStatement} instances in gcontracts. Utilized
+ * Central place to create {@link org.codehaus.groovy.ast.stmt.AssertStatement} instances in GContracts. Utilized
  * to centralize {@link AssertionError} message generation.
  *
  * @see org.codehaus.groovy.ast.stmt.AssertStatement

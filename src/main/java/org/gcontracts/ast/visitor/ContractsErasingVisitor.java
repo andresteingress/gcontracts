@@ -14,6 +14,17 @@ import org.gcontracts.annotations.Requires;
 import java.util.List;
 
 /**
+ * <p>
+ * Erases GContracts closure annotations from {@link org.gcontracts.annotations.Requires}, {@link org.gcontracts.annotations.Ensures}
+ * and {@link org.gcontracts.annotations.Invariant}.
+ * </p>
+ *
+ * @see org.gcontracts.annotations.Requires
+ * @see org.gcontracts.annotations.Ensures
+ * @see org.gcontracts.annotations.Invariant
+ *
+ * @see org.gcontracts.ast.visitor.BaseVisitor
+ *
  * @author andre.steingress@gmail.com
  */
 public class ContractsErasingVisitor extends BaseVisitor {

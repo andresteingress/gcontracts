@@ -17,6 +17,13 @@ import org.gcontracts.generation.PreconditionGenerator;
 import java.util.List;
 
 /**
+ * <p>
+ * Main visitor in GContracts extending {@link org.gcontracts.ast.visitor.BaseVisitor}. At runtime visitors of
+ * this class are used to generate and add class invariants, pre- and postconditions to annotated classes and methods.
+ * </p>
+ *
+ * @see org.gcontracts.ast.visitor.BaseVisitor
+ *
  * @author andre.steingress@gmail.com
  */
 public class ContractsVisitor extends BaseVisitor {

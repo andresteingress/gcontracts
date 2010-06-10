@@ -5,6 +5,13 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 
 /**
+ * <p>
+ * Base class for {@link org.codehaus.groovy.ast.ClassCodeVisitorSupport} descendants. This class is used in GContracts
+ * as root class for all code visitors directly used by global AST transformations.
+ * </p>
+ *
+ * @see org.codehaus.groovy.ast.ClassCodeVisitorSupport
+ *
  * @author andre.steingress@gmail.com
  */
 public abstract class BaseVisitor extends ClassCodeVisitorSupport {
