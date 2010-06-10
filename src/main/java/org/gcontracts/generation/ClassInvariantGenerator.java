@@ -89,7 +89,6 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
         ClosureExpression closureExpression = new ClosureExpression(null, closureBlockStatement);
         closureExpression.setVariableScope(new VariableScope());
-        closureExpression.setSynthetic(true);
 
         generateInvariantAssertionStatement(type, closureExpression);
 
