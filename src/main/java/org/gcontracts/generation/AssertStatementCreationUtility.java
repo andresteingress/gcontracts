@@ -90,13 +90,15 @@ public final class AssertStatementCreationUtility {
 
     /**
      * Creates a {@link org.codehaus.groovy.ast.expr.DeclarationExpression} which wraps the given {@link org.codehaus.groovy.ast.stmt.AssertStatement} into
-     * a closure with according parameters. This helper variable is needed in descendants to check for inherited assertions.
+     * a closure with the current method parameters. This helper variable is needed in descendants to check for inherited assertions.
      *
-     * @param assertionType
-     * @param method
-     * @param assertStatement
+     * @param assertionType the type of the current assertion either <i>precondition</i> or <i>postcondition</i>
+     * @param method the current {@link org.codehaus.groovy.ast.MethodNode} for which the declaration expression is generated
+     * @param assertStatement the {@link org.codehaus.groovy.ast.stmt.AssertStatement} to be wrapped
+     * @param withOldVariable tells whether the closure should provide an <tt>old</tt> parameter
+     * @param withResultVariable tells whether the closure should provide a <tt>result</tt> parameter
      * 
-     * @return
+     * @return a {@link org.codehaus.groovy.ast.expr.DeclarationExpression} that wraps the given {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      */
     public static DeclarationExpression getDeclarationExpression(final String assertionType, final MethodNode method, final AssertStatement assertStatement, boolean withOldVariable, boolean withResultVariable)  {
 
@@ -104,6 +106,7 @@ public final class AssertStatementCreationUtility {
         // e.g. when renaming of method parameter happens during redefinition of a method ...
         final BlockStatement closureBlockStatement = new BlockStatement();
 
+        // copy the assert statement to provide a new message expression
         final AssertStatement newAssertStatement = new AssertStatement(assertStatement.getBooleanExpression());
         newAssertStatement.setLineNumber(assertStatement.getLineNumber());
         newAssertStatement.setColumnNumber(assertStatement.getColumnNumber());
@@ -111,6 +114,7 @@ public final class AssertStatementCreationUtility {
         newAssertStatement.setLastLineNumber(assertStatement.getLastLineNumber());
         newAssertStatement.setMessageExpression(new ConstantExpression(((ConstantExpression) assertStatement.getMessageExpression()).getText().replaceFirst(assertionType, "inherited " + assertionType)));
 
+        // add return value "true" so valid assertions in sub assertion statements get through
         closureBlockStatement.addStatement(newAssertStatement);
         closureBlockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
 
@@ -132,6 +136,15 @@ public final class AssertStatementCreationUtility {
         return declarationExpression;
     }
 
+    /**
+     * Looks up the next precondition in the class hierarchy of the given class and generates a method call on the previously
+     * generated closure in the declaration expression.
+     *
+     * @param methodNode the current {@link org.codehaus.groovy.ast.MethodNode}, the lookup mechanism starts at the superclass of the declaring class node
+     * @param assertStatement the current {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     *
+     * @return a {@link org.codehaus.groovy.ast.expr.MethodCallExpression} to the inherited precondition
+     */
     public static MethodCallExpression getMethodCallExpressionToSuperClassPrecondition(final MethodNode methodNode, final AssertStatement assertStatement)  {
 
         final MethodNode nextMethodNode = AnnotationUtils.getMethodNodeInHierarchyWithAnnotation(methodNode, Requires.class);
@@ -153,6 +166,17 @@ public final class AssertStatementCreationUtility {
         return methodCallExpression;
     }
 
+    /**
+     * Looks up the next postcondition in the class hierarchy of the given class and generates a method call on the previously
+     * generated closure in the declaration expression.
+     *
+     * @param methodNode the current {@link org.codehaus.groovy.ast.MethodNode}, the lookup mechanism starts at the superclass of the declaring class node
+     * @param assertStatement the current {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     * @param withOldVariable indicates whether the call needs an <tt>old</tt> parameter
+     * @param withResultVariable indicates whether the call needs a <tt>result</tt> parameter
+     *
+     * @return a {@link org.codehaus.groovy.ast.expr.MethodCallExpression} to the inherited postcondition
+     */
     public static MethodCallExpression getMethodCallExpressionToSuperClassPostcondition(final MethodNode methodNode, final AssertStatement assertStatement, boolean withOldVariable, boolean withResultVariable)  {
 
         final MethodNode nextMethodNode = AnnotationUtils.getMethodNodeInHierarchyWithAnnotation(methodNode, Ensures.class);
@@ -177,6 +201,14 @@ public final class AssertStatementCreationUtility {
         return methodCallExpression;
     }
 
+    /**
+     * Helper method to add an {@link org.codehaus.groovy.ast.expr.Expression} to the given {@link org.codehaus.groovy.ast.stmt.AssertStatement}. In fact,
+     * a {@link org.codehaus.groovy.ast.expr.BinaryExpression} will be added where the two expressions are concatenated using the given <tt>booleanOperator</tt>.
+     *
+     * @param assertStatement the {@link org.codehaus.groovy.ast.stmt.AssertStatement} to be modified
+     * @param expressionToAdd the {@link org.codehaus.groovy.ast.expr.Expression} to be added to the assert statement's expression
+     * @param booleanOperator the {@link org.codehaus.groovy.syntax.Token} to be used for concatenation
+     */
     public static void addToAssertStatement(final AssertStatement assertStatement, final Expression expressionToAdd, final Token booleanOperator)  {
 
         final BooleanExpression booleanExpressionLeft = assertStatement.getBooleanExpression();

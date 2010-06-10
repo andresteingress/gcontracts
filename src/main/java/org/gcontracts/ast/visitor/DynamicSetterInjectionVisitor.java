@@ -54,6 +54,7 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
         return setterMethodBlock;
     }
 
+    @Override
     public void visitProperty(PropertyNode node) {
         final ClassNode classNode = node.getDeclaringClass();
         final String setterName = "set" + MetaClassHelper.capitalize(node.getName());
