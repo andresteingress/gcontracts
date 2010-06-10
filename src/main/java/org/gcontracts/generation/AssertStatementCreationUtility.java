@@ -32,6 +32,7 @@ import org.codehaus.groovy.transform.powerassert.AssertionRewriter;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Requires;
 import org.gcontracts.util.AnnotationUtils;
+import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,25 +90,24 @@ public final class AssertStatementCreationUtility {
     }
 
     /**
-     * Creates a {@link org.codehaus.groovy.ast.expr.DeclarationExpression} which wraps the given {@link org.codehaus.groovy.ast.stmt.AssertStatement} into
-     * a closure with the current method parameters. This helper variable is needed in descendants to check for inherited assertions.
+     * Create a backup {@link org.codehaus.groovy.ast.MethodNode} with the given <tt>assertStatement</tt>. This method will be used
+     * in descendants to call inherited assertions.
      *
-     * @param assertionType the type of the current assertion either <i>precondition</i> or <i>postcondition</i>
-     * @param method the current {@link org.codehaus.groovy.ast.MethodNode} for which the declaration expression is generated
-     * @param assertStatement the {@link org.codehaus.groovy.ast.stmt.AssertStatement} to be wrapped
-     * @param withOldVariable tells whether the closure should provide an <tt>old</tt> parameter
-     * @param withResultVariable tells whether the closure should provide a <tt>result</tt> parameter
-     * 
-     * @return a {@link org.codehaus.groovy.ast.expr.DeclarationExpression} that wraps the given {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     * @param assertionType the assertion type (precondition or postcondition)
+     * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
+     * @param assertStatement the {@link org.codehaus.groovy.ast.stmt.AssertStatement} for which the backup should be created
+     * @param withOldVariable indicates whether the old variable should be added as parameter
+     * @param withResultVariable indicates whether the result variable should be added as parameter
      */
-    public static DeclarationExpression getDeclarationExpression(final String assertionType, final MethodNode method, final AssertStatement assertStatement, boolean withOldVariable, boolean withResultVariable)  {
+    public static void addAssertionMethodNode(final String assertionType, final MethodNode method, final AssertStatement assertStatement, boolean withOldVariable, boolean withResultVariable)  {
 
         // creates a new closure with all method parameters as closure parameters -> this is needed in descendants
         // e.g. when renaming of method parameter happens during redefinition of a method ...
-        final BlockStatement closureBlockStatement = new BlockStatement();
+        final BlockStatement methodBlockStatement = new BlockStatement();
 
         // copy the assert statement to provide a new message expression
-        final AssertStatement newAssertStatement = new AssertStatement(assertStatement.getBooleanExpression());
+        final BooleanExpression booleanExpression = new BooleanExpression(assertStatement.getBooleanExpression().getExpression());
+        final AssertStatement newAssertStatement = new AssertStatement(booleanExpression);
         newAssertStatement.setLineNumber(assertStatement.getLineNumber());
         newAssertStatement.setColumnNumber(assertStatement.getColumnNumber());
         newAssertStatement.setLastColumnNumber(assertStatement.getLastColumnNumber());
@@ -115,8 +115,8 @@ public final class AssertStatementCreationUtility {
         newAssertStatement.setMessageExpression(new ConstantExpression(((ConstantExpression) assertStatement.getMessageExpression()).getText().replaceFirst(assertionType, "inherited " + assertionType)));
 
         // add return value "true" so valid assertions in sub assertion statements get through
-        closureBlockStatement.addStatement(newAssertStatement);
-        closureBlockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
+        methodBlockStatement.addStatement(newAssertStatement);
+        methodBlockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
 
         final ArrayList<Parameter> parameters = new ArrayList<Parameter>();
         parameters.addAll(Arrays.asList(method.getParameters()));
@@ -124,16 +124,19 @@ public final class AssertStatementCreationUtility {
         if (withOldVariable) parameters.add(new Parameter(ClassHelper.OBJECT_TYPE, "old"));
         if (withResultVariable) parameters.add(new Parameter(method.getReturnType(), "result"));
 
-        final ClosureExpression closureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), closureBlockStatement);
-        closureExpression.setVariableScope(new VariableScope(method.getVariableScope()));
-        closureExpression.setSynthetic(true);
-        closureExpression.setLineNumber(assertStatement.getLineNumber());
-        
-        final DeclarationExpression declarationExpression = new DeclarationExpression(new VariableExpression("$" + assertionType + "$"), Token.newSymbol(Types.ASSIGN, -1, -1), closureExpression);
-        declarationExpression.setSynthetic(true);
-        declarationExpression.setLineNumber(assertStatement.getLineNumber());
+        final ClassNode declaringClass = method.getDeclaringClass();
+        final Parameter[] parameterArray = parameters.toArray(new Parameter[parameters.size()]);
+        final String assertionMethodName = getAssertionMethodName(assertionType, method);
 
-        return declarationExpression;
+        if (method.getDeclaringClass().getSuperClass() != null && method.getDeclaringClass().getSuperClass().hasDeclaredMethod(assertionMethodName, parameterArray)) {
+            final MethodCallExpression methodCallExpression = "precondition".equals(assertionType) ? getMethodCallExpressionToSuperClassPrecondition(method, newAssertStatement.getLineNumber()) : getMethodCallExpressionToSuperClassPostcondition(method, newAssertStatement.getLineNumber(), withOldVariable, withResultVariable);
+            if (methodCallExpression != null)  {
+                addToAssertStatement(newAssertStatement, methodCallExpression, "precondition".equals(assertionType) ? Token.newSymbol(Types.LOGICAL_OR, -1, -1) : Token.newSymbol(Types.LOGICAL_AND, -1, -1));
+            }
+        }
+
+        final MethodNode preconditionMethodNode = declaringClass.addMethod(assertionMethodName, Opcodes.ACC_PROTECTED, ClassHelper.Boolean_TYPE, parameterArray, ClassNode.EMPTY_ARRAY, methodBlockStatement);
+        preconditionMethodNode.setSynthetic(true);
     }
 
     /**
@@ -141,26 +144,22 @@ public final class AssertStatementCreationUtility {
      * generated closure in the declaration expression.
      *
      * @param methodNode the current {@link org.codehaus.groovy.ast.MethodNode}, the lookup mechanism starts at the superclass of the declaring class node
-     * @param assertStatement the current {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     * @param lineNumber the line number of the current assertion
      *
      * @return a {@link org.codehaus.groovy.ast.expr.MethodCallExpression} to the inherited precondition
      */
-    public static MethodCallExpression getMethodCallExpressionToSuperClassPrecondition(final MethodNode methodNode, final AssertStatement assertStatement)  {
+    public static MethodCallExpression getMethodCallExpressionToSuperClassPrecondition(final MethodNode methodNode, final int lineNumber)  {
 
         final MethodNode nextMethodNode = AnnotationUtils.getMethodNodeInHierarchyWithAnnotation(methodNode, Requires.class);
         if (nextMethodNode == null) return null;
 
-        BlockStatement methodBlockStatement = (BlockStatement) nextMethodNode.getCode();
-        final ClosureExpression closureExpressionOfSuperPrecondition = getAssertionClosureExpression("precondition", methodBlockStatement);
-        if (closureExpressionOfSuperPrecondition == null) return null;
-
-        final List<Expression> closureVariables = new ArrayList<Expression>();
+        final List<Expression> methodParameters = new ArrayList<Expression>();
         for (final Parameter param : methodNode.getParameters())  {
-            closureVariables.add(new VariableExpression(param));
+            methodParameters.add(new VariableExpression(param));
         }
 
-        final MethodCallExpression methodCallExpression = new MethodCallExpression(closureExpressionOfSuperPrecondition, "call", new ArgumentListExpression(new ListExpression(closureVariables)));
-        methodCallExpression.setLineNumber(assertStatement.getLineNumber());
+        final MethodCallExpression methodCallExpression = new MethodCallExpression(VariableExpression.SUPER_EXPRESSION, getAssertionMethodName("precondition", nextMethodNode), new ArgumentListExpression(methodParameters));
+        methodCallExpression.setLineNumber(lineNumber);
         methodCallExpression.setSynthetic(true);
 
         return methodCallExpression;
@@ -171,31 +170,27 @@ public final class AssertStatementCreationUtility {
      * generated closure in the declaration expression.
      *
      * @param methodNode the current {@link org.codehaus.groovy.ast.MethodNode}, the lookup mechanism starts at the superclass of the declaring class node
-     * @param assertStatement the current {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     * @param lineNumber the lineNumber of the current assertion
      * @param withOldVariable indicates whether the call needs an <tt>old</tt> parameter
      * @param withResultVariable indicates whether the call needs a <tt>result</tt> parameter
      *
      * @return a {@link org.codehaus.groovy.ast.expr.MethodCallExpression} to the inherited postcondition
      */
-    public static MethodCallExpression getMethodCallExpressionToSuperClassPostcondition(final MethodNode methodNode, final AssertStatement assertStatement, boolean withOldVariable, boolean withResultVariable)  {
+    public static MethodCallExpression getMethodCallExpressionToSuperClassPostcondition(final MethodNode methodNode, final int lineNumber, boolean withOldVariable, boolean withResultVariable)  {
 
         final MethodNode nextMethodNode = AnnotationUtils.getMethodNodeInHierarchyWithAnnotation(methodNode, Ensures.class);
         if (nextMethodNode == null) return null;
 
-        BlockStatement methodBlockStatement = (BlockStatement) nextMethodNode.getCode();
-        final ClosureExpression closureExpressionOfSuperPostcondition = getAssertionClosureExpression("postcondition", methodBlockStatement);
-        if (closureExpressionOfSuperPostcondition == null) return null;
-
-        final List<Expression> closureVariables = new ArrayList<Expression>();
+        final List<Expression> methodParameters = new ArrayList<Expression>();
         for (final Parameter param : methodNode.getParameters())  {
-            closureVariables.add(new VariableExpression(param));
+            methodParameters.add(new VariableExpression(param));
         }
 
-        if (withOldVariable) closureVariables.add(new VariableExpression("old"));
-        if (withResultVariable) closureVariables.add(new VariableExpression("result"));
+        if (withOldVariable) methodParameters.add(new VariableExpression("old"));
+        if (withResultVariable) methodParameters.add(new VariableExpression("result"));
 
-        final MethodCallExpression methodCallExpression = new MethodCallExpression(closureExpressionOfSuperPostcondition, "call", new ArgumentListExpression(new ListExpression(closureVariables)));
-        methodCallExpression.setLineNumber(assertStatement.getLineNumber());
+        final MethodCallExpression methodCallExpression = new MethodCallExpression(VariableExpression.SUPER_EXPRESSION, getAssertionMethodName("postcondition", nextMethodNode), new ArgumentListExpression(methodParameters));
+        methodCallExpression.setLineNumber(lineNumber);
         methodCallExpression.setSynthetic(true);
 
         return methodCallExpression;
@@ -220,6 +215,17 @@ public final class AssertStatementCreationUtility {
         final BooleanExpression newBooleanExpression = new BooleanExpression(binaryExpression);
 
         assertStatement.setBooleanExpression(newBooleanExpression);
+    }
+
+    /**
+     * Creates the assertion method node name.
+     *
+     * @param assertionType the assertion type (precondition or postcondition)
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to create the assertion method name
+     * @return the newly created assertion method name
+     */
+    private static String getAssertionMethodName(final String assertionType, final MethodNode method)  {
+        return assertionType + "_" + method.getReturnType().getName().replaceAll("\\.", "_") + "_" + method.getName();
     }
 
     /**
@@ -260,19 +266,26 @@ public final class AssertStatementCreationUtility {
         return null;
     }
 
-    private static ClosureExpression getAssertionClosureExpression(final String assertionType, final BlockStatement methodBlockStatement)  {
+    /**
+     * Gets a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} from the given {@link org.codehaus.groovy.ast.stmt.Statement}.
+     *
+     * @param lastStatement the last {@link org.codehaus.groovy.ast.stmt.Statement} of some method code block
+     * @return a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} or <tt>null</tt>
+     */
+    public static ReturnStatement getReturnStatement(ClassNode declaringClass, MethodNode method, Statement lastStatement)  {
 
-        for (Statement statement : methodBlockStatement.getStatements())  {
-            if (statement instanceof ExpressionStatement
-                    && ((ExpressionStatement) statement).getExpression() instanceof DeclarationExpression
-                    && ((DeclarationExpression) ((ExpressionStatement) statement).getExpression()).getLeftExpression() instanceof VariableExpression
-                    && ((VariableExpression) ((DeclarationExpression) ((ExpressionStatement) statement).getExpression()).getLeftExpression()).getName().equals("$" + assertionType + "$"))  {
+        if (lastStatement instanceof ReturnStatement)  {
+            return (ReturnStatement) lastStatement;
+        } else if (lastStatement instanceof BlockStatement) {
+            BlockStatement blockStatement = (BlockStatement) lastStatement;
+            List<Statement> statements = blockStatement.getStatements();
 
-
-                return (ClosureExpression) ((DeclarationExpression) ((ExpressionStatement) statement).getExpression()).getRightExpression();
-            }
+            return statements.size() > 0 ? getReturnStatement(declaringClass, method, statements.get(statements.size() - 1)) : null;
+        } else {
+            if (!(lastStatement instanceof ExpressionStatement)) throw new GroovyBugError("Last statement in " + declaringClass.getName() + "." + method.getTypeDescriptor() + " not of type ExpressionStatement: " + lastStatement);
+            // the last statement in a Groovy method could also be an expression which result is treated as return value
+            ExpressionStatement expressionStatement = (ExpressionStatement) lastStatement;
+            return new ReturnStatement(expressionStatement);
         }
-
-        return null;
     }
 }

@@ -4,6 +4,7 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
@@ -33,7 +34,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param classInvariant the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
      */
-    public void generateInvariantAssertionStatement(ClassNode type, ClosureExpression classInvariant)  {
+    public void generateInvariantAssertionStatement(final ClassNode type, final ClosureExpression classInvariant)  {
 
         // adding super-calls to invariants of parent classes
         addCallsToSuperClassInvariants(type, classInvariant);
@@ -60,7 +61,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
      *
      * @return a generated {@link org.codehaus.groovy.ast.expr.ClosureExpression} with a default class invariant
      */
-    public ClosureExpression generateDefaultInvariantAssertionStatement(ClassNode type) {
+    public ClosureExpression generateDefaultInvariantAssertionStatement(final ClassNode type) {
         BlockStatement closureBlockStatement = new BlockStatement();
         closureBlockStatement.addStatement(new ExpressionStatement(new BooleanExpression(ConstantExpression.TRUE)));
 
@@ -80,7 +81,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param closure the current class-invariant as {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      */
-    public void addCallsToSuperClassInvariants(ClassNode type, ClosureExpression closure)  {
+    public void addCallsToSuperClassInvariants(final ClassNode type, final ClosureExpression closure)  {
 
         final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
         if (nextClassWithInvariant == null) return;
@@ -109,14 +110,17 @@ public class ClassInvariantGenerator extends BaseGenerator {
      * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
      * @param classInvariant the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
      */
-    public void generateInvariantAssertionStatement(MethodNode method, ClosureExpression classInvariant)  {
+    public void generateInvariantAssertionStatement(final ClassNode type, final MethodNode method, final ClosureExpression classInvariant)  {
 
         final BlockStatement assertionBlock = new BlockStatement();
         assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant));
 
         final Statement statement = method.getCode();
-        if (statement instanceof BlockStatement)  {
-            ((BlockStatement) statement).addStatement(assertionBlock);
+        if (statement instanceof BlockStatement && method.getReturnType() != ClassHelper.VOID_TYPE)  {
+            final BlockStatement blockStatement = (BlockStatement) statement;
+            final int numberOfStatements = blockStatement.getStatements().size();
+
+            blockStatement.getStatements().add(numberOfStatements > 0 ? numberOfStatements - 1 : 0, assertionBlock);
         } else  {
             assertionBlock.getStatements().add(0, statement);
             method.setCode(assertionBlock);

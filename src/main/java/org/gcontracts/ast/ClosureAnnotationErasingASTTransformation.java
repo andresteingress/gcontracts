@@ -19,7 +19,7 @@ import org.gcontracts.ast.visitor.ContractsErasingVisitor;
  *
  * @author andre.steingress@gmail.com
  */
-@GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
+@GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class ClosureAnnotationErasingASTTransformation extends BaseASTTransformation {
 
     public void visit(ASTNode[] nodes, SourceUnit unit) {

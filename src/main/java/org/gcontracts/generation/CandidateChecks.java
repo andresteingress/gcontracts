@@ -1,5 +1,6 @@
 package org.gcontracts.generation;
 
+import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.PropertyNode;
@@ -45,5 +46,20 @@ public class CandidateChecks {
     public static boolean isClassInvariantCandidate(final PropertyNode propertyNode)  {
         return propertyNode != null &&
                 propertyNode.isPublic() && !propertyNode.isStatic() && !propertyNode.isInStaticContext() && !propertyNode.isClosureSharedVariable();
+    }
+
+    /**
+     * Decides whether the given <tt>method</tt> is a candidate for a pre- or postcondition.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to check for pre- or postcondition compliance
+     * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for pre- or postconditions 
+     */
+    public static boolean isPreOrPostconditionCandidate(final ClassNode type, final MethodNode method)  {
+        if (method.isSynthetic() || method.isStatic() || method.isStaticConstructor() || method.isAbstract() || !method.isPublic()) return false;
+        if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
+        if (method.getDeclaringClass() != type) return false;
+
+        return true;
     }
 }

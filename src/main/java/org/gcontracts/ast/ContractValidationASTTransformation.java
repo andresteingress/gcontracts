@@ -45,9 +45,9 @@ import java.lang.reflect.Field;
  *
  * @see AssertionError
  *
- * @author andre.steingress@gmail.com
+ * @author andre.steingress@gmail.com                        
  */
-@GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
+@GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class ContractValidationASTTransformation extends BaseASTTransformation {
 
     /**
