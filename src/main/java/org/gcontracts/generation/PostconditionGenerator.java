@@ -70,6 +70,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 Statement lastStatement = statements.get(statements.size() - 1);
 
                 ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(method.getDeclaringClass(), method, lastStatement);
+                if (returnStatement == null) throw new GroovyBugError("Return statement could not be found in method: " + method.getTypeDescriptor());
 
                 statements.remove(statements.size() - 1);
 
@@ -138,8 +139,6 @@ public class PostconditionGenerator extends BaseGenerator {
      */
     public void generateDefaultPostconditionStatement(final ClassNode type, final MethodNode methodNode)  {
 
-        // generate old variables -> are added as parameter with each inherited postcondition call
-        final MapExpression oldVariableMap = new VariableGenerationUtility().generateOldVariablesMap(methodNode);
         final BlockStatement methodBlock = (BlockStatement) methodNode.getCode();
 
         // if return type is not void, than a "result" variable is provided in the postcondition expression
@@ -148,17 +147,17 @@ public class PostconditionGenerator extends BaseGenerator {
             final BlockStatement postconditionCheck = new BlockStatement();
 
             if (methodNode.getReturnType() != ClassHelper.VOID_TYPE)  {
+                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(methodNode, methodNode.getLineNumber(), true, true);
+                if (methodCallToSuperPostcondition == null) return;
+
+                final MapExpression oldVariableMap = new VariableGenerationUtility().generateOldVariablesMap(methodNode);
                 Statement lastStatement = statements.get(statements.size() - 1);
 
                 ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(type, methodNode, lastStatement);
                 statements.remove(statements.size() - 1);
 
-                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(methodNode, methodNode.getLineNumber(), true, true);
-                if (methodCallToSuperPostcondition == null) return;
-                
                 final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(methodCallToSuperPostcondition));
                 assertStatement.setLineNumber(methodNode.getLineNumber());
-                postconditionCheck.addStatement(assertStatement);
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression resultVariable = new VariableExpression("result");
@@ -167,7 +166,7 @@ public class PostconditionGenerator extends BaseGenerator {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         returnStatement.getExpression()));
 
-                postconditionCheck.getStatements().add(0, resultVariableStatement);
+                postconditionCheck.addStatement(resultVariableStatement);
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");
@@ -176,18 +175,20 @@ public class PostconditionGenerator extends BaseGenerator {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         oldVariableMap));
 
-                postconditionCheck.getStatements().add(0, oldVariabeStatement);
+                postconditionCheck.addStatement(oldVariabeStatement);
+                postconditionCheck.addStatement(assertStatement);
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
                 methodBlock.addStatement(returnStatement);
+                
             } else {
 
                 final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(methodNode, methodNode.getLineNumber(), true, false);
                 if (methodCallToSuperPostcondition == null) return;
 
+                final MapExpression oldVariableMap = new VariableGenerationUtility().generateOldVariablesMap(methodNode);
                 final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(methodCallToSuperPostcondition));
                 assertStatement.setLineNumber(methodNode.getLineNumber());
-                postconditionCheck.addStatement(assertStatement);
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");
@@ -196,7 +197,8 @@ public class PostconditionGenerator extends BaseGenerator {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         oldVariableMap));
 
-                postconditionCheck.getStatements().add(0, oldVariabeStatement);
+                postconditionCheck.addStatement(oldVariabeStatement);
+                postconditionCheck.addStatement(assertStatement);
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
             }
