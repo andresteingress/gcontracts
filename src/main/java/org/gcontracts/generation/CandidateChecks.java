@@ -45,7 +45,7 @@ public class CandidateChecks {
      * @return whether the given <tt>type</tt> is a candidate for applying contract assertions
      */
     public static boolean isContractsCandidate(final ClassNode type)  {
-        return !type.isSynthetic() && !type.isInterface();    
+        return !type.isSynthetic() && !type.isInterface() && !type.isEnum();
     }
 
         /**
