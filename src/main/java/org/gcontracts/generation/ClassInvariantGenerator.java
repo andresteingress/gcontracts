@@ -71,7 +71,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
         for (ConstructorNode constructor : type.getDeclaredConstructors())  {
             if (CandidateChecks.isClassInvariantCandidate(constructor))  {
                 if (constructor.getCode() instanceof BlockStatement)  {
-                    ((BlockStatement) constructor.getCode()).addStatement(assertionBlock);
+                    ((BlockStatement) constructor.getCode()).addStatements(assertionBlock.getStatements());
                 }
             }
         }

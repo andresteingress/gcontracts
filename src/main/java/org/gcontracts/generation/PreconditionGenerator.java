@@ -68,7 +68,11 @@ public class PreconditionGenerator extends BaseGenerator {
         assertStatement.setLineNumber(closureExpression.getLineNumber());
 
         modifiedMethodCode.addStatement(assertStatement);
-        modifiedMethodCode.addStatement(method.getCode());
+        if (method.getCode() instanceof BlockStatement)  {
+            modifiedMethodCode.addStatements(((BlockStatement) method.getCode()).getStatements());
+        } else {
+            modifiedMethodCode.addStatement(method.getCode());    
+        }
 
         method.setCode(modifiedMethodCode);
     }
@@ -90,7 +94,11 @@ public class PreconditionGenerator extends BaseGenerator {
         assertStatement.setLineNumber(methodNode.getLineNumber());
 
         modifiedMethodCode.addStatement(assertStatement);
-        modifiedMethodCode.addStatement(methodNode.getCode());
+        if (methodNode.getCode() instanceof BlockStatement)  {
+            modifiedMethodCode.addStatements(((BlockStatement) methodNode.getCode()).getStatements());
+        } else {
+            modifiedMethodCode.addStatement(methodNode.getCode());    
+        }
 
         methodNode.setCode(modifiedMethodCode);
     }
