@@ -60,6 +60,8 @@ public class ContractsVisitor extends BaseVisitor {
     @Override
     public void visitClass(ClassNode type) {
 
+        if (!CandidateChecks.isContractsCandidate(type)) return;
+
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
 
         boolean found = false;

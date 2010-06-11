@@ -37,6 +37,17 @@ import org.codehaus.groovy.ast.PropertyNode;
  */
 public class CandidateChecks {
 
+    /**
+     * Checks whether the given {@link org.codehaus.groovy.ast.ClassNode} is a candidate
+     * for applying contracts.
+     *
+     * @param type the {@link org.codehaus.groovy.ast.ClassNode} to be checked
+     * @return whether the given <tt>type</tt> is a candidate for applying contract assertions
+     */
+    public static boolean isContractsCandidate(final ClassNode type)  {
+        return !type.isSynthetic() && !type.isInterface();    
+    }
+
         /**
      * Decides whether the given <tt>constructorNode</tt> is a candidate for class invariant injection.
      *
