@@ -122,7 +122,7 @@ public class ContractsVisitor extends BaseVisitor {
 
         // If there is a class invariant we will append the check to this invariant
         // after each method call
-        if (CandidateChecks.isClassInvariantCandidate(method))  {
+        if (classInvariant != null && CandidateChecks.isClassInvariantCandidate(method))  {
             classInvariantGenerator.generateInvariantAssertionStatement(type, method, classInvariant);
         }
     }

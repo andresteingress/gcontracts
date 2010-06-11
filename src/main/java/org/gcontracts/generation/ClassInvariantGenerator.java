@@ -86,6 +86,9 @@ public class ClassInvariantGenerator extends BaseGenerator {
      * @return a generated {@link org.codehaus.groovy.ast.expr.ClosureExpression} with a default class invariant
      */
     public ClosureExpression generateDefaultInvariantAssertionStatement(final ClassNode type) {
+        final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
+        if (nextClassWithInvariant == null) return null;
+
         BlockStatement closureBlockStatement = new BlockStatement();
         closureBlockStatement.addStatement(new ExpressionStatement(new BooleanExpression(ConstantExpression.TRUE)));
 
