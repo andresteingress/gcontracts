@@ -62,7 +62,6 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
         final BlockStatement setterMethodBlock = new BlockStatement();
 
         // check invariant before assignment
-
         setterMethodBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(classNode, closureExpression));
 
         // do assignment

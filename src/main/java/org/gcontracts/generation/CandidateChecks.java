@@ -56,7 +56,7 @@ public class CandidateChecks {
      */
     public static boolean isClassInvariantCandidate(final ConstructorNode constructorNode)  {
         return constructorNode != null &&
-                constructorNode.isPublic() && !constructorNode.isStatic();
+                constructorNode.isPublic() && !constructorNode.isStatic() && !constructorNode.isSynthetic();
     }
 
     /**
