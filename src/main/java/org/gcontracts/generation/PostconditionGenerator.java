@@ -23,10 +23,7 @@
 package org.gcontracts.generation;
 
 import org.codehaus.groovy.GroovyBugError;
-import org.codehaus.groovy.ast.ClassHelper;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
@@ -103,7 +100,20 @@ public class PostconditionGenerator extends BaseGenerator {
                 postconditionCheck.getStatements().add(0, oldVariabeStatement);
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
-                methodBlock.addStatement(returnStatement);
+                methodBlock.addStatement(new ReturnStatement(resultVariable));
+            } else if (method instanceof ConstructorNode) {
+
+                final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
+                // backup the current assertion in a synthetic method
+                AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertStatement, false, false);
+
+                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertStatement.getLineNumber(), false, false);
+
+                if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
+
+                postconditionCheck.addStatement(assertStatement);
+                methodBlock.addStatements(postconditionCheck.getStatements());
+
             } else {
 
                 final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);

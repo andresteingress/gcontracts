@@ -83,6 +83,10 @@ public class ContractsVisitor extends BaseVisitor {
 
         super.visitClass(type);
 
+        for (final MethodNode methodNode : type.getDeclaredConstructors())  {
+            addPreOrPostcondition(type, methodNode);
+        }
+
         for (final MethodNode methodNode : type.getAllDeclaredMethods())  {
             addPreOrPostcondition(type, methodNode);
         }

@@ -225,7 +225,7 @@ public final class AssertStatementCreationUtility {
      * @return the newly created assertion method name
      */
     private static String getAssertionMethodName(final String assertionType, final MethodNode method)  {
-        return assertionType + "_" + method.getReturnType().getName().replaceAll("\\.", "_") + "_" + method.getName();
+        return assertionType + "_" + method.getReturnType().getName().replaceAll("\\.", "_") + "_" + (method instanceof ConstructorNode ? "contructor" : method.getName());
     }
 
     /**

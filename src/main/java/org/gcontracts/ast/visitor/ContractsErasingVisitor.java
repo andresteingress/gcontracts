@@ -22,10 +22,7 @@
  */
 package org.gcontracts.ast.visitor;
 
-import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassHelper;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.ClassExpression;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
@@ -74,6 +71,21 @@ public class ContractsErasingVisitor extends BaseVisitor {
         super.visitMethod(method);
 
         List<AnnotationNode> annotations = method.getAnnotations();
+        for (AnnotationNode annotation: annotations)  {
+            if (annotation.getClassNode().getName().equals(Requires.class.getName()))  {
+                eraseClosureParameter(annotation);
+            } else if (annotation.getClassNode().getName().equals(Ensures.class.getName()))  {
+                eraseClosureParameter(annotation);
+            }
+        }
+    }
+    
+    @Override
+    public void visitConstructor(ConstructorNode constructor) {
+
+        super.visitConstructor(constructor);
+
+        List<AnnotationNode> annotations = constructor.getAnnotations();
         for (AnnotationNode annotation: annotations)  {
             if (annotation.getClassNode().getName().equals(Requires.class.getName()))  {
                 eraseClosureParameter(annotation);

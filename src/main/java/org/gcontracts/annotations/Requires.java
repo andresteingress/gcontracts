@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  * @author andre.steingress@gmail.com
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface Requires {
     Class value();
 }
