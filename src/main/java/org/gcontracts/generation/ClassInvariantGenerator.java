@@ -24,10 +24,7 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.ReturnStatement;
-import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -63,18 +60,6 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
         // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
         type.addField(getInvariantClosureFieldName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
-
-        final BlockStatement assertionBlock = new BlockStatement();
-
-        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant));
-
-        for (ConstructorNode constructor : type.getDeclaredConstructors())  {
-            if (CandidateChecks.isClassInvariantCandidate(constructor))  {
-                if (constructor.getCode() instanceof BlockStatement)  {
-                    ((BlockStatement) constructor.getCode()).addStatements(assertionBlock.getStatements());
-                }
-            }
-        }
     }
 
     /**
@@ -138,17 +123,22 @@ public class ClassInvariantGenerator extends BaseGenerator {
      */
     public void generateInvariantAssertionStatement(final ClassNode type, final MethodNode method, final ClosureExpression classInvariant)  {
 
-        final BlockStatement assertionBlock = new BlockStatement();
-        assertionBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant));
+        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant);
 
         final Statement statement = method.getCode();
-        if (statement instanceof BlockStatement && method.getReturnType() != ClassHelper.VOID_TYPE)  {
+        if (statement instanceof BlockStatement && method.getReturnType() != ClassHelper.VOID_TYPE && !(method instanceof ConstructorNode))  {
             final BlockStatement blockStatement = (BlockStatement) statement;
             final int numberOfStatements = blockStatement.getStatements().size();
 
-            blockStatement.getStatements().add(numberOfStatements > 0 ? numberOfStatements - 1 : 0, assertionBlock);
-        } else  {
-            assertionBlock.getStatements().add(0, statement);
+            blockStatement.getStatements().add(numberOfStatements > 0 ? numberOfStatements - 1 : 0, invariantAssertionStatement);
+        } else if (statement instanceof BlockStatement) {
+            final BlockStatement blockStatement = (BlockStatement) statement;
+            blockStatement.addStatement(invariantAssertionStatement);
+        } else {
+            final BlockStatement assertionBlock = new BlockStatement();
+            assertionBlock.addStatement(statement);
+            assertionBlock.addStatement(invariantAssertionStatement);
+
             method.setCode(assertionBlock);
         }
     }

@@ -189,7 +189,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 postconditionCheck.addStatement(assertStatement);
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
-                methodBlock.addStatement(returnStatement);
+                methodBlock.addStatement(new ReturnStatement(resultVariable));
                 
             } else {
 
