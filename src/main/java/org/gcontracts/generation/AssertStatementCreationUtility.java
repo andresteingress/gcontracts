@@ -69,6 +69,18 @@ public final class AssertStatementCreationUtility {
     }
 
     /**
+     * Gets the first {@link org.codehaus.groovy.ast.stmt.AssertStatement} found in the code of the given invariant {@link org.codehaus.groovy.ast.MethodNode}.
+     *
+     * @param methodNode the method which contains the class invariant
+     * @return the {@link org.codehaus.groovy.ast.stmt.AssertStatement} found in the given <tt>methodNode</tt>
+     */
+    public static AssertStatement getAssertStatementFromInvariantMethod(final MethodNode methodNode)  {
+
+        final BlockStatement blockStatement = (BlockStatement) methodNode.getCode();
+        return (AssertStatement) blockStatement.getStatements().get(0);
+    }
+
+    /**
      * Reusable method for creating assert statements for the given <tt>closureExpression</tt>, injected in the
      * given <tt>method</tt> and with optional closure parameters.
      *
@@ -269,6 +281,8 @@ public final class AssertStatementCreationUtility {
     /**
      * Gets a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} from the given {@link org.codehaus.groovy.ast.stmt.Statement}.
      *
+     * @param declaringClass the current {@link org.codehaus.groovy.ast.ClassNode} which declares the given method
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} that holds the given <tt>lastStatement</tt>
      * @param lastStatement the last {@link org.codehaus.groovy.ast.stmt.Statement} of some method code block
      * @return a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} or <tt>null</tt>
      */
@@ -282,7 +296,7 @@ public final class AssertStatementCreationUtility {
 
             return statements.size() > 0 ? getReturnStatement(declaringClass, method, statements.get(statements.size() - 1)) : null;
         } else {
-            if (!(lastStatement instanceof ExpressionStatement)) throw new GroovyBugError("Last statement in " + declaringClass.getName() + "." + method.getTypeDescriptor() + " not of type ExpressionStatement: " + lastStatement);
+            if (!(lastStatement instanceof ExpressionStatement)) return null;
             // the last statement in a Groovy method could also be an expression which result is treated as return value
             ExpressionStatement expressionStatement = (ExpressionStatement) lastStatement;
             return new ReturnStatement(expressionStatement);

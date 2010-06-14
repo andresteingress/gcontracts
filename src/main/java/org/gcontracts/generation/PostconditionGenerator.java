@@ -67,28 +67,30 @@ public class PostconditionGenerator extends BaseGenerator {
                 Statement lastStatement = statements.get(statements.size() - 1);
 
                 ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(method.getDeclaringClass(), method, lastStatement);
-                if (returnStatement == null) throw new GroovyBugError("Return statement could not be found in method: " + method.getTypeDescriptor());
-
-                statements.remove(statements.size() - 1);
+                if (returnStatement != null) statements.remove(statements.size() - 1);
 
                 final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
 
                 // backup the current assertion in a synthetic method
-                AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertStatement, true, true);
+                AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertStatement, true, returnStatement != null);
 
-                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertStatement.getLineNumber(), true, true);
+                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertStatement.getLineNumber(), true, returnStatement != null);
                 if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
 
                 postconditionCheck.addStatement(assertStatement);
 
-                // Assign the return statement expression to a local variable of type Object
-                VariableExpression resultVariable = new VariableExpression("result");
-                ExpressionStatement resultVariableStatement = new ExpressionStatement(
-                new DeclarationExpression(resultVariable,
-                        Token.newSymbol(Types.ASSIGN, -1, -1),
-                        returnStatement.getExpression()));
+                VariableExpression resultVariable = null;
 
-                postconditionCheck.getStatements().add(0, resultVariableStatement);
+                if (returnStatement != null)  {
+                    // Assign the return statement expression to a local variable of type Object
+                    resultVariable = new VariableExpression("result");
+                    ExpressionStatement resultVariableStatement = new ExpressionStatement(
+                    new DeclarationExpression(resultVariable,
+                            Token.newSymbol(Types.ASSIGN, -1, -1),
+                            returnStatement.getExpression()));
+
+                    postconditionCheck.getStatements().add(0, resultVariableStatement);
+                }
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");
@@ -100,7 +102,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 postconditionCheck.getStatements().add(0, oldVariabeStatement);
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
-                methodBlock.addStatement(new ReturnStatement(resultVariable));
+                if (returnStatement != null) methodBlock.addStatement(new ReturnStatement(resultVariable));
             } else if (method instanceof ConstructorNode) {
 
                 final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
@@ -157,26 +159,31 @@ public class PostconditionGenerator extends BaseGenerator {
             final BlockStatement postconditionCheck = new BlockStatement();
 
             if (methodNode.getReturnType() != ClassHelper.VOID_TYPE)  {
-                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(methodNode, methodNode.getLineNumber(), true, true);
+                Statement lastStatement = statements.get(statements.size() - 1);
+                ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(type, methodNode, lastStatement);
+
+                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(methodNode, methodNode.getLineNumber(), true, returnStatement != null);
                 if (methodCallToSuperPostcondition == null) return;
 
                 final MapExpression oldVariableMap = new VariableGenerationUtility().generateOldVariablesMap(methodNode);
-                Statement lastStatement = statements.get(statements.size() - 1);
 
-                ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(type, methodNode, lastStatement);
-                statements.remove(statements.size() - 1);
+                if (returnStatement != null) statements.remove(statements.size() - 1);
 
                 final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(methodCallToSuperPostcondition));
                 assertStatement.setLineNumber(methodNode.getLineNumber());
 
                 // Assign the return statement expression to a local variable of type Object
-                VariableExpression resultVariable = new VariableExpression("result");
-                ExpressionStatement resultVariableStatement = new ExpressionStatement(
-                new DeclarationExpression(resultVariable,
-                        Token.newSymbol(Types.ASSIGN, -1, -1),
-                        returnStatement.getExpression()));
+                VariableExpression resultVariable = null;
 
-                postconditionCheck.addStatement(resultVariableStatement);
+                if (returnStatement != null)  {
+                    resultVariable = new VariableExpression("result");
+                    ExpressionStatement resultVariableStatement = new ExpressionStatement(
+                        new DeclarationExpression(resultVariable,
+                            Token.newSymbol(Types.ASSIGN, -1, -1),
+                            returnStatement.getExpression()));
+
+                    postconditionCheck.addStatement(resultVariableStatement);
+                }
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");
@@ -189,7 +196,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 postconditionCheck.addStatement(assertStatement);
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
-                methodBlock.addStatement(new ReturnStatement(resultVariable));
+                if (returnStatement != null) methodBlock.addStatement(new ReturnStatement(resultVariable));
                 
             } else {
 

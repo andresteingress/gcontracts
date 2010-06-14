@@ -47,8 +47,9 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
 
     /**
-     * Reads the {@link org.gcontracts.annotations.Invariant} closure expression and adds a class-invariant to
-     * all declard contructors of that <tt>type</tt>.
+     * Reads the {@link org.gcontracts.annotations.Invariant} closure expression and generates a synthetic
+     * method holding this class invariant. This is used for heir calls to find out about inherited class
+     * invariants.
      *
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param classInvariant the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
@@ -58,8 +59,12 @@ public class ClassInvariantGenerator extends BaseGenerator {
         // adding super-calls to invariants of parent classes
         addCallsToSuperClassInvariants(type, classInvariant);
 
-        // add a local protected field with the invariant closure - this is needed for invariant checks in inheritance lines
-        type.addField(getInvariantClosureFieldName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, classInvariant);
+        final BlockStatement blockStatement = new BlockStatement();
+        blockStatement.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant));
+        blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
+
+        // add a local protected method with the invariant closure - this is needed for invariant checks in inheritance lines
+        type.addMethod(getInvariantMethodName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.Boolean_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, blockStatement);
     }
 
     /**
@@ -68,11 +73,11 @@ public class ClassInvariantGenerator extends BaseGenerator {
      *
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode} to be extended by a default class invariant
      *
-     * @return a generated {@link org.codehaus.groovy.ast.expr.ClosureExpression} with a default class invariant
+     * @return whether generation of a default class invariant was done or adding a class invariant does not make sense
      */
-    public ClosureExpression generateDefaultInvariantAssertionStatement(final ClassNode type) {
+    public boolean generateDefaultInvariantAssertionMethod(final ClassNode type) {
         final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
-        if (nextClassWithInvariant == null) return null;
+        if (nextClassWithInvariant == null) return false;
 
         BlockStatement closureBlockStatement = new BlockStatement();
         closureBlockStatement.addStatement(new ExpressionStatement(new BooleanExpression(ConstantExpression.TRUE)));
@@ -82,7 +87,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
         generateInvariantAssertionStatement(type, closureExpression);
 
-        return closureExpression;
+        return true;
     }
 
     /**
@@ -97,11 +102,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
         final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
         if (nextClassWithInvariant == null) return;
 
-        final String fieldName = getInvariantClosureFieldName(nextClassWithInvariant);
-        FieldNode nextClassInvariantField = getInvariantClosureFieldNode(nextClassWithInvariant);
-        if (nextClassInvariantField == null)  {
-            nextClassInvariantField = new FieldNode(fieldName, Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.CLOSURE_TYPE, nextClassWithInvariant, null);
-        }
+        final String methodName = getInvariantMethodName(nextClassWithInvariant);
 
         final BlockStatement blockStatement = (BlockStatement) closure.getCode();
         final ExpressionStatement expressionStatement = (ExpressionStatement) blockStatement.getStatements().get(0);
@@ -112,18 +113,22 @@ public class ClassInvariantGenerator extends BaseGenerator {
                  new BinaryExpression(
                          new BooleanExpression(expression),
                          Token.newSymbol(Types.LOGICAL_AND, -1, -1),
-                         new BooleanExpression(new MethodCallExpression(new PropertyExpression(VariableExpression.THIS_EXPRESSION, fieldName), "call", ArgumentListExpression.EMPTY_ARGUMENTS))));
+                         new BooleanExpression(new MethodCallExpression(VariableExpression.THIS_EXPRESSION, methodName, ArgumentListExpression.EMPTY_ARGUMENTS))));
     }
 
     /**
      * Adds the current class-invariant to the given <tt>method</tt>.
      *
+     * @param type the {@link org.codehaus.groovy.ast.ClassNode} which declared the given {@link org.codehaus.groovy.ast.MethodNode}
      * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
-     * @param classInvariant the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
      */
-    public void generateInvariantAssertionStatement(final ClassNode type, final MethodNode method, final ClosureExpression classInvariant)  {
+    public void addInvariantAssertionStatement(final ClassNode type, final MethodNode method)  {
 
-        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getInvariantAssertionStatement(method.getDeclaringClass(), classInvariant);
+        final String invariantMethodName = getInvariantMethodName(type);
+        final MethodNode invariantMethod = type.getDeclaredMethod(invariantMethodName, Parameter.EMPTY_ARRAY);
+        if (invariantMethod == null) return;
+
+        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethod);
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement && method.getReturnType() != ClassHelper.VOID_TYPE && !(method instanceof ConstructorNode))  {
@@ -142,5 +147,4 @@ public class ClassInvariantGenerator extends BaseGenerator {
             method.setCode(assertionBlock);
         }
     }
-
 }

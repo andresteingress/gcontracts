@@ -27,6 +27,7 @@ import org.codehaus.groovy.ast.expr.BinaryExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.ast.expr.FieldExpression;
 import org.codehaus.groovy.ast.expr.VariableExpression;
+import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.SourceUnit;
@@ -52,7 +53,7 @@ import java.util.List;
  */
 public class DynamicSetterInjectionVisitor extends BaseVisitor {
 
-    private ClosureExpression closureExpression;
+    private AssertStatement invariantAssertStatement;
 
     public DynamicSetterInjectionVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
@@ -62,7 +63,7 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
         final BlockStatement setterMethodBlock = new BlockStatement();
 
         // check invariant before assignment
-        setterMethodBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(classNode, closureExpression));
+        setterMethodBlock.addStatement(invariantAssertStatement);
 
         // do assignment
         BinaryExpression fieldAssignment = new BinaryExpression(new FieldExpression(field), Token.newSymbol(Types.ASSIGN, -1, -1), new VariableExpression(parameter));
@@ -70,7 +71,7 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
 
 
         // check invariant after assignment
-        setterMethodBlock.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(classNode, closureExpression));
+        setterMethodBlock.addStatement(invariantAssertStatement);
 
         return setterMethodBlock;
     }
@@ -92,15 +93,17 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
     @Override
     public void visitClass(ClassNode classNode) {
         // if a class invariant is available visit all property nodes else skip this class
-        final FieldNode invariantField = BaseGenerator.getInvariantClosureFieldNode(classNode);
-        if (invariantField == null) return;
+        final MethodNode invariantMethodNode = BaseGenerator.getInvariantMethodNode(classNode);
+        if (invariantMethodNode == null) return;
 
-        closureExpression = (ClosureExpression) invariantField.getInitialValueExpression();
+        invariantAssertStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethodNode);
+
+        if (invariantAssertStatement == null) return;
 
         List<ConstructorNode> declaredConstructors = classNode.getDeclaredConstructors();
         if (declaredConstructors == null || declaredConstructors.isEmpty())  {
             // create default constructor with class invariant check
-            ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, AssertStatementCreationUtility.getInvariantAssertionStatement(classNode, closureExpression));
+            ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, invariantAssertStatement);
             constructor.setSynthetic(true);
             classNode.addConstructor(constructor);
         }

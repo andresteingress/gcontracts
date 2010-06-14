@@ -24,6 +24,8 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.FieldNode;
+import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.control.io.ReaderSource;
 
 /**
@@ -35,29 +37,29 @@ import org.codehaus.groovy.control.io.ReaderSource;
  */
 public abstract class BaseGenerator {
 
-    public static final String INVARIANT_CLOSURE_PREFIX = "$invariant$";
+    public static final String INVARIANT_CLOSURE_PREFIX = "invariant";
 
     protected final ReaderSource source;
 
     public BaseGenerator(final ReaderSource source)  {
         this.source = source;
-    }
+    }                                     
 
     /**
      * @param classNode the {@link org.codehaus.groovy.ast.ClassNode} used to look up the invariant closure field
      *
      * @return the field name of the invariant closure field of the given <tt>classNode</tt>
      */
-    public static String getInvariantClosureFieldName(final ClassNode classNode)  {
-        return INVARIANT_CLOSURE_PREFIX + classNode.getNameWithoutPackage();
+    public static String getInvariantMethodName(final ClassNode classNode)  {
+        return INVARIANT_CLOSURE_PREFIX + "_" + classNode.getName().replaceAll("\\.", "_");
     }
 
     /**
      * @param classNode the {@link org.codehaus.groovy.ast.ClassNode} used to look up the invariant closure field
      *
-     * @return the {@link org.codehaus.groovy.ast.FieldNode} which contains the invariant closure of the given <tt>classNode</tt>
+     * @return the {@link org.codehaus.groovy.ast.MethodNode} which contains the invariant of the given <tt>classNode</tt>
      */
-    public static FieldNode getInvariantClosureFieldNode(final ClassNode classNode)  {
-        return classNode.getField(getInvariantClosureFieldName(classNode));
+    public static MethodNode getInvariantMethodNode(final ClassNode classNode)  {
+        return classNode.getDeclaredMethod(getInvariantMethodName(classNode), Parameter.EMPTY_ARRAY);
     }
 }

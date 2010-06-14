@@ -36,7 +36,6 @@ import org.gcontracts.generation.ClassInvariantGenerator;
 import org.gcontracts.generation.PostconditionGenerator;
 import org.gcontracts.generation.PreconditionGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,7 +50,7 @@ import java.util.List;
  */
 public class ContractsVisitor extends BaseVisitor {
 
-    private ClosureExpression classInvariant;
+    private boolean hasClassInvariant = false;
 
     public ContractsVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
@@ -64,21 +63,17 @@ public class ContractsVisitor extends BaseVisitor {
 
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
 
-        boolean found = false;
-
         List<AnnotationNode> annotations = type.getAnnotations();
         for (AnnotationNode annotation: annotations)  {
             if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {
-                classInvariant = (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME);
-
-                classInvariantGenerator.generateInvariantAssertionStatement(type, classInvariant);
-
-                found = true;
+                // Generates a synthetic method holding the class invariant
+                classInvariantGenerator.generateInvariantAssertionStatement(type, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
+                hasClassInvariant = true;
             }
         }
 
-        if (!found)  {
-            classInvariant = classInvariantGenerator.generateDefaultInvariantAssertionStatement(type);
+        if (!hasClassInvariant)  {
+            hasClassInvariant = classInvariantGenerator.generateDefaultInvariantAssertionMethod(type);
         }
 
         super.visitClass(type);
@@ -126,8 +121,8 @@ public class ContractsVisitor extends BaseVisitor {
 
         // If there is a class invariant we will append the check to this invariant
         // after each method call
-        if (classInvariant != null && CandidateChecks.isClassInvariantCandidate(method))  {
-            classInvariantGenerator.generateInvariantAssertionStatement(type, method, classInvariant);
+        if (hasClassInvariant && CandidateChecks.isClassInvariantCandidate(method))  {
+            classInvariantGenerator.addInvariantAssertionStatement(type, method);
         }
     }
 
