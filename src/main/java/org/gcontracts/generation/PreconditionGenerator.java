@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, gcontracts.lib@gmail.com
+ * Copyright (c) 2010, gcontracts@me.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -29,7 +29,6 @@ import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.ast.expr.MethodCallExpression;
 import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;

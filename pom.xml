@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
     <version>1.1.1</version>
     <inceptionYear>2010</inceptionYear>
-    <name>GContracts - Contract-Oriented Programming with Groovy</name>
+    <name>GContracts - Contract-Oriented Programming for Groovy</name>
     <url>http://github.com/andresteingress/gcontracts</url>
 
     <description>GContracts provides annotations to implement interface contracts aka design by contract in Groovy classes.</description>
@@ -15,7 +15,7 @@
         <developer>
             <id>andre</id>
             <name>Andre Steingress</name>
-            <email>gcontracts.lib@gmail.com</email>
+            <email>gcontracts@me.com</email>
             <organization>Andre Steingress</organization>
             <organizationUrl>http://andresteingress.wordpress.com</organizationUrl>
             <roles>
@@ -30,7 +30,7 @@
             <name>BSD License</name>
             <comments>
                 /**
-                Copyright (c) 2010, gcontracts.lib@gmail.com
+                Copyright (c) 2010, gcontracts@me.com
                 All rights reserved.
 
                 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -72,14 +72,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.email>gcontracts.lib@gmail.com</project.email>
+        <project.email>gcontracts@me.com</project.email>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -99,7 +99,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.1</version>
+            <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -120,9 +120,6 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>generateStubs</goal>
-                            <goal>compile</goal>
-                            <goal>generateTestStubs</goal>
                             <goal>testCompile</goal>
                         </goals>
                     </execution>
@@ -243,6 +240,20 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <includes>
+                        <include>**/*.java</include>
+                        <include>**/*.groovy</include>
+                    </includes>
+                    <excludes>
+                        <exclude>org/gcontracts/tests/basic/*.*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

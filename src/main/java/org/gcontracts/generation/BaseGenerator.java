@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, gcontracts.lib@gmail.com
+ * Copyright (c) 2010, gcontracts@me.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -23,7 +23,6 @@
 package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.FieldNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.control.io.ReaderSource;

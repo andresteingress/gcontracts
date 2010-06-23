@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, gcontracts.lib@gmail.com
+ * Copyright (c) 2010, gcontracts@me.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -28,7 +28,6 @@ import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.codehaus.groovy.transform.powerassert.AssertionRewriter;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Requires;
 import org.gcontracts.util.AnnotationUtils;
@@ -36,7 +35,6 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**

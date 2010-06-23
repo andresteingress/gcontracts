@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, gcontracts.lib@gmail.com
+ * Copyright (c) 2010, gcontracts@me.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -45,6 +45,8 @@ import org.gcontracts.ast.visitor.ContractsErasingVisitor;
 public class ClosureAnnotationErasingASTTransformation extends BaseASTTransformation {
 
     public void visit(ASTNode[] nodes, SourceUnit unit) {
+        if (nodes == null || nodes.length == 0 || unit == null) return;
+        
         final ModuleNode moduleNode = (ModuleNode)nodes[0];
 
         ReaderSource source = getReaderSource(unit);

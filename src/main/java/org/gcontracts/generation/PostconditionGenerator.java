@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, gcontracts.lib@gmail.com
+ * Copyright (c) 2010, gcontracts@me.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -22,7 +22,6 @@
  */
 package org.gcontracts.generation;
 
-import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;

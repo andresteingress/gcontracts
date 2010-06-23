@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, gcontracts.lib@gmail.com
+ * Copyright (c) 2010, gcontracts@me.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -26,12 +26,9 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.ast.visitor.ContractsVisitor;
 import org.gcontracts.ast.visitor.DynamicSetterInjectionVisitor;
-
-import java.lang.reflect.Field;
 
 /**
  * <p>
@@ -54,6 +51,8 @@ public class ContractValidationASTTransformation extends BaseASTTransformation {
      * {@link org.codehaus.groovy.transform.ASTTransformation#visit(org.codehaus.groovy.ast.ASTNode[], org.codehaus.groovy.control.SourceUnit)}
      */
     public void visit(ASTNode[] nodes, SourceUnit unit) {
+        if (nodes == null || nodes.length == 0 || unit == null) return;
+
         final ModuleNode moduleNode = (ModuleNode)nodes[0];
 
         ReaderSource source = getReaderSource(unit);

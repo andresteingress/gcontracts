@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, gcontracts.lib@gmail.com
+ * Copyright (c) 2010, gcontracts@me.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -38,7 +38,7 @@ import java.lang.reflect.Field;
 public abstract class BaseASTTransformation implements ASTTransformation {
 
     /**
-     * Reads the protected <tt>source</tt> instance variable of {@link org.codehaus.groovy.control.SourceUnit}.
+     * Reads the protected <tt>source1</tt> instance variable of {@link org.codehaus.groovy.control.SourceUnit}.
      *
      * @param unit the {@link org.codehaus.groovy.control.SourceUnit} to retrieve the {@link org.codehaus.groovy.control.io.ReaderSource} from
      * @return the {@link org.codehaus.groovy.control.io.ReaderSource} of the given <tt>unit</tt>.
@@ -52,7 +52,7 @@ public abstract class BaseASTTransformation implements ASTTransformation {
                 sourceUnitClass = sourceUnitClass.getSuperclass();
             }
 
-            Field field = sourceUnitClass.getDeclaredField("source");
+            Field field = sourceUnitClass.getDeclaredField("source1");
             field.setAccessible(true);
 
             return (ReaderSource) field.get(unit);
