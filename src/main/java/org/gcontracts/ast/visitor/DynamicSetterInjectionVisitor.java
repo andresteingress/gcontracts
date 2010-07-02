@@ -26,8 +26,8 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.BinaryExpression;
 import org.codehaus.groovy.ast.expr.FieldExpression;
 import org.codehaus.groovy.ast.expr.VariableExpression;
-import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
@@ -52,7 +52,7 @@ import java.util.List;
  */
 public class DynamicSetterInjectionVisitor extends BaseVisitor {
 
-    private AssertStatement invariantAssertStatement;
+    private IfStatement invariantAssertionBlockStatement;
 
     public DynamicSetterInjectionVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
@@ -62,7 +62,7 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
         final BlockStatement setterMethodBlock = new BlockStatement();
 
         // check invariant before assignment
-        setterMethodBlock.addStatement(invariantAssertStatement);
+        setterMethodBlock.addStatement(invariantAssertionBlockStatement);
 
         // do assignment
         BinaryExpression fieldAssignment = new BinaryExpression(new FieldExpression(field), Token.newSymbol(Types.ASSIGN, -1, -1), new VariableExpression(parameter));
@@ -70,7 +70,7 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
 
 
         // check invariant after assignment
-        setterMethodBlock.addStatement(invariantAssertStatement);
+        setterMethodBlock.addStatement(invariantAssertionBlockStatement);
 
         return setterMethodBlock;
     }
@@ -95,14 +95,14 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
         final MethodNode invariantMethodNode = BaseGenerator.getInvariantMethodNode(classNode);
         if (invariantMethodNode == null) return;
 
-        invariantAssertStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethodNode);
+        invariantAssertionBlockStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethodNode);
 
-        if (invariantAssertStatement == null) return;
+        if (invariantAssertionBlockStatement == null) return;
 
         List<ConstructorNode> declaredConstructors = classNode.getDeclaredConstructors();
         if (declaredConstructors == null || declaredConstructors.isEmpty())  {
             // create default constructor with class invariant check
-            ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, invariantAssertStatement);
+            ConstructorNode constructor = new ConstructorNode(Opcodes.ACC_PUBLIC, invariantAssertionBlockStatement);
             constructor.setSynthetic(true);
             classNode.addConstructor(constructor);
         }

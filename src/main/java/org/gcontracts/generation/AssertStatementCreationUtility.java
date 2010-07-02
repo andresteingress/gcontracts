@@ -30,6 +30,7 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Requires;
+import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
@@ -62,7 +63,7 @@ public final class AssertStatementCreationUtility {
 
         final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[invariant] in class <" + classNode.getName() + "> violated"));
         assertStatement.setLineNumber(classNode.getLineNumber());
-
+        
         return assertStatement;
     }
 
@@ -72,10 +73,10 @@ public final class AssertStatementCreationUtility {
      * @param methodNode the method which contains the class invariant
      * @return the {@link org.codehaus.groovy.ast.stmt.AssertStatement} found in the given <tt>methodNode</tt>
      */
-    public static AssertStatement getAssertStatementFromInvariantMethod(final MethodNode methodNode)  {
+    public static IfStatement getAssertStatementFromInvariantMethod(final MethodNode methodNode)  {
 
         final BlockStatement blockStatement = (BlockStatement) methodNode.getCode();
-        return (AssertStatement) blockStatement.getStatements().get(0);
+        return (IfStatement) blockStatement.getStatements().get(0);
     }
 
     /**
@@ -86,9 +87,9 @@ public final class AssertStatementCreationUtility {
      * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
      * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      *
-     * @return a new {@link org.codehaus.groovy.ast.stmt.BlockStatement} which holds the assertion
+     * @return a new {@link org.codehaus.groovy.ast.stmt.IfStatement} which holds the assertion
      */
-    public static AssertStatement getAssertionStatement(final String assertionType, MethodNode method, ClosureExpression closureExpression) {
+    public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, ClosureExpression closureExpression) {
 
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
@@ -96,7 +97,10 @@ public final class AssertStatementCreationUtility {
         final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[" + assertionType + "] in method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated"));
         assertStatement.setLineNumber(closureExpression.getLineNumber());
 
-        return assertStatement;
+        final BlockStatement assertionBlockStatement = new BlockStatement();
+        assertionBlockStatement.addStatement(assertStatement);
+
+        return new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertionBlockStatement, new BlockStatement());
     }
 
     /**
@@ -117,15 +121,18 @@ public final class AssertStatementCreationUtility {
 
         // copy the assert statement to provide a new message expression
         final BooleanExpression booleanExpression = new BooleanExpression(assertStatement.getBooleanExpression().getExpression());
+
+        final BlockStatement assertBlockStatement = new BlockStatement();
         final AssertStatement newAssertStatement = new AssertStatement(booleanExpression);
         newAssertStatement.setLineNumber(assertStatement.getLineNumber());
         newAssertStatement.setColumnNumber(assertStatement.getColumnNumber());
         newAssertStatement.setLastColumnNumber(assertStatement.getLastColumnNumber());
         newAssertStatement.setLastLineNumber(assertStatement.getLastLineNumber());
         newAssertStatement.setMessageExpression(new ConstantExpression(((ConstantExpression) assertStatement.getMessageExpression()).getText().replaceFirst(assertionType, "inherited " + assertionType)));
+        assertBlockStatement.addStatement(newAssertStatement);
 
         // add return value "true" so valid assertions in sub assertion statements get through
-        methodBlockStatement.addStatement(newAssertStatement);
+        methodBlockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
         methodBlockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
 
         final ArrayList<Parameter> parameters = new ArrayList<Parameter>();

@@ -29,6 +29,7 @@ import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.Invariant;
+import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
@@ -59,8 +60,11 @@ public class ClassInvariantGenerator extends BaseGenerator {
         // adding super-calls to invariants of parent classes
         addCallsToSuperClassInvariants(type, classInvariant);
 
+        final BlockStatement assertBlockStatement = new BlockStatement();
+        assertBlockStatement.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant));
+
         final BlockStatement blockStatement = new BlockStatement();
-        blockStatement.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant));
+        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
         blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
 
         // add a local protected method with the invariant closure - this is needed for invariant checks in inheritance lines
@@ -128,7 +132,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
         final MethodNode invariantMethod = type.getDeclaredMethod(invariantMethodName, Parameter.EMPTY_ARRAY);
         if (invariantMethod == null) return;
 
-        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethod);
+        final IfStatement invariantAssertionStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethod);
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement && method.getReturnType() != ClassHelper.VOID_TYPE && !(method instanceof ConstructorNode))  {

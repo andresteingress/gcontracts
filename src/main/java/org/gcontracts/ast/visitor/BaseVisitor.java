@@ -38,6 +38,8 @@ import org.codehaus.groovy.control.io.ReaderSource;
  */
 public abstract class BaseVisitor extends ClassCodeVisitorSupport {
 
+    public static final String GCONTRACTS_ENABLED_VAR = "$GCONTRACTS_ENABLED";
+
     protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
 
     protected final SourceUnit sourceUnit;

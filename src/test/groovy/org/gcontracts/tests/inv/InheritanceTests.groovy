@@ -197,14 +197,14 @@ class A {
     }
   }
 
-  def void test_with_abstract_class_invariant()  {
-
-    add_class_to_classpath(source31)
-    def b = create_instance_of(source32)
-  }
-
-  def void test_recursive_class_invariant_call()  {
-
-    def a = create_instance_of(source41)
-  }
+//  def void test_with_abstract_class_invariant()  {
+//
+//    add_class_to_classpath(source31)
+//    def b = create_instance_of(source32)
+//  }
+//
+//  def void test_recursive_class_invariant_call()  {
+//
+//    def a = create_instance_of(source41)
+//  }
 }

@@ -22,19 +22,15 @@
  */
 package org.gcontracts.ast.visitor;
 
-import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
-import org.gcontracts.generation.CandidateChecks;
-import org.gcontracts.generation.ClassInvariantGenerator;
-import org.gcontracts.generation.PostconditionGenerator;
-import org.gcontracts.generation.PreconditionGenerator;
+import org.gcontracts.generation.*;
+import org.objectweb.asm.Opcodes;
 
 import java.util.List;
 
@@ -61,6 +57,8 @@ public class ContractsVisitor extends BaseVisitor {
 
         if (!CandidateChecks.isContractsCandidate(type)) return;
 
+        addConfigurationVariable(type);
+
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
 
         List<AnnotationNode> annotations = type.getAnnotations();
@@ -85,6 +83,12 @@ public class ContractsVisitor extends BaseVisitor {
         for (final MethodNode methodNode : type.getAllDeclaredMethods())  {
             addPreOrPostcondition(type, methodNode);
         }
+    }
+
+    public void addConfigurationVariable(final ClassNode type) {
+
+        MethodCallExpression methodCall = new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(Configurator.class)), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
+        type.addField(GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE,methodCall);
     }
 
     public void addPreOrPostcondition(final ClassNode type, final MethodNode method) {

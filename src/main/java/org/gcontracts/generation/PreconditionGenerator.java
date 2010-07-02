@@ -29,6 +29,7 @@ import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.ast.expr.MethodCallExpression;
 import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -54,19 +55,19 @@ public class PreconditionGenerator extends BaseGenerator {
     public void generatePreconditionAssertionStatement(final ClassNode type, final MethodNode method, final ClosureExpression closureExpression)  {
 
         final BlockStatement modifiedMethodCode = new BlockStatement();
-        final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, closureExpression);
+
+        final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, closureExpression);
+        final AssertStatement assertionStatement = (AssertStatement) ((BlockStatement) assertionIfStatement.getIfBlock()).getStatements().get(0);
 
         // backup the current assertion in a synthetic method
-        AssertStatementCreationUtility.addAssertionMethodNode("precondition", method, assertStatement, false, false);
+        AssertStatementCreationUtility.addAssertionMethodNode("precondition", method, assertionStatement, false, false);
 
-        final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(method, assertStatement.getLineNumber());
+        final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(method, assertionIfStatement.getLineNumber());
         if (methodCallToSuperPrecondition != null) {
-            AssertStatementCreationUtility.addToAssertStatement(assertStatement, methodCallToSuperPrecondition, Token.newSymbol(Types.LOGICAL_OR, -1, -1));
+            AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPrecondition, Token.newSymbol(Types.LOGICAL_OR, -1, -1));
         }
 
-        assertStatement.setLineNumber(closureExpression.getLineNumber());
-
-        modifiedMethodCode.addStatement(assertStatement);
+        modifiedMethodCode.addStatement(assertionIfStatement);
         if (method.getCode() instanceof BlockStatement)  {
             modifiedMethodCode.addStatements(((BlockStatement) method.getCode()).getStatements());
         } else {
