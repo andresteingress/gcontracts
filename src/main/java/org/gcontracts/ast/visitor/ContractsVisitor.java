@@ -88,7 +88,8 @@ public class ContractsVisitor extends BaseVisitor {
     public void addConfigurationVariable(final ClassNode type) {
 
         MethodCallExpression methodCall = new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(Configurator.class)), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
-        type.addField(GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE,methodCall);
+        final FieldNode fieldNode = type.addField(GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, methodCall);
+        fieldNode.setSynthetic(true);
     }
 
     public void addPreOrPostcondition(final ClassNode type, final MethodNode method) {

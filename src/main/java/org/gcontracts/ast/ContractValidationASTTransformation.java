@@ -27,6 +27,7 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.codehaus.groovy.transform.powerassert.AssertionRewriter;
 import org.gcontracts.ast.visitor.ContractsVisitor;
 import org.gcontracts.ast.visitor.DynamicSetterInjectionVisitor;
 

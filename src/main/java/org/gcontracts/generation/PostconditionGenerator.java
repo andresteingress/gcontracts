@@ -69,7 +69,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 if (returnStatement != null) statements.remove(statements.size() - 1);
 
                 final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
-                final AssertStatement assertionStatement = (AssertStatement) ((BlockStatement) assertionIfStatement.getIfBlock()).getStatements().get(0);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
                 AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, true, returnStatement != null);
@@ -106,7 +106,7 @@ public class PostconditionGenerator extends BaseGenerator {
             } else if (method instanceof ConstructorNode) {
 
                 final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
-                final AssertStatement assertionStatement = (AssertStatement) ((BlockStatement) assertionIfStatement.getIfBlock()).getStatements().get(0);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
                 AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, false, false);
@@ -121,7 +121,7 @@ public class PostconditionGenerator extends BaseGenerator {
             } else {
 
                 final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
-                final AssertStatement assertionStatement = (AssertStatement) ((BlockStatement) assertionIfStatement.getIfBlock()).getStatements().get(0);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
                 AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, true, false);
@@ -173,9 +173,6 @@ public class PostconditionGenerator extends BaseGenerator {
 
                 if (returnStatement != null) statements.remove(statements.size() - 1);
 
-                final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(methodCallToSuperPostcondition));
-                assertStatement.setLineNumber(methodNode.getLineNumber());
-
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression resultVariable = null;
 
@@ -197,7 +194,7 @@ public class PostconditionGenerator extends BaseGenerator {
                         oldVariableMap));
 
                 postconditionCheck.addStatement(oldVariabeStatement);
-                postconditionCheck.addStatement(assertStatement);
+                postconditionCheck.addStatement(new ExpressionStatement(methodCallToSuperPostcondition));
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
                 if (returnStatement != null) methodBlock.addStatement(new ReturnStatement(resultVariable));
@@ -208,8 +205,6 @@ public class PostconditionGenerator extends BaseGenerator {
                 if (methodCallToSuperPostcondition == null) return;
 
                 final MapExpression oldVariableMap = new VariableGenerationUtility().generateOldVariablesMap(methodNode);
-                final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(methodCallToSuperPostcondition));
-                assertStatement.setLineNumber(methodNode.getLineNumber());
 
                 // Assign the return statement expression to a local variable of type Object
                 VariableExpression oldVariable = new VariableExpression("old");
@@ -219,7 +214,7 @@ public class PostconditionGenerator extends BaseGenerator {
                         oldVariableMap));
 
                 postconditionCheck.addStatement(oldVariabeStatement);
-                postconditionCheck.addStatement(assertStatement);
+                postconditionCheck.addStatement(new ExpressionStatement(methodCallToSuperPostcondition));
 
                 methodBlock.addStatements(postconditionCheck.getStatements());
             }

@@ -117,6 +117,46 @@ class Descendant extends Parent {
   }
 }
 '''
+
+  def source2 = '''
+package tests
+
+import org.gcontracts.annotations.*
+
+@Invariant({ speed != null && speed >= 0 && speed <= 100 })
+class Rocket  {
+    int speed
+    boolean started
+
+    @Requires({ !started })
+    def start() { started = true }
+
+    @Requires({ started })
+    @Ensures({ old -> speed != null && speed > 0 && old.speed != null })
+    def accelerate()  { speed += 10 }
+}
+'''
+
+  def source3 = '''
+package tests
+
+import org.gcontracts.annotations.*
+
+class BetterRocket extends Rocket {
+    @Override
+    def accelerate() {
+      speed += 20
+    }
+}
+'''
+  def void test_inherited_postcondition_with_param()  {
+    add_class_to_classpath(source2)
+    def betterRocket = create_instance_of(source3)
+
+    betterRocket.start()
+    betterRocket.accelerate()
+
+  }
   
   def void test_inherited_postcondition()  {
 

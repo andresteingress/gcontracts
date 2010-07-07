@@ -29,6 +29,7 @@ import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.ast.expr.MethodCallExpression;
 import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
@@ -57,7 +58,7 @@ public class PreconditionGenerator extends BaseGenerator {
         final BlockStatement modifiedMethodCode = new BlockStatement();
 
         final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, closureExpression);
-        final AssertStatement assertionStatement = (AssertStatement) ((BlockStatement) assertionIfStatement.getIfBlock()).getStatements().get(0);
+        final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
         // backup the current assertion in a synthetic method
         AssertStatementCreationUtility.addAssertionMethodNode("precondition", method, assertionStatement, false, false);
@@ -90,10 +91,7 @@ public class PreconditionGenerator extends BaseGenerator {
         final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(methodNode, methodNode.getLineNumber());
         if (methodCallToSuperPrecondition == null) return;
         
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(methodCallToSuperPrecondition));
-        assertStatement.setLineNumber(methodNode.getLineNumber());
-
-        modifiedMethodCode.addStatement(assertStatement);
+        modifiedMethodCode.addStatement(new ExpressionStatement(methodCallToSuperPrecondition));
         if (methodNode.getCode() instanceof BlockStatement)  {
             modifiedMethodCode.addStatements(((BlockStatement) methodNode.getCode()).getStatements());
         } else {

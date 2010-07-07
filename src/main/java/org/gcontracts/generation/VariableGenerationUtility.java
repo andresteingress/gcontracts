@@ -30,6 +30,7 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author andre.steingress@gmail.com

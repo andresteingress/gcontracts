@@ -61,8 +61,11 @@ public final class AssertStatementCreationUtility {
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[invariant] in class <" + classNode.getName() + "> violated"));
-        assertStatement.setLineNumber(classNode.getLineNumber());
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression));
+        assertStatement.setLineNumber(closureExpression.getLineNumber());
+        assertStatement.setColumnNumber(closureExpression.getColumnNumber());
+        assertStatement.setLastLineNumber(closureExpression.getLastLineNumber());
+        assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
         
         return assertStatement;
     }
@@ -94,13 +97,31 @@ public final class AssertStatementCreationUtility {
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression), new ConstantExpression("[" + assertionType + "] in method <" + method.getName() + "(" + getMethodParameterString(method) + ")> violated"));
+        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression));
         assertStatement.setLineNumber(closureExpression.getLineNumber());
+        assertStatement.setColumnNumber(closureExpression.getColumnNumber());
+        assertStatement.setLastLineNumber(closureExpression.getLastLineNumber());
+        assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
 
         final BlockStatement assertionBlockStatement = new BlockStatement();
-        assertionBlockStatement.addStatement(assertStatement);
+        assertionBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("<" + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement));
 
         return new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertionBlockStatement, new BlockStatement());
+    }
+
+    /**
+     * Returns the {@link org.codehaus.groovy.ast.stmt.AssertStatement} from the given {@link org.codehaus.groovy.ast.stmt.Statement}.
+     *
+     * @param stmt the statement to read the {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     * @return the {@link org.codehaus.groovy.ast.stmt.AssertStatement} or <tt>null</tt>
+     */
+    public static AssertStatement getAssertStatement(final Statement stmt)  {
+        if (!(stmt instanceof IfStatement)) return null;
+
+        IfStatement ifStatement = (IfStatement) stmt;
+        TryCatchStatement tryCatchStatement = (TryCatchStatement) ((BlockStatement) ifStatement.getIfBlock()).getStatements().get(0);
+
+        return (AssertStatement) tryCatchStatement.getTryStatement();
     }
 
     /**
@@ -123,13 +144,15 @@ public final class AssertStatementCreationUtility {
         final BooleanExpression booleanExpression = new BooleanExpression(assertStatement.getBooleanExpression().getExpression());
 
         final BlockStatement assertBlockStatement = new BlockStatement();
+
         final AssertStatement newAssertStatement = new AssertStatement(booleanExpression);
         newAssertStatement.setLineNumber(assertStatement.getLineNumber());
         newAssertStatement.setColumnNumber(assertStatement.getColumnNumber());
         newAssertStatement.setLastColumnNumber(assertStatement.getLastColumnNumber());
         newAssertStatement.setLastLineNumber(assertStatement.getLastLineNumber());
-        newAssertStatement.setMessageExpression(new ConstantExpression(((ConstantExpression) assertStatement.getMessageExpression()).getText().replaceFirst(assertionType, "inherited " + assertionType)));
-        assertBlockStatement.addStatement(newAssertStatement);
+        newAssertStatement.setMessageExpression(ConstantExpression.NULL);
+        
+        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("<inherited " + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", newAssertStatement));
 
         // add return value "true" so valid assertions in sub assertion statements get through
         methodBlockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));

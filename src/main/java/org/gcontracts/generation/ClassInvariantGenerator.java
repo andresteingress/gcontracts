@@ -61,7 +61,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
         addCallsToSuperClassInvariants(type, classInvariant);
 
         final BlockStatement assertBlockStatement = new BlockStatement();
-        assertBlockStatement.addStatement(AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant));
+        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("<class invariant> " + type.getName() + "\n\n", AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant)));
 
         final BlockStatement blockStatement = new BlockStatement();
         blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
