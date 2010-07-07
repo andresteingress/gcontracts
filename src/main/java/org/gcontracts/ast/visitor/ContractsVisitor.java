@@ -122,6 +122,10 @@ public class ContractsVisitor extends BaseVisitor {
         // adding a default postcondition if an inherited postcondition is found
         if (!postconditionFound)  {
             postconditionGenerator.generateDefaultPostconditionStatement(type, method);
+        } else {
+            // generation the old variables method just in case a postcondition is found
+            // in this class
+            postconditionGenerator.addOldVariablesMethod(type);
         }
 
         // If there is a class invariant we will append the check to this invariant

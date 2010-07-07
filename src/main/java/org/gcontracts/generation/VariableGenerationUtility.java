@@ -26,43 +26,45 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.objectweb.asm.Opcodes;
 
 /**
  * @author andre.steingress@gmail.com
  */
 public class VariableGenerationUtility {
 
-    /**
-     * Each field of the class is assigned to an old variable before method execution. After method execution
-     * a map with the old variable values is generated, which is than used as parameter in the {@link org.gcontracts.annotations.Ensures}
-     * closure.
-     *
-     * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
-     * @return a {@link org.codehaus.groovy.ast.expr.MapExpression} which holds either none or some old variables
-     */
-    public MapExpression generateOldVariablesMap(MethodNode method) {
+    public static final String OLD_VARIABLES_METHOD = "computeOldVariables";
 
-        final ClassNode declaringClass = method.getDeclaringClass();
-        final ArrayList<ExpressionStatement> oldVariableAssignments = new ArrayList<ExpressionStatement>();
-        final ArrayList<VariableExpression> oldVariableExpressions = new ArrayList<VariableExpression>();
+    /**
+     * Creates a synthetic method handling generation of the <tt>old</tt> variable map. If a super class declares
+     * the same synthetic method it will be called and the results will be merged.
+     *
+     * @param classNode which contains postconditions, so an old variable generating method makes sense here.
+     */
+    public static void addOldVariableMethodNode(final ClassNode classNode)  {
+        if (classNode.getDeclaredMethod(OLD_VARIABLES_METHOD, Parameter.EMPTY_ARRAY) != null) return;
+
+        final BlockStatement methodBlockStatement = new BlockStatement();
+
+        final MapExpression oldVariablesMap = new MapExpression();
 
         // create variable assignments for old variables
-        for (final FieldNode fieldNode : declaringClass.getFields())   {
+        for (final FieldNode fieldNode : classNode.getFields())   {
+            if (fieldNode.getName().startsWith("$")) continue;
+
             final ClassNode fieldType = ClassHelper.getWrapper(fieldNode.getType());
 
             if (fieldType.getName().startsWith("java.lang") || ClassHelper.isPrimitiveType(fieldType) || fieldType.getName().startsWith("java.math") ||
                     fieldType.getName().startsWith("java.util") ||
-                    fieldType.getName().startsWith("java.sql") || 
+                    fieldType.getName().startsWith("java.sql") ||
                     fieldType.getName().equals("groovy.lang.GString")  ||
                     fieldType.getName().equals("java.lang.String"))  {
 
                 MethodNode cloneMethod = fieldType.getMethod("clone", Parameter.EMPTY_ARRAY);
-                // if a clone method is available, the value is cloned
+                // if a clone classNode is available, the value is cloned
                 if (cloneMethod != null && fieldType.implementsInterface(ClassHelper.make("java.lang.Cloneable")))  {
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
 
@@ -75,8 +77,8 @@ public class VariableGenerationUtility {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                                 methodCall));
 
-                    oldVariableExpressions.add(oldVariable);
-                    oldVariableAssignments.add(oldVariableAssignment);
+                    methodBlockStatement.addStatement(oldVariableAssignment);
+                    oldVariablesMap.addMapEntryExpression(new MapEntryExpression(new ConstantExpression(oldVariable.getName().substring("$old$".length())), oldVariable));
 
                 } else if (ClassHelper.isPrimitiveType(fieldType)
                         || ClassHelper.isNumberType(fieldType)
@@ -90,23 +92,38 @@ public class VariableGenerationUtility {
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         new FieldExpression(fieldNode)));
 
-                    oldVariableExpressions.add(oldVariable);
-                    oldVariableAssignments.add(oldVariableAssignment);
+                    methodBlockStatement.addStatement(oldVariableAssignment);
+                    oldVariablesMap.addMapEntryExpression(new MapEntryExpression(new ConstantExpression(oldVariable.getName().substring("$old$".length())), oldVariable));
                 }
             }
         }
 
-        BlockStatement methodBlock = (BlockStatement) method.getCode();
+        VariableExpression oldVariable = new VariableExpression("old", ClassHelper.MAP_TYPE);
+        ExpressionStatement oldVariabeStatement = new ExpressionStatement(
+                new DeclarationExpression(oldVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        oldVariablesMap));
 
-        MapExpression oldVariablesMap = new MapExpression();
-        // add old variable statements
-        for (int i = 0; i < oldVariableAssignments.size(); i++)  {
-            VariableExpression variable = oldVariableExpressions.get(i);
+        methodBlockStatement.addStatement(oldVariabeStatement);
 
-            methodBlock.getStatements().add(0, oldVariableAssignments.get(i));
-            oldVariablesMap.addMapEntryExpression(new MapEntryExpression(new ConstantExpression(variable.getName().substring("$old$".length())), variable));
+        VariableExpression mergedOldVariables = null;
+
+        // let's ask the super class for old variables...
+        if (classNode.getSuperClass() != null && classNode.getSuperClass().getMethod(OLD_VARIABLES_METHOD, Parameter.EMPTY_ARRAY) != null)  {
+            mergedOldVariables = new VariableExpression("mergedOldVariables", ClassHelper.MAP_TYPE);
+            ExpressionStatement mergedOldVariablesStatement = new ExpressionStatement(
+                new DeclarationExpression(mergedOldVariables,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        new MethodCallExpression(oldVariable, "plus", new ArgumentListExpression(new MethodCallExpression(VariableExpression.SUPER_EXPRESSION, OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)))));
+
+
+            methodBlockStatement.addStatement(mergedOldVariablesStatement);
         }
 
-        return oldVariablesMap;
+        methodBlockStatement.addStatement(new ReturnStatement(mergedOldVariables != null ? mergedOldVariables : oldVariable));
+
+        final MethodNode preconditionMethodNode = classNode.addMethod(OLD_VARIABLES_METHOD, Opcodes.ACC_PROTECTED, ClassHelper.DYNAMIC_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, methodBlockStatement);
+        preconditionMethodNode.setSynthetic(true);
+
     }
 }

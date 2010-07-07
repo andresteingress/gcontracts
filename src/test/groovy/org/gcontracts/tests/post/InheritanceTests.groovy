@@ -132,8 +132,8 @@ class Rocket  {
     def start() { started = true }
 
     @Requires({ started })
-    @Ensures({ old -> speed != null && speed > 0 && old.speed != null })
-    def accelerate()  { speed += 10 }
+    @Ensures({ old -> (speed - old.speed) > 0 })
+    def accelerate()  { speed = 12 }
 }
 '''
 
@@ -149,6 +149,14 @@ class BetterRocket extends Rocket {
     }
 }
 '''
+  def void test_simple()  {
+    def rocket = create_instance_of(source2)
+
+    rocket.start()
+    rocket.accelerate()
+
+  }
+
   def void test_inherited_postcondition_with_param()  {
     add_class_to_classpath(source2)
     def betterRocket = create_instance_of(source3)
