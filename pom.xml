@@ -11,6 +11,12 @@
 
     <description>GContracts provides annotations to implement interface contracts aka design by contract in Groovy classes.</description>
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>3</version>
+    </parent>
+
     <developers>
         <developer>
             <id>andre</id>
@@ -60,14 +66,6 @@
         <connection>scm:git:file:///Users/andre/Development/gcontracts</connection>
         <url>scm:git:file:///Users/andre/Development/gcontracts</url>
     </scm>
-
-    <distributionManagement>
-        <repository>
-          <id>sonatype-nexus-staging</id>
-          <name>Nexus Release Repository</name>
-          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
