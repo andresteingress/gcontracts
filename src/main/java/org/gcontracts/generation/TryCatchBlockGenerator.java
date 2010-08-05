@@ -28,7 +28,6 @@ import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.codehaus.groovy.transform.powerassert.PowerAssertionError;
 
 /**
  * Creates a try-catch block around a given {@link org.codehaus.groovy.ast.stmt.AssertStatement} and catches
@@ -42,24 +41,41 @@ public class TryCatchBlockGenerator {
 
        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertStatement, new EmptyStatement());
        final BlockStatement catchBlock = new BlockStatement();
+       final Class powerAssertionErrorClass = loadPowerAssertionErrorClass();
 
-       ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(new VariableExpression("newError", ClassHelper.makeWithoutCaching(PowerAssertionError.class)), Token.newSymbol(Types.ASSIGN, -1, -1),
-               new ConstructorCallExpression(ClassHelper.makeWithoutCaching(PowerAssertionError.class),
-                       new ArgumentListExpression(new BinaryExpression(new ConstantExpression(message), Token.newSymbol(Types.PLUS, -1, -1), new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(PowerAssertionError.class), "error")), "getMessage", ArgumentListExpression.EMPTY_ARGUMENTS))))));
+       ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(new VariableExpression("newError", ClassHelper.makeWithoutCaching(powerAssertionErrorClass)), Token.newSymbol(Types.ASSIGN, -1, -1),
+               new ConstructorCallExpression(ClassHelper.makeWithoutCaching(powerAssertionErrorClass),
+                       new ArgumentListExpression(new BinaryExpression(new ConstantExpression(message), Token.newSymbol(Types.PLUS, -1, -1), new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getMessage", ArgumentListExpression.EMPTY_ARGUMENTS))))));
 
-       ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(new VariableExpression("newError", ClassHelper.makeWithoutCaching(PowerAssertionError.class)), "setStackTrace", new ArgumentListExpression(
-               new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(PowerAssertionError.class), "error")), "getStackTrace", ArgumentListExpression.EMPTY_ARGUMENTS)
+       ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(new VariableExpression("newError", ClassHelper.makeWithoutCaching(powerAssertionErrorClass)), "setStackTrace", new ArgumentListExpression(
+               new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getStackTrace", ArgumentListExpression.EMPTY_ARGUMENTS)
        )));
 
 
-       ThrowStatement throwStatement = new ThrowStatement(new VariableExpression("newError", ClassHelper.makeWithoutCaching(PowerAssertionError.class)));
+       ThrowStatement throwStatement = new ThrowStatement(new VariableExpression("newError", ClassHelper.makeWithoutCaching(powerAssertionErrorClass)));
 
        catchBlock.addStatement(expr);
        catchBlock.addStatement(exp2);
        catchBlock.addStatement(throwStatement);
 
-       tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(PowerAssertionError.class), "error"), catchBlock));
+       tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error"), catchBlock));
 
        return tryCatchStatement;
    }
+
+    private static Class loadPowerAssertionErrorClass() {
+
+        Class result = null;
+
+        try {
+            result = TryCatchBlockGenerator.class.getClassLoader().loadClass("org.codehaus.groovy.transform.powerassert.PowerAssertionError");
+        } catch (ClassNotFoundException e) {
+            try {
+                result = TryCatchBlockGenerator.class.getClassLoader().loadClass("org.codehaus.groovy.runtime.powerassert.PowerAssertionError");
+            } catch (ClassNotFoundException e1) {
+            }
+        }
+
+        return result;
+    }
 }
