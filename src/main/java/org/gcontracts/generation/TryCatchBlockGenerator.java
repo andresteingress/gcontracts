@@ -22,6 +22,7 @@
  */
 package org.gcontracts.generation;
 
+import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.*;
@@ -42,6 +43,8 @@ public class TryCatchBlockGenerator {
        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertStatement, new EmptyStatement());
        final BlockStatement catchBlock = new BlockStatement();
        final Class powerAssertionErrorClass = loadPowerAssertionErrorClass();
+       
+       if (powerAssertionErrorClass == null) throw new GroovyBugError("GContracts >= 1.1.2 needs Groovy 1.7 or above!");
 
        ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(new VariableExpression("newError", ClassHelper.makeWithoutCaching(powerAssertionErrorClass)), Token.newSymbol(Types.ASSIGN, -1, -1),
                new ConstructorCallExpression(ClassHelper.makeWithoutCaching(powerAssertionErrorClass),
