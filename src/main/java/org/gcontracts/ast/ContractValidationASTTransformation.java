@@ -35,7 +35,7 @@ import org.gcontracts.ast.visitor.DynamicSetterInjectionVisitor;
  * <p>
  * Custom AST transformation that removes closure annotations of {@link org.gcontracts.annotations.Invariant},
  * {@link org.gcontracts.annotations.Requires} and {@link org.gcontracts.annotations.Ensures} and adds Java
- * assertions which executing the constraint-code instead.
+ * assertions executing the closure-code.
  * </p>
  * <p>
  * Whenever a constraint is broken an {@link AssertionError} will be thrown.
