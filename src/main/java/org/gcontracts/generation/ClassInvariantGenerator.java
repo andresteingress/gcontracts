@@ -28,6 +28,7 @@ import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.gcontracts.ClassInvariantViolation;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
@@ -61,7 +62,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
         addCallsToSuperClassInvariants(type, classInvariant);
 
         final BlockStatement assertBlockStatement = new BlockStatement();
-        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("<class invariant> " + type.getName() + "\n\n", AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant)));
+        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement(ClassHelper.makeWithoutCaching(ClassInvariantViolation.class), "<class invariant> " + type.getName() + "\n\n", AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant)));
 
         final BlockStatement blockStatement = new BlockStatement();
         blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));

@@ -24,6 +24,7 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.ClassHelper;
+import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
@@ -38,7 +39,7 @@ import org.codehaus.groovy.syntax.Types;
  */
 public class TryCatchBlockGenerator {
 
-   public static Statement generateTryCatchStatement(final String message, final AssertStatement assertStatement)  {
+   public static Statement generateTryCatchStatement(final ClassNode assertionErrorClass, final String message, final AssertStatement assertStatement)  {
 
        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertStatement, new EmptyStatement());
        final BlockStatement catchBlock = new BlockStatement();
@@ -46,16 +47,16 @@ public class TryCatchBlockGenerator {
        
        if (powerAssertionErrorClass == null) throw new GroovyBugError("GContracts >= 1.1.2 needs Groovy 1.7 or above!");
 
-       ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(new VariableExpression("newError", ClassHelper.makeWithoutCaching(powerAssertionErrorClass)), Token.newSymbol(Types.ASSIGN, -1, -1),
-               new ConstructorCallExpression(ClassHelper.makeWithoutCaching(powerAssertionErrorClass),
+       ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(new VariableExpression("newError", assertionErrorClass), Token.newSymbol(Types.ASSIGN, -1, -1),
+               new ConstructorCallExpression(assertionErrorClass,
                        new ArgumentListExpression(new BinaryExpression(new ConstantExpression(message), Token.newSymbol(Types.PLUS, -1, -1), new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getMessage", ArgumentListExpression.EMPTY_ARGUMENTS))))));
 
-       ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(new VariableExpression("newError", ClassHelper.makeWithoutCaching(powerAssertionErrorClass)), "setStackTrace", new ArgumentListExpression(
+       ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(new VariableExpression("newError", assertionErrorClass), "setStackTrace", new ArgumentListExpression(
                new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getStackTrace", ArgumentListExpression.EMPTY_ARGUMENTS)
        )));
 
 
-       ThrowStatement throwStatement = new ThrowStatement(new VariableExpression("newError", ClassHelper.makeWithoutCaching(powerAssertionErrorClass)));
+       ThrowStatement throwStatement = new ThrowStatement(new VariableExpression("newError", assertionErrorClass));
 
        catchBlock.addStatement(expr);
        catchBlock.addStatement(exp2);

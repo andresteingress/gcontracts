@@ -24,8 +24,8 @@ class EnsureVariables {
 '''
 
   def void testing_result_with_result_variable_in_method_block()  {
-    def var = create_instance_of(source, [])
+    //def var = create_instance_of(source, [])
 
-    var.concatenateColon("part1", "part2")
+    //var.concatenateColon("part1", "part2")
   }
 }

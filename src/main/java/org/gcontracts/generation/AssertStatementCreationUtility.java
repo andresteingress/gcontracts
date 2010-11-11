@@ -28,6 +28,8 @@ import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.gcontracts.PostconditionViolation;
+import org.gcontracts.PreconditionViolation;
 import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Requires;
 import org.gcontracts.ast.visitor.BaseVisitor;
@@ -104,7 +106,7 @@ public final class AssertStatementCreationUtility {
         assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
 
         final BlockStatement assertionBlockStatement = new BlockStatement();
-        assertionBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("<" + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement));
+        assertionBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<" + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement));
 
         return new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertionBlockStatement, new BlockStatement());
     }
@@ -152,7 +154,7 @@ public final class AssertStatementCreationUtility {
         newAssertStatement.setLastLineNumber(assertStatement.getLastLineNumber());
         newAssertStatement.setMessageExpression(ConstantExpression.NULL);
         
-        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("<inherited " + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", newAssertStatement));
+        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<inherited " + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", newAssertStatement));
 
         // add return value "true" so valid assertions in sub assertion statements get through
         methodBlockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
