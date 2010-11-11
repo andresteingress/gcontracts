@@ -26,11 +26,9 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.expr.ConstructorCallExpression;
 import org.codehaus.groovy.ast.expr.MethodCallExpression;
-import org.codehaus.groovy.ast.stmt.AssertStatement;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.IfStatement;
+import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -70,9 +68,17 @@ public class PreconditionGenerator extends BaseGenerator {
 
         modifiedMethodCode.addStatement(assertionIfStatement);
         if (method.getCode() instanceof BlockStatement)  {
-            modifiedMethodCode.addStatements(((BlockStatement) method.getCode()).getStatements());
+
+            BlockStatement methodBlock = (BlockStatement) method.getCode();
+            for (Statement statement : methodBlock.getStatements())  {
+                if (statement instanceof ExpressionStatement && ((ExpressionStatement) statement).getExpression() instanceof ConstructorCallExpression)  {
+                    modifiedMethodCode.getStatements().add(0, statement);
+                } else {
+                    modifiedMethodCode.getStatements().add(statement);
+                }
+            }
         } else {
-            modifiedMethodCode.addStatement(method.getCode());    
+            modifiedMethodCode.addStatement(method.getCode());
         }
 
         method.setCode(modifiedMethodCode);

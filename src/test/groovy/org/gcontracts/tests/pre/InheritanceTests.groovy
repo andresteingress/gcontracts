@@ -44,6 +44,12 @@ import org.gcontracts.annotations.*
 
 class Descendant extends Parent {
 
+  @Requires({ true })
+  @Ensures({ true })
+  def Descendant()  {
+    super()
+  }
+
   @Override
   @Requires({ param1 > 1 && param2 > 1  })
   def some_operation1(Integer param1, Integer param2)  {
