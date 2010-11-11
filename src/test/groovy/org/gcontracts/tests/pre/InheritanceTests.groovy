@@ -14,6 +14,11 @@ import org.gcontracts.annotations.*
 
 class Parent {
 
+  @Requires({ true })
+  def Parent()  {
+
+  }
+
   @Requires({ param1 > 0 && param2 > 0  })
   def some_operation1(Integer param1, Integer param2)  {
 
