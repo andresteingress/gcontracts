@@ -104,7 +104,13 @@ public class ContractsVisitor extends BaseVisitor {
         for (ClassNode interfaceClassNode : type.getAllInterfaces())  {
             if (interfaceClassNode.getName().equals(INITIALIZINGBEAN_INTERFACE))  {
                 foundAfterPropertiesSet = type.getDeclaredMethod(AFTER_PROPERTIES_SET, Parameter.EMPTY_ARRAY) != null;
+                break;
             }
+        }
+
+        if (foundAfterPropertiesSet && hasClassInvariant && isSpringComponent) {
+            addError("the class invariant can not be applied because there is a custom implementation of afterPropertiesSet()", type);
+            return;
         }
 
         if (foundAfterPropertiesSet) return;
