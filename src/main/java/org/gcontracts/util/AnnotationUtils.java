@@ -22,6 +22,7 @@
  */
 package org.gcontracts.util;
 
+import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
@@ -35,14 +36,14 @@ public class AnnotationUtils {
 
     /**
      * Checks whether the given {@link org.codehaus.groovy.ast.ClassNode} is annotated
-     * with an annotations of the given package or full type name.
+     * with an annotations of the given package or full annotatedNode name.
      *
-     * @param type the {@link org.codehaus.groovy.ast.ClassNode} to search for the given annotation
+     * @param annotatedNode the {@link org.codehaus.groovy.ast.AnnotatedNode} to search for the given annotation
      * @param typeOrPackageName can either be a part of the package or the complete annotation class name
      * @return <tt>true</tt> if an annotation was found, <tt>false</tt> otherwise
      */
-    public static boolean hasAnnotationOfType(ClassNode type, String typeOrPackageName)  {
-        for (AnnotationNode annotation: type.getAnnotations())  {
+    public static boolean hasAnnotationOfType(AnnotatedNode annotatedNode, String typeOrPackageName)  {
+        for (AnnotationNode annotation: annotatedNode.getAnnotations())  {
             if (annotation.getClassNode().getName().startsWith(typeOrPackageName))  {
                 return true;
             }

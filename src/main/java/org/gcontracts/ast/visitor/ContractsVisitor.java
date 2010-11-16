@@ -31,6 +31,7 @@ import org.gcontracts.annotations.Ensures;
 import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.Requires;
 import org.gcontracts.generation.*;
+import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
 import java.util.List;
@@ -51,7 +52,9 @@ public class ContractsVisitor extends BaseVisitor {
     private boolean isSpringComponent = false;
 
     private static final String INITIALIZINGBEAN_INTERFACE = "org.springframework.beans.factory.InitializingBean";
-    private static final String AFTER_PROPERTIES_SET = "afterPropertiesSet";
+    private static final String POSTCONSTRUCT_ANNOTATION = "javax.annotation.PostConstruct";
+
+    private static final String POSTCONSTRUCT_METHOD_NAME = "$gcontracts_postConstruct";
     private static final String SPRING_STEREOTYPE_PACKAGE = "org.springframework.stereotype";
 
     public ContractsVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
@@ -71,7 +74,7 @@ public class ContractsVisitor extends BaseVisitor {
         addPreOrPostconditionsToConstructors(type);
         addPreOrPostconditionsToDeclaredMethods(type);
 
-        addPreOrPostconditionsToAfterPropertiesSet(type);
+        createPostConstructMethodForSpringBeans(type);
     }
 
     private void addClassInvariant(ClassNode type) {
@@ -96,44 +99,48 @@ public class ContractsVisitor extends BaseVisitor {
         }
     }
 
-    private void addPreOrPostconditionsToAfterPropertiesSet(ClassNode type) {
+    private void createPostConstructMethodForSpringBeans(ClassNode type) {
         if (!isSpringComponent) return;
+        if (isAnyPostConstructionCallbackAvailable(type)) return;
 
-        boolean foundAfterPropertiesSet = false;
+        // add a synthetic post-construction method
+        final MethodNode postConstructionMethodNode =
+                type.addMethod(POSTCONSTRUCT_METHOD_NAME, Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC, ClassHelper.VOID_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new BlockStatement());
 
+        final Class<?> postConstructAnnotationClass;
+        try {
+            postConstructAnnotationClass = ContractsVisitor.class.getClassLoader().loadClass(POSTCONSTRUCT_ANNOTATION);
+
+            final ClassNode postConstructAnnotationClassNode = ClassHelper.makeWithoutCaching(postConstructAnnotationClass);
+            postConstructionMethodNode.addAnnotation(new AnnotationNode(postConstructAnnotationClassNode));
+
+            addPreOrPostcondition(type, postConstructionMethodNode);
+        } catch (ClassNotFoundException e) {
+            addError("Annotation " + POSTCONSTRUCT_ANNOTATION + " could not be found in classpath!", type);
+        }
+    }
+
+    private boolean isAnyPostConstructionCallbackAvailable(ClassNode type)  {
+
+        boolean foundAnyPostConstructionCallback = false;
+
+        // 1: the bean implements InitializingBean
         for (ClassNode interfaceClassNode : type.getAllInterfaces())  {
             if (interfaceClassNode.getName().equals(INITIALIZINGBEAN_INTERFACE))  {
-                foundAfterPropertiesSet = type.getDeclaredMethod(AFTER_PROPERTIES_SET, Parameter.EMPTY_ARRAY) != null;
+                foundAnyPostConstructionCallback = true;
                 break;
             }
         }
 
-        if (foundAfterPropertiesSet && hasClassInvariant && isSpringComponent) {
-            addError("the class invariant can not be applied because there is a custom implementation of afterPropertiesSet()", type);
-            return;
+        // 2: method annotated with @PostConstruct (JEE5)
+        for (MethodNode methodNode : type.getAllDeclaredMethods())  {
+            if (AnnotationUtils.hasAnnotationOfType(methodNode, POSTCONSTRUCT_ANNOTATION))  {
+                foundAnyPostConstructionCallback = true;
+                break;
+            }
         }
 
-        if (foundAfterPropertiesSet) return;
-
-        try {
-            final Class<?> initializingBeanClass = ContractsVisitor.class.getClassLoader().loadClass(INITIALIZINGBEAN_INTERFACE);
-            final ClassNode initializingBeanClassNode = ClassHelper.makeWithoutCaching(initializingBeanClass);
-
-            // add the interface
-            type.addInterface(initializingBeanClassNode);
-
-            // add afterPropertiesSet
-            final MethodNode afterPropertiesSetMethodNode =
-                    type.addMethod(AFTER_PROPERTIES_SET, Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC, ClassHelper.VOID_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new BlockStatement());
-
-            addPreOrPostcondition(type, afterPropertiesSetMethodNode);
-
-        } catch (ClassNotFoundException e) {
-            addError("Could not found class '\"" + INITIALIZINGBEAN_INTERFACE + "\" in classpath!", type);
-            return;
-        }
-
-
+        return foundAnyPostConstructionCallback;
     }
 
     private void addPreOrPostconditionsToDeclaredMethods(ClassNode type) {

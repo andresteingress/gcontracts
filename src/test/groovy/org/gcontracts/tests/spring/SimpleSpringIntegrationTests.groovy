@@ -28,15 +28,21 @@ class A {
   def source2 = '''
 package tests
 
+import org.springframework.stereotype.*
 import org.gcontracts.annotations.*
 
+@Component
 @Invariant({ property != null })
-class A {
+class A implements org.springframework.beans.factory.InitializingBean {
 
   private property
 
   def A(def someValue)  {
     property = someValue
+  }
+
+  void afterPropertiesSet() throws Exception {
+   // noop
   }
 }
 '''
@@ -44,8 +50,10 @@ class A {
   def source3 = '''
 package tests
 
+import org.springframework.stereotype.*
 import org.gcontracts.annotations.*
 
+@Component
 @Invariant({ property != null })
 class A {
 
@@ -55,7 +63,10 @@ class A {
     property = someValue
   }
 
-  static me = "me"
+  @javax.annotation.PostConstruct
+  void afterPropertiesSet() throws Exception {
+   // noop
+  }
 }
 '''
 
@@ -66,7 +77,21 @@ class A {
   def void test_invariant_check_in_afterPropertiesSet()  {
     def a = create_instance_of(source1, [null])
     shouldFail AssertionError, {
-      a.afterPropertiesSet()
+      a.$gcontracts_postConstruct()
+    }
+  }
+
+  def void test_Sinvariant_check_will_be_ignored_for_bean_with_InitializingBean()  {
+    def a = create_instance_of(source2, [null])
+    shouldFail MissingMethodException, {
+      a.$gcontracts_postConstruct()
+    }
+  }
+
+  def void test_Sinvariant_check_will_be_ignored_for_bean_with_PostConstruct()  {
+    def a = create_instance_of(source3, [null])
+    shouldFail MissingMethodException, {
+      a.$gcontracts_postConstruct()
     }
   }
 }
