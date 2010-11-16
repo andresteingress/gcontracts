@@ -37,6 +37,7 @@ import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.generation.BaseGenerator;
 import org.gcontracts.generation.AssertStatementCreationUtility;
 import org.gcontracts.generation.CandidateChecks;
+import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
 import java.util.List;
@@ -51,6 +52,8 @@ import java.util.List;
  * @author andre.steingress@gmail.com
  */
 public class DynamicSetterInjectionVisitor extends BaseVisitor {
+
+    private static final String SPRING_STEREOTYPE_PACKAGE = "org.springframework.stereotype";
 
     private IfStatement invariantAssertionBlockStatement;
 
@@ -93,7 +96,7 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
     public void visitClass(ClassNode classNode) {
         // if a class invariant is available visit all property nodes else skip this class
         final MethodNode invariantMethodNode = BaseGenerator.getInvariantMethodNode(classNode);
-        if (invariantMethodNode == null) return;
+        if (invariantMethodNode == null || AnnotationUtils.hasAnnotationOfType(classNode, SPRING_STEREOTYPE_PACKAGE)) return;
 
         invariantAssertionBlockStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethodNode);
 

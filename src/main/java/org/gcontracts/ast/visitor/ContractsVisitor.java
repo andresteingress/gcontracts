@@ -24,6 +24,7 @@ package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.Ensures;
@@ -47,6 +48,11 @@ import java.util.List;
 public class ContractsVisitor extends BaseVisitor {
 
     private boolean hasClassInvariant = false;
+    private boolean isSpringComponent = false;
+
+    private static final String INITIALIZINGBEAN_INTERFACE = "org.springframework.beans.factory.InitializingBean";
+    private static final String AFTER_PROPERTIES_SET = "afterPropertiesSet";
+    private static final String SPRING_STEREOTYPE_PACKAGE = "org.springframework.stereotype";
 
     public ContractsVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
@@ -58,11 +64,26 @@ public class ContractsVisitor extends BaseVisitor {
         if (!CandidateChecks.isContractsCandidate(type)) return;
 
         addConfigurationVariable(type);
+        addClassInvariant(type);
 
+        super.visitClass(type);
+
+        addPreOrPostconditionsToConstructors(type);
+        addPreOrPostconditionsToDeclaredMethods(type);
+
+        addPreOrPostconditionsToAfterPropertiesSet(type);
+    }
+
+    private void addClassInvariant(ClassNode type) {
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
 
         List<AnnotationNode> annotations = type.getAnnotations();
         for (AnnotationNode annotation: annotations)  {
+            // if this is a spring component, we will have to handle constructor invariants differently
+            if (annotation.getClassNode().getName().startsWith(SPRING_STEREOTYPE_PACKAGE))  {
+                isSpringComponent = true;
+            }
+
             if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {
                 // Generates a synthetic method holding the class invariant
                 classInvariantGenerator.generateInvariantAssertionStatement(type, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
@@ -73,14 +94,53 @@ public class ContractsVisitor extends BaseVisitor {
         if (!hasClassInvariant)  {
             hasClassInvariant = classInvariantGenerator.generateDefaultInvariantAssertionMethod(type);
         }
+    }
 
-        super.visitClass(type);
+    private void addPreOrPostconditionsToAfterPropertiesSet(ClassNode type) {
+        if (!isSpringComponent) return;
 
-        for (final MethodNode methodNode : type.getDeclaredConstructors())  {
-            addPreOrPostcondition(type, methodNode);
+        boolean foundAfterPropertiesSet = false;
+
+        for (ClassNode interfaceClassNode : type.getAllInterfaces())  {
+            if (interfaceClassNode.getName().equals(INITIALIZINGBEAN_INTERFACE))  {
+                foundAfterPropertiesSet = type.getDeclaredMethod(AFTER_PROPERTIES_SET, Parameter.EMPTY_ARRAY) != null;
+            }
         }
 
+        if (foundAfterPropertiesSet) return;
+
+        try {
+            final Class<?> initializingBeanClass = ContractsVisitor.class.getClassLoader().loadClass(INITIALIZINGBEAN_INTERFACE);
+            final ClassNode initializingBeanClassNode = ClassHelper.makeWithoutCaching(initializingBeanClass);
+
+            // add the interface
+            type.addInterface(initializingBeanClassNode);
+
+            // add afterPropertiesSet
+            final MethodNode afterPropertiesSetMethodNode =
+                    type.addMethod(AFTER_PROPERTIES_SET, Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC, ClassHelper.VOID_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new BlockStatement());
+
+            addPreOrPostcondition(type, afterPropertiesSetMethodNode);
+
+        } catch (ClassNotFoundException e) {
+            addError("Could not found class '\"" + INITIALIZINGBEAN_INTERFACE + "\" in classpath!", type);
+            return;
+        }
+
+
+    }
+
+    private void addPreOrPostconditionsToDeclaredMethods(ClassNode type) {
         for (final MethodNode methodNode : type.getAllDeclaredMethods())  {
+            addPreOrPostcondition(type, methodNode);
+        }
+    }
+
+    private void addPreOrPostconditionsToConstructors(ClassNode type) {
+        // if this is a Spring component class, we'll skip constructor modifications
+        if (isSpringComponent) return;
+
+        for (final MethodNode methodNode : type.getDeclaredConstructors())  {
             addPreOrPostcondition(type, methodNode);
         }
     }
