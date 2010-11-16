@@ -332,4 +332,22 @@ public final class AssertStatementCreationUtility {
             return new ReturnStatement(expressionStatement);
         }
     }
+
+    /**
+     * Removes a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} from the given {@link org.codehaus.groovy.ast.stmt.Statement}.
+     */
+    public static void removeReturnStatement(BlockStatement statement, ReturnStatement returnStatement)  {
+
+        List<Statement> statements = statement.getStatements();
+        for (int i = statements.size() - 1; i >= 0; i--)  {
+            Statement stmt = statements.get(i);
+            if (stmt == returnStatement) {
+                statements.remove(i);
+                return;
+            } else if (stmt instanceof BlockStatement)  {
+                removeReturnStatement((BlockStatement) stmt, returnStatement);
+                return;
+            }
+        }
+    }
 }

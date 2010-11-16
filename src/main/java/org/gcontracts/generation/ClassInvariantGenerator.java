@@ -138,9 +138,16 @@ public class ClassInvariantGenerator extends BaseGenerator {
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement && method.getReturnType() != ClassHelper.VOID_TYPE && !(method instanceof ConstructorNode))  {
             final BlockStatement blockStatement = (BlockStatement) statement;
-            final int numberOfStatements = blockStatement.getStatements().size();
 
-            blockStatement.getStatements().add(numberOfStatements > 0 ? numberOfStatements - 1 : 0, invariantAssertionStatement);
+            final ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(type, method, blockStatement);
+            if (returnStatement != null)  {
+                AssertStatementCreationUtility.removeReturnStatement(blockStatement, returnStatement);
+                blockStatement.addStatement(invariantAssertionStatement);
+                blockStatement.addStatement(returnStatement);
+            } else {
+                blockStatement.addStatement(invariantAssertionStatement);
+            }
+
         } else if (statement instanceof BlockStatement) {
             final BlockStatement blockStatement = (BlockStatement) statement;
             blockStatement.addStatement(invariantAssertionStatement);
