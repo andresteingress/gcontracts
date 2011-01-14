@@ -55,6 +55,8 @@ public class ContractsErasingVisitor extends BaseVisitor {
     @Override
     public void visitClass(ClassNode type) {
 
+        System.out.println("Erasing contracts for " + type.getName());
+
         List<AnnotationNode> annotations = type.getAnnotations();
         for (AnnotationNode annotation: annotations)  {
             if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {

@@ -1,8 +1,7 @@
 package org.gcontracts.tests.basic
 
 import org.codehaus.groovy.control.CompilePhase
-import org.gcontracts.ast.ClosureAnnotationErasingASTTransformation
-import org.gcontracts.ast.ContractValidationASTTransformation
+import org.gcontracts.ast.GContractsASTTransformation
 import groovy.text.GStringTemplateEngine
 
 /**
@@ -19,8 +18,7 @@ class BaseTestClass extends GroovyTestCase {
     templateEngine = new GStringTemplateEngine()
 
     loader = new ASTTransformationTestsGroovyClassLoader(getClass().getClassLoader(), [
-            new ContractValidationASTTransformation(),
-            new ClosureAnnotationErasingASTTransformation()
+            new GContractsASTTransformation()
     ], CompilePhase.SEMANTIC_ANALYSIS)
   }
 

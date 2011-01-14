@@ -28,6 +28,7 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.codehaus.groovy.transform.powerassert.AssertionRewriter;
+import org.gcontracts.ast.visitor.ContractsErasingVisitor;
 import org.gcontracts.ast.visitor.ContractsVisitor;
 import org.gcontracts.ast.visitor.DynamicSetterInjectionVisitor;
 
@@ -46,21 +47,20 @@ import org.gcontracts.ast.visitor.DynamicSetterInjectionVisitor;
  * @author andre.steingress@gmail.com                        
  */
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
-public class ContractValidationASTTransformation extends BaseASTTransformation {
+public class GContractsASTTransformation extends BaseASTTransformation {
 
     /**
      * {@link org.codehaus.groovy.transform.ASTTransformation#visit(org.codehaus.groovy.ast.ASTNode[], org.codehaus.groovy.control.SourceUnit)}
      */
     public void visit(ASTNode[] nodes, SourceUnit unit) {
-        if (nodes == null || nodes.length == 0 || unit == null) return;
-
-        final ModuleNode moduleNode = (ModuleNode)nodes[0];
+        final ModuleNode moduleNode = unit.getAST();
 
         ReaderSource source = getReaderSource(unit);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
             new ContractsVisitor(unit, source).visitClass(classNode);
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
+            new ContractsErasingVisitor(unit, source).visitClass(classNode);
         }
     }
 }

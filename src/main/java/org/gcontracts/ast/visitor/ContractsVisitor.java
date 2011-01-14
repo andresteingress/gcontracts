@@ -66,6 +66,8 @@ public class ContractsVisitor extends BaseVisitor {
 
         if (!CandidateChecks.isContractsCandidate(type)) return;
 
+        System.out.println("Adding contracts for " + type.getName());
+
         addConfigurationVariable(type);
         addClassInvariant(type);
 

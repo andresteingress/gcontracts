@@ -1,6 +1,8 @@
 .idea
 .DS_Store
+.gradle
 out
+build
 target
 settings.xml
 gcontracts.iml
