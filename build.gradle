@@ -32,7 +32,7 @@ compileTestGroovy.options.fork = false
 
 // external dependencies
 dependencies {
-  groovy group: 'org.codehaus.groovy', name: 'groovy', version: '1.7.6'
+  groovy "org.codehaus.groovy:groovy-all:1.8.0-rc-1"
   testCompile junit
 }
 
