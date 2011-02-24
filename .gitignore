@@ -5,4 +5,6 @@ out
 build
 target
 settings.xml
-gcontracts.iml
+*.ipr
+*.iws
+*.iml
