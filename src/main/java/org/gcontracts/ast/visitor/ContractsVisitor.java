@@ -89,7 +89,7 @@ public class ContractsVisitor extends BaseVisitor {
 
             if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {
                 // Generates a synthetic method holding the class invariant
-                classInvariantGenerator.generateInvariantAssertionStatement(type, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
+                classInvariantGenerator.generateInvariantAssertionStatement(type, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME), false);
                 hasClassInvariant = true;
             }
         }

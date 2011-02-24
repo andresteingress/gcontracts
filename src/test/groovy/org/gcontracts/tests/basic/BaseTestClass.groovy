@@ -1,25 +1,20 @@
 package org.gcontracts.tests.basic
 
-import org.codehaus.groovy.control.CompilePhase
-import org.gcontracts.ast.GContractsASTTransformation
 import groovy.text.GStringTemplateEngine
 
-/**
+ /**
  * @author andre.steingress@gmail.com
  */
 class BaseTestClass extends GroovyTestCase {
 
   private groovy.text.TemplateEngine templateEngine
-  private ASTTransformationTestsGroovyClassLoader loader;
+  private GroovyClassLoader loader;
 
   protected void setUp() {
     super.setUp();
 
     templateEngine = new GStringTemplateEngine()
-
-    loader = new ASTTransformationTestsGroovyClassLoader(getClass().getClassLoader(), [
-            new GContractsASTTransformation()
-    ], CompilePhase.SEMANTIC_ANALYSIS)
+    loader = new GroovyClassLoader(getClass().getClassLoader())
   }
 
   String createSourceCodeForTemplate(final String template, final Map binding)  {
