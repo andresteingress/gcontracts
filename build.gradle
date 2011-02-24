@@ -9,6 +9,7 @@ buildscript {
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'idea'
 apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
 
 group = "org.gcontracts"
