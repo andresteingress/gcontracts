@@ -36,8 +36,5 @@ class AnnotationUtilsTests extends BaseTestClass {
 
         annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode.getParameters()[0], ContractElement.class.getName())
         assertEquals(1, annotationNodes.size())
-
-        Parameter param = methodNode.getParameters()[0]
-        param.get
     }
 }
