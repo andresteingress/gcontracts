@@ -35,6 +35,17 @@ import java.lang.annotation.Target;
 /**
  * Used to mark method or constructor parameters being not nullable.
  *
+ * <pre>
+ * // constructor parameters
+ * def MyClass(@NotNull param) { ... }
+ * def MyClass(@NotNull String param) { ... }
+ *
+ * // method parameters
+ * def method(@NotNull someParam)  { ... }
+ * def method(@NotNull String someParam) { ... }
+ * def method(@NotNull String someParam, @NotNull anotherParam) { ... }
+ * </pre>
+ *
  * @author andre.steingress@gmail.com
  */
 @Retention(RetentionPolicy.RUNTIME)
