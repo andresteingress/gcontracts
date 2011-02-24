@@ -30,6 +30,7 @@ import org.gcontracts.annotations.meta.ClassInvariant;
 import org.gcontracts.annotations.meta.Postcondition;
 import org.gcontracts.annotations.meta.Precondition;
 import org.gcontracts.common.spi.AnnotationProcessingASTTransformation;
+import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
 
@@ -43,11 +44,11 @@ import org.gcontracts.util.Validate;
  */
 public abstract class BaseAnnotationProcessingASTTransformation implements AnnotationProcessingASTTransformation {
 
-    public void process(ClassNode classNode, MethodNode methodNode, Parameter parameter) {}
+    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode, Parameter parameter) {}
 
-    public void process(ClassNode classNode, MethodNode methodNode) {}
+    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {}
 
-    public void process(ClassNode classNode) {}
+    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
 
     protected boolean hasPreconditionAnnotation(AnnotatedNode annotatedNode)  {
         Validate.notNull(annotatedNode);

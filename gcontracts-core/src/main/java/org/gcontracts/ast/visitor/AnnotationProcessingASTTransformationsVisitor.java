@@ -23,15 +23,23 @@
 package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.expr.ArgumentListExpression;
+import org.codehaus.groovy.ast.expr.ClassExpression;
+import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.expr.MethodCallExpression;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.control.messages.Message;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.spi.AnnotationProcessingASTTransformation;
+import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
+import org.gcontracts.generation.Configurator;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
+import org.objectweb.asm.Opcodes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,8 +52,12 @@ import java.util.List;
  */
 public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
 
+    private ProcessingContextInformation pci;
+
     public AnnotationProcessingASTTransformationsVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
+
+        pci = new ProcessingContextInformation(source, true, true);
     }
 
     protected AnnotationProcessingASTTransformationsVisitor() {}
@@ -53,21 +65,18 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
     @Override
     public void visitClass(ClassNode type) {
         if (!CandidateChecks.isContractsCandidate(type)) return;
-        super.visitClass(type);
 
+        //addConfigurationVariable(type);
         visitAnnotatedNode(type, null, null);
-    }
 
-    @Override
-    protected void visitConstructorOrMethod(MethodNode node, boolean isConstructor) {
-        super.visitConstructorOrMethod(node, isConstructor);
+        List<MethodNode> methodNodes = new ArrayList<MethodNode>(type.getMethods());
 
-        // not using visitAnnoatedNodes of super class since parameters would need to be
-        // handled differently and context to methodNode would be lost
-        visitAnnotatedNode(node, null, null);
+        for (MethodNode methodNode : methodNodes)  {
+            visitAnnotatedNode(methodNode, type, null);
 
-        for (Parameter parameter : node.getParameters())  {
-            visitAnnotatedNode(parameter, node.getDeclaringClass(), node);
+            for (Parameter parameter : methodNode.getParameters())  {
+                visitAnnotatedNode(parameter, type, methodNode);
+            }
         }
     }
 
@@ -78,24 +87,31 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
 
         for (AnnotationNode annotationNode : annotationNodes)  {
             final org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation annotationProcessingAnno = (org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation) annotationNode.getClassNode().getTypeClass().getAnnotation(org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation.class);
-            Class<? extends AnnotationProcessingASTTransformation> clz = annotationProcessingAnno.value();
+            Class<? extends AnnotationProcessingASTTransformation>[] classes = annotationProcessingAnno.value();
 
-            try {
-                final AnnotationProcessingASTTransformation processor = clz.newInstance();
-                if (annotatedNode instanceof ClassNode)  {
-                    processor.process((ClassNode) annotatedNode);
-                } else if (annotatedNode instanceof MethodNode)  {
-                    MethodNode annotatedMethodNode = (MethodNode) annotatedNode;
-                    processor.process(classNode, annotatedMethodNode);
-                } else if (annotatedNode instanceof Parameter)  {
-                    processor.process(classNode, methodNode, (Parameter) annotatedNode);
+            for (Class<? extends AnnotationProcessingASTTransformation> clz : classes)  {
+                try {
+                    final AnnotationProcessingASTTransformation processor = clz.newInstance();
+                    if (annotatedNode instanceof ClassNode)  {
+                        processor.process(pci, (ClassNode) annotatedNode);
+                    } else if (annotatedNode instanceof MethodNode)  {
+                        MethodNode annotatedMethodNode = (MethodNode) annotatedNode;
+                        processor.process(pci, classNode, annotatedMethodNode);
+                    } else if (annotatedNode instanceof Parameter)  {
+                        processor.process(pci, classNode, methodNode, (Parameter) annotatedNode);
+                    }
+                } catch (InstantiationException e) {
+                    getSourceUnit().getErrorCollector().addError(Message.create("Could not instantiate " + clz, getSourceUnit()), false);
+                } catch (IllegalAccessException e) {
+                    getSourceUnit().getErrorCollector().addError(Message.create("Could not access " + clz, getSourceUnit()), false);
                 }
-
-            } catch (InstantiationException e) {
-                getSourceUnit().getErrorCollector().addError(Message.create("Could not instantiate " + clz, getSourceUnit()), false);
-            } catch (IllegalAccessException e) {
-                getSourceUnit().getErrorCollector().addError(Message.create("Could not access " + clz, getSourceUnit()), false);
             }
         }
+    }
+
+    public void addConfigurationVariable(final ClassNode type) {
+        MethodCallExpression methodCall = new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(Configurator.class)), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
+        final FieldNode fieldNode = type.addField(GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, methodCall);
+        fieldNode.setSynthetic(true);
     }
 }

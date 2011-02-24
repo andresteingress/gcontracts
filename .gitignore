@@ -2,7 +2,7 @@
 .DS_Store
 .gradle
 out
-build
+build/
 target
 settings.xml
 *.ipr

@@ -61,8 +61,8 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
             new ContractsVisitor(unit, source).visitClass(classNode);
-            new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
             new AnnotationProcessingASTTransformationsVisitor(unit, source).visitClass(classNode);
+            new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
             new ContractsErasingVisitor(unit, source).visitClass(classNode);
         }
     }

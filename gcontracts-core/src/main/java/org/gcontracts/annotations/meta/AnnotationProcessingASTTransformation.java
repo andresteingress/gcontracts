@@ -16,5 +16,5 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AnnotationProcessingASTTransformation {
-    Class<? extends org.gcontracts.common.spi.AnnotationProcessingASTTransformation> value();
+    Class<? extends org.gcontracts.common.spi.AnnotationProcessingASTTransformation>[] value();
 }

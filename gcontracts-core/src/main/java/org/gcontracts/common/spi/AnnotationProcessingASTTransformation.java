@@ -31,8 +31,8 @@ import org.codehaus.groovy.ast.Parameter;
  */
 public interface AnnotationProcessingASTTransformation {
 
-    public void process(final ClassNode classNode, final MethodNode methodNode, final Parameter parameter);
-    public void process(final ClassNode classNode, final MethodNode methodNode);
-    public void process(final ClassNode classNode);
+    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter);
+    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode);
+    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode);
 
 }

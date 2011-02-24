@@ -34,6 +34,7 @@ import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ast.visitor.BaseAnnotationProcessingASTTransformation;
+import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.util.Validate;
 
 /**
@@ -48,7 +49,7 @@ import org.gcontracts.util.Validate;
 public class NotNullAnnotationProcessor extends BaseAnnotationProcessingASTTransformation {
 
     @Override
-    public void process(ClassNode classNode, MethodNode methodNode, Parameter targetAnnotatedNode) {
+    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode, Parameter targetAnnotatedNode) {
         AssertStatement assertStatement = new AssertStatement(new BooleanExpression(new BinaryExpression(new VariableExpression(targetAnnotatedNode), Token.newSymbol(Types.COMPARE_NOT_EQUAL, -1, -1), ConstantExpression.NULL)));
         assertStatement.setMessageExpression(new ConstantExpression("Parameter '" + targetAnnotatedNode.getName() + "' must not be null (marked with @NotNull)!"));
         assertStatement.setSourcePosition(targetAnnotatedNode);

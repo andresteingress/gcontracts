@@ -66,6 +66,7 @@ public class ContractsVisitor extends BaseVisitor {
 
         if (!CandidateChecks.isContractsCandidate(type)) return;
 
+        // TODO:
         addConfigurationVariable(type);
         addClassInvariant(type);
 
@@ -182,11 +183,12 @@ public class ContractsVisitor extends BaseVisitor {
                 preconditionGenerator.generatePreconditionAssertionStatement(type, method, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
                 preconditionFound = true;
             } else if (annotation.getClassNode().getName().equals(Ensures.class.getName()))  {
-                postconditionGenerator.generatePostconditionAssertionStatement(method, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
+                //postconditionGenerator.generatePostconditionAssertionStatement(method, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME));
                 postconditionFound = true;
             }
         }
 
+        //TODO
         // adding a default precondition if an inherited precondition is found
         if (!preconditionFound)  {
             preconditionGenerator.generateDefaultPreconditionStatement(type, method);
@@ -201,6 +203,7 @@ public class ContractsVisitor extends BaseVisitor {
             postconditionGenerator.addOldVariablesMethod(type);
         }
 
+        // TODO
         // If there is a class invariant we will append the check to this invariant
         // after each method call
         if (hasClassInvariant && CandidateChecks.isClassInvariantCandidate(method))  {
