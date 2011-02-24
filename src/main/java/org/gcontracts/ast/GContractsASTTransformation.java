@@ -29,6 +29,7 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.gcontracts.ast.visitor.AnnotationProcessingASTTransformationsVisitor;
 import org.gcontracts.ast.visitor.ContractsErasingVisitor;
 import org.gcontracts.ast.visitor.ContractsVisitor;
 import org.gcontracts.ast.visitor.DynamicSetterInjectionVisitor;
@@ -61,6 +62,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         for (final ClassNode classNode : moduleNode.getClasses())  {
             new ContractsVisitor(unit, source).visitClass(classNode);
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
+            new AnnotationProcessingASTTransformationsVisitor(unit, source).visitClass(classNode);
             new ContractsErasingVisitor(unit, source).visitClass(classNode);
         }
     }

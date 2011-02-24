@@ -20,40 +20,30 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.ast.visitor;
+package org.gcontracts.annotations.common;
 
-import org.codehaus.groovy.ast.ClassCodeVisitorSupport;
-import org.codehaus.groovy.control.SourceUnit;
-import org.codehaus.groovy.control.io.ReaderSource;
+import org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation;
+import org.gcontracts.annotations.meta.Postcondition;
+import org.gcontracts.annotations.meta.Precondition;
+import org.gcontracts.common.impl.NotNullAnnotationProcessor;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * <p>
- * Base class for {@link org.codehaus.groovy.ast.ClassCodeVisitorSupport} descendants. This class is used in GContracts
- * as root class for all code visitors directly used by global AST transformations.
- * </p>
- *
- * @see org.codehaus.groovy.ast.ClassCodeVisitorSupport
+ * Used to mark method or constructor parameters being not nullable.
  *
  * @author andre.steingress@gmail.com
  */
-public abstract class BaseVisitor extends ClassCodeVisitorSupport {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.PARAMETER})
 
-    public static final String GCONTRACTS_ENABLED_VAR = "$GCONTRACTS_ENABLED";
+@Precondition
+@Postcondition
 
-    protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
+@AnnotationProcessingASTTransformation(NotNullAnnotationProcessor.class)
+public @interface NotNull {
 
-    protected SourceUnit sourceUnit;
-    protected ReaderSource source;
-
-    public BaseVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
-        this.sourceUnit = sourceUnit;
-        this.source = source;
-    }
-
-    protected BaseVisitor() {}
-
-    @Override
-    protected SourceUnit getSourceUnit() {
-        return null;
-    }
 }

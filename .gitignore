@@ -8,3 +8,4 @@ settings.xml
 *.ipr
 *.iws
 *.iml
+*.class

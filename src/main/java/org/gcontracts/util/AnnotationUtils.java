@@ -22,10 +22,10 @@
  */
 package org.gcontracts.util;
 
-import org.codehaus.groovy.ast.AnnotatedNode;
-import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper methods for reading/getting {@link org.codehaus.groovy.ast.AnnotationNode} instances.
@@ -93,5 +93,23 @@ public class AnnotationUtils {
         }
         
         return getMethodNodeInHierarchyWithAnnotation(superMethod, anno);
+    }
+
+    public static List<AnnotationNode> hasMetaAnnotations(AnnotatedNode annotatedNode, String metaAnnotationClassName)  {
+
+        ArrayList<AnnotationNode> result = new ArrayList<AnnotationNode>();
+
+        for (AnnotationNode annotationNode : annotatedNode.getAnnotations())  {
+            if (!annotationNode.getClassNode().getName().startsWith("org.gcontracts")) continue;
+
+            // is the annotation marked with the given meta annotation
+            final List<AnnotationNode> metaAnnotations = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(metaAnnotationClassName));
+            if (metaAnnotations.isEmpty())  {
+                hasMetaAnnotations(annotationNode.getClassNode(), metaAnnotationClassName);
+            }
+
+            result.add(annotationNode);
+        }
+        return result;
     }
 }
