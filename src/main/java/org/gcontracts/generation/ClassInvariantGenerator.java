@@ -55,14 +55,21 @@ public class ClassInvariantGenerator extends BaseGenerator {
      *
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param classInvariant the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
+     * @oaram isDefaultInvariant specifies whether this is used to generate a default invariant
      */
-    public void generateInvariantAssertionStatement(final ClassNode type, final ClosureExpression classInvariant)  {
+    public void generateInvariantAssertionStatement(final ClassNode type, final ClosureExpression classInvariant, boolean isDefaultInvariant)  {
 
         // adding super-calls to invariants of parent classes
         addCallsToSuperClassInvariants(type, classInvariant);
 
         final BlockStatement assertBlockStatement = new BlockStatement();
-        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement(ClassHelper.makeWithoutCaching(ClassInvariantViolation.class), "<class invariant> " + type.getName() + "\n\n", AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant)));
+        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant);
+        if (isDefaultInvariant)  {
+            // set a dummy message expression in order to avoid NP in Groovy 1.8 rc1
+            invariantAssertionStatement.setMessageExpression(new ConstantExpression(""));
+        }
+
+        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement(ClassHelper.makeWithoutCaching(ClassInvariantViolation.class), "<class invariant> " + type.getName() + "\n\n", invariantAssertionStatement));
 
         final BlockStatement blockStatement = new BlockStatement();
         blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
@@ -90,7 +97,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
         ClosureExpression closureExpression = new ClosureExpression(null, closureBlockStatement);
         closureExpression.setVariableScope(new VariableScope());
 
-        generateInvariantAssertionStatement(type, closureExpression);
+        generateInvariantAssertionStatement(type, closureExpression, true);
 
         return true;
     }
