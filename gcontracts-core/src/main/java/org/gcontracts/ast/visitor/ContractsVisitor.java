@@ -38,11 +38,11 @@ import java.util.List;
 
 /**
  * <p>
- * Main visitor in GContracts extending {@link org.gcontracts.ast.visitor.BaseVisitor}. At runtime visitors of
+ * Main visitor in GContracts extending {@link BaseVisitor}. At runtime visitors of
  * this class are used to generate and add class invariants, pre- and postconditions to annotated classes and methods.
  * </p>
  *
- * @see org.gcontracts.ast.visitor.BaseVisitor
+ * @see BaseVisitor
  *
  * @author andre.steingress@gmail.com
  */

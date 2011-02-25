@@ -1,4 +1,4 @@
-package org.gcontracts.common.impl;
+package org.gcontracts.common.base;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;

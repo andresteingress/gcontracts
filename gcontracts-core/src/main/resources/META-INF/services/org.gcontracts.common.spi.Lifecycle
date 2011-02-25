@@ -1,2 +1,3 @@
-org.gcontracts.common.impl.PreconditionLifecycle
-org.gcontracts.common.impl.PostconditionLifecycle
+org.gcontracts.common.impl.lc.PreconditionLifecycle
+org.gcontracts.common.impl.lc.PostconditionLifecycle
+org.gcontracts.common.impl.lc.ClassInvariantLifecycle

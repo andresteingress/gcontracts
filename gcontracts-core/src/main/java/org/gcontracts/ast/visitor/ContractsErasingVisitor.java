@@ -42,7 +42,7 @@ import java.util.List;
  * @see org.gcontracts.annotations.Ensures
  * @see org.gcontracts.annotations.Invariant
  *
- * @see org.gcontracts.ast.visitor.BaseVisitor
+ * @see BaseVisitor
  *
  * @author andre.steingress@gmail.com
  */

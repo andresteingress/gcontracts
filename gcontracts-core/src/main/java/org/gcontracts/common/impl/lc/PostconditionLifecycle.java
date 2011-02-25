@@ -1,7 +1,8 @@
-package org.gcontracts.common.impl;
+package org.gcontracts.common.impl.lc;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
+import org.gcontracts.common.base.BaseLifecycle;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.PostconditionGenerator;

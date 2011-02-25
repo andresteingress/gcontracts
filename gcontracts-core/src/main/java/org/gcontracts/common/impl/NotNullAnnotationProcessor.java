@@ -33,6 +33,7 @@ import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.gcontracts.common.base.BaseAnnotationProcessingASTTransformation;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.util.Validate;
 
@@ -41,7 +42,7 @@ import org.gcontracts.util.Validate;
  * {@link Parameter} instances for null values when {@link org.gcontracts.annotations.common.NotNull} is
  * specified on them.
  *
- * @see BaseAnnotationProcessingASTTransformation
+ * @see org.gcontracts.common.base.BaseAnnotationProcessingASTTransformation
  *
  * @author andre.steingress@gmail.com
  */

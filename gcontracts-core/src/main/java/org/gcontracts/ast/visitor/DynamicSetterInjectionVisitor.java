@@ -47,7 +47,7 @@ import java.util.List;
  * Implements contract support for setter methods in Groovy properties and public default constructors.
  * </p>
  *
- * @see org.gcontracts.ast.visitor.BaseVisitor
+ * @see BaseVisitor
  *
  * @author andre.steingress@gmail.com
  */

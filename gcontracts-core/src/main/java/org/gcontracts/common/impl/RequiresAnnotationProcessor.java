@@ -6,6 +6,7 @@ import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.Requires;
+import org.gcontracts.common.base.BaseAnnotationProcessingASTTransformation;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.PreconditionGenerator;
