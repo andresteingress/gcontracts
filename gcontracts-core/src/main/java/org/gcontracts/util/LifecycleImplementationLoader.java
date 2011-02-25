@@ -29,6 +29,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * Finds and loads implementation classes of interface {@link org.gcontracts.common.spi.LifeCycle}.
+ *
+ * @author andre.steingress@gmail.com
+ **/
 public final class LifecycleImplementationLoader<S>
     implements Iterable<S>
 {

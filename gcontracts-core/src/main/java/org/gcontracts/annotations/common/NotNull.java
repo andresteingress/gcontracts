@@ -32,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to mark method or constructor parameters being not nullable.
+ * Used to mark method or constructor parameters which should not be null at runtime.
  *
  * <pre>
  * // constructor parameters

@@ -19,7 +19,7 @@ allprojects {
     asm = "asm:asm:3.2"
     junit = "junit:junit:3.8.1"
 
-    description = "GContracts provides closure annotations to support design by contract (tm) for Groovy"
+    description = "GContracts provides closure annotations to support Programming by Contract for Groovy"
 
     targetCompatibility = "1.5"
     sourceCompatibility = "1.5"
@@ -27,9 +27,6 @@ allprojects {
 
 subprojects {
   apply plugin: "groovy"
-
-  sourceCompatibility = 1.5
-  targetCompatibility = 1.5
 
   compileGroovy.options.fork = false
   compileTestGroovy.options.fork = true

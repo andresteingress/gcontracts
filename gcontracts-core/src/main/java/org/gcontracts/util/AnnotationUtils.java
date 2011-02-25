@@ -95,6 +95,13 @@ public class AnnotationUtils {
         return getMethodNodeInHierarchyWithAnnotation(superMethod, anno);
     }
 
+    /**
+     * Loads all annotation nodes of the given {@link org.codehaus.groovy.ast.AnnotatedNode} instance which are marked
+     * with the annotation <tt>metaAnnotationClassName</tt>.
+     *
+     * @param annotatedNode an {@link org.codehaus.groovy.ast.AnnotatedNode} from which the annotations are checked
+     * @param metaAnnotationClassName the name of the meta annotation
+     */
     public static List<AnnotationNode> hasMetaAnnotations(AnnotatedNode annotatedNode, String metaAnnotationClassName)  {
 
         ArrayList<AnnotationNode> result = new ArrayList<AnnotationNode>();
