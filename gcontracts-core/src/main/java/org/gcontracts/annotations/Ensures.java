@@ -23,7 +23,7 @@
 package org.gcontracts.annotations;
 
 import org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation;
-import org.gcontracts.annotations.meta.Postcondition;
+import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.impl.EnsuresAnnotationProcessor;
 
 import java.lang.annotation.ElementType;
@@ -57,8 +57,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
 
-@Postcondition
-
+@ContractElement
 @AnnotationProcessingASTTransformation(EnsuresAnnotationProcessor.class)
 public @interface Ensures {
     public abstract Class value();

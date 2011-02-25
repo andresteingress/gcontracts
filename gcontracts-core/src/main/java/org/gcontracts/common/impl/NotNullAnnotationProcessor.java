@@ -57,11 +57,6 @@ public class NotNullAnnotationProcessor extends BaseAnnotationProcessingASTTrans
         Validate.isTrue(methodNode.getCode() instanceof BlockStatement);
 
         BlockStatement blockStatement = (BlockStatement) methodNode.getCode();
-        if (hasPreconditionAnnotation(targetAnnotatedNode))  {
-            blockStatement.getStatements().add(0, assertStatement);
-        }
-        if (hasPostconditionAnnotation(targetAnnotatedNode))  {
-            blockStatement.getStatements().add(assertStatement);
-        }
+        blockStatement.getStatements().add(0, assertStatement);
     }
 }

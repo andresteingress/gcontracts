@@ -23,7 +23,7 @@
 package org.gcontracts.annotations.common;
 
 import org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation;
-import org.gcontracts.annotations.meta.Precondition;
+import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.impl.NotNullAnnotationProcessor;
 
 import java.lang.annotation.ElementType;
@@ -50,8 +50,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
 
-@Precondition
-
+@ContractElement
 @AnnotationProcessingASTTransformation(NotNullAnnotationProcessor.class)
 public @interface NotNull {
 
