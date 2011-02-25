@@ -22,7 +22,9 @@
  */
 package org.gcontracts.annotations;
 
+import org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation;
 import org.gcontracts.annotations.meta.ClassInvariant;
+import org.gcontracts.common.impl.ClassInvariantAnnotationProcessor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -56,6 +58,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 
 @ClassInvariant
+
+@AnnotationProcessingASTTransformation(ClassInvariantAnnotationProcessor.class)
 public @interface Invariant {
     Class value();
 }

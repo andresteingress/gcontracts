@@ -57,7 +57,7 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
     public AnnotationProcessingASTTransformationsVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
 
-        pci = new ProcessingContextInformation(source, true, true);
+        pci = new ProcessingContextInformation(source, true, true, true);
     }
 
     protected AnnotationProcessingASTTransformationsVisitor() {}
