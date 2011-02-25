@@ -23,7 +23,6 @@
 package org.gcontracts.annotations.common;
 
 import org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation;
-import org.gcontracts.annotations.meta.Postcondition;
 import org.gcontracts.annotations.meta.Precondition;
 import org.gcontracts.common.impl.NotNullAnnotationProcessor;
 
@@ -52,7 +51,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER})
 
 @Precondition
-@Postcondition
 
 @AnnotationProcessingASTTransformation(NotNullAnnotationProcessor.class)
 public @interface NotNull {
