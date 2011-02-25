@@ -65,6 +65,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
             new ConfiguratorSetupVisitor(unit, source).visitClass(classNode);
 
+            new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
             new AnnotationProcessingASTTransformationsVisitor(unit, source, pci).visitClass(classNode);
             new LifecycleAfterTransformationVisitor(unit, source, pci).visitClass(classNode);
 

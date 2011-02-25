@@ -61,7 +61,9 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
         //addConfigurationVariable(type);
         visitAnnotatedNode(type, null, null);
 
-        List<MethodNode> methodNodes = new ArrayList<MethodNode>(type.getMethods());
+        List<MethodNode> methodNodes = new ArrayList<MethodNode>();
+        methodNodes.addAll(type.getAllDeclaredMethods());
+        methodNodes.addAll(type.getDeclaredConstructors());
 
         for (MethodNode methodNode : methodNodes)  {
             visitAnnotatedNode(methodNode, type, null);

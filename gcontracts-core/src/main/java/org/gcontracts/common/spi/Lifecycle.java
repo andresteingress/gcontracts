@@ -13,4 +13,7 @@ public interface Lifecycle {
 
     public void beforeProcessingMethodNode(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode);
     public void afterProcessingMethodNode(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode);
+
+    public void beforeProcessingContructorNode(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode constructorNode);
+    public void afterProcessingContructorNode(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode constructorNode);
 }

@@ -9,6 +9,8 @@ import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.util.LifecycleImplementationLoader;
 import org.gcontracts.util.Validate;
 
+import java.util.ArrayList;
+
 /**
  * @author andre.steingress@gmail.com
  */
@@ -29,15 +31,19 @@ public class LifecycleAfterTransformationVisitor extends BaseVisitor {
     public void visitClass(ClassNode node) {
         super.visitClass(node);
 
+        ArrayList<MethodNode> methods = new ArrayList<MethodNode>(node.getAllDeclaredMethods());
+        ArrayList<MethodNode> constructors = new ArrayList<MethodNode>(node.getDeclaredConstructors());
+
         for (Lifecycle lifecyle : LifecycleImplementationLoader.load(Lifecycle.class, getClass().getClassLoader()))  {
             lifecyle.afterProcessingClassNode(pci, node);
-        }
-    }
 
-    @Override
-    protected void visitConstructorOrMethod(MethodNode node, boolean isConstructor) {
-        for (Lifecycle lifecyle : LifecycleImplementationLoader.load(Lifecycle.class))  {
-            lifecyle.afterProcessingMethodNode(pci, node.getDeclaringClass(), node);
+            for (MethodNode constructor : constructors)  {
+                lifecyle.afterProcessingContructorNode(pci, node, constructor);
+            }
+
+            for (MethodNode method: methods)  {
+                lifecyle.afterProcessingMethodNode(pci, node, method);
+            }
         }
     }
 }

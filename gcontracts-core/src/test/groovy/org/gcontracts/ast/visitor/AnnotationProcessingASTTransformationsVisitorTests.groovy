@@ -151,7 +151,8 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
 
         } catch (AssertionError ae) {
             ae.printStackTrace()
-            return }
+            return
+        }
 
         fail("AssertionError must have been thrown")
     }
