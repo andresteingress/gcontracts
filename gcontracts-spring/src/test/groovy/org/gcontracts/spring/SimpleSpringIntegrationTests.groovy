@@ -1,8 +1,6 @@
-package org.gcontracts.tests.spring
+package org.gcontracts.spring
 
-import org.gcontracts.tests.basic.BaseTestClass
-
-/**
+ /**
  * @author andre.steingress@gmail.com
  */
 class SimpleSpringIntegrationTests extends BaseTestClass {

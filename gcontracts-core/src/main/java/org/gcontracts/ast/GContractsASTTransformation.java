@@ -62,7 +62,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         for (final ClassNode classNode : moduleNode.getClasses())  {
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
-            final ProcessingContextInformation pci = new ProcessingContextInformation(source, true, true, true);
+            final ProcessingContextInformation pci = new ProcessingContextInformation(unit, source);
 
             new ConfiguratorSetupVisitor(unit, source).visitClass(classNode);
 

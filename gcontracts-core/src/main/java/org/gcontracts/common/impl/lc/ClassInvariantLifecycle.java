@@ -35,6 +35,7 @@ public class ClassInvariantLifecycle extends BaseLifecycle {
     @Override
     public void afterProcessingContructorNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode constructorNode) {
          if (!CandidateChecks.isPreOrPostconditionCandidate(classNode, constructorNode)) return;
+         if (!processingContextInformation.isConstructorAssertionsEnabled()) return;
          if (processingContextInformation.classInvariantClassNodes().isEmpty()) return;
 
          final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(processingContextInformation.readerSource());
