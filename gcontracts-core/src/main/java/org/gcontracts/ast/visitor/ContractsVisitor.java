@@ -67,7 +67,7 @@ public class ContractsVisitor extends BaseVisitor {
         if (!CandidateChecks.isContractsCandidate(type)) return;
 
         // TODO:
-        addConfigurationVariable(type);
+
         addClassInvariant(type);
 
         super.visitClass(type);
@@ -157,13 +157,6 @@ public class ContractsVisitor extends BaseVisitor {
         for (final MethodNode methodNode : type.getDeclaredConstructors())  {
             addPreOrPostcondition(type, methodNode);
         }
-    }
-
-    public void addConfigurationVariable(final ClassNode type) {
-
-        MethodCallExpression methodCall = new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(Configurator.class)), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
-        final FieldNode fieldNode = type.addField(GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, methodCall);
-        fieldNode.setSynthetic(true);
     }
 
     public void addPreOrPostcondition(final ClassNode type, final MethodNode method) {

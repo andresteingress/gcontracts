@@ -1,0 +1,2 @@
+org.gcontracts.common.impl.PreconditionLifecycle
+org.gcontracts.common.impl.PostconditionLifecycle

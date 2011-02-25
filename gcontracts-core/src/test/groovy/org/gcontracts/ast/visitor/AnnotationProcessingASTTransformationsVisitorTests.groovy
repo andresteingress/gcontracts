@@ -95,6 +95,38 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
         fail("AssertionError must have been thrown")
     }
 
+    def void test_default_requires_method() {
+
+        def source = '''
+    import org.gcontracts.annotations.*
+
+    class Tester {
+
+        def method(param1, param2) {}
+    }'''
+
+        GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        Class clz = loader.parseClass(source)
+        assertNotNull(clz)
+
+    }
+
+    def void test_default_ensures_method() {
+
+        def source = '''
+    import org.gcontracts.annotations.*
+
+    class Tester {
+
+        def method(param1, param2) {}
+    }'''
+
+        GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        Class clz = loader.parseClass(source)
+        assertNotNull(clz)
+
+    }
+
     def void test_ensures_method() {
 
         def source = '''

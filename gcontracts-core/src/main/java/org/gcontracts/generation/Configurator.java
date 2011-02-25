@@ -88,9 +88,7 @@ public final class Configurator {
      * @return whether assertion checking is enabled or not
      */
     public static boolean checkAssertionsEnabled(final String className)  {
-        boolean result = internalMethod(className);
-        // System.out.println("className " + className + ": " + result);
-        return result;
+        return internalMethod(className);
     }
 
     private static boolean internalMethod(String className) {

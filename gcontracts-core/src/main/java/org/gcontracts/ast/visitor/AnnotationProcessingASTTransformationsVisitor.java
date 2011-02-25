@@ -23,21 +23,14 @@
 package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.ArgumentListExpression;
-import org.codehaus.groovy.ast.expr.ClassExpression;
-import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.codehaus.groovy.ast.expr.MethodCallExpression;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.control.messages.Message;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.spi.AnnotationProcessingASTTransformation;
 import org.gcontracts.common.spi.ProcessingContextInformation;
-import org.gcontracts.generation.CandidateChecks;
-import org.gcontracts.generation.Configurator;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
-import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,18 +47,17 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
 
     private ProcessingContextInformation pci;
 
-    public AnnotationProcessingASTTransformationsVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
+    public AnnotationProcessingASTTransformationsVisitor(final SourceUnit sourceUnit, final ReaderSource source, final ProcessingContextInformation pci) {
         super(sourceUnit, source);
+        Validate.notNull(pci);
 
-        pci = new ProcessingContextInformation(source, true, true, true);
+        this.pci = pci;
     }
 
     protected AnnotationProcessingASTTransformationsVisitor() {}
 
     @Override
     public void visitClass(ClassNode type) {
-        if (!CandidateChecks.isContractsCandidate(type)) return;
-
         //addConfigurationVariable(type);
         visitAnnotatedNode(type, null, null);
 
@@ -107,11 +99,5 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
                 }
             }
         }
-    }
-
-    public void addConfigurationVariable(final ClassNode type) {
-        MethodCallExpression methodCall = new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(Configurator.class)), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
-        final FieldNode fieldNode = type.addField(GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, methodCall);
-        fieldNode.setSynthetic(true);
     }
 }

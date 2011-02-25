@@ -44,12 +44,12 @@ import java.lang.annotation.Target;
  * <p>
  * Example:
  *
- * <code>
+ * <pre>
  *   @Ensures({ result -> result != argument1 })
  *   def T someOperation(def argument1, def argument2)  {
  *     ...
  *   }
- * </code>
+ * </pre>
  * </p>
  *
  * @author andre.steingress@gmail.com
