@@ -58,7 +58,6 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
 
     @Override
     public void visitClass(ClassNode type) {
-        //addConfigurationVariable(type);
         visitAnnotatedNode(type, null, null);
 
         List<MethodNode> methodNodes = new ArrayList<MethodNode>();
