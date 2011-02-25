@@ -1,5 +1,5 @@
 ====
-    Copyright (c) 2010, gcontracts@me.com
+    Copyright (c) 2010, Andre Steingress
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
