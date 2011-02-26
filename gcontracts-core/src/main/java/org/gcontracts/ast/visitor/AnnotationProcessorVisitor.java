@@ -26,8 +26,9 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.control.messages.Message;
+import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
-import org.gcontracts.common.spi.AnnotationProcessingASTTransformation;
+import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
@@ -37,24 +38,24 @@ import java.util.List;
 
 /**
  * Visits annotations of meta-type {@link ContractElement} and applies the AST transformations of the underlying
- * {@link AnnotationProcessingASTTransformation} implementation.
+ * {@link org.gcontracts.common.spi.AnnotationProcessor} implementation.
  *
- * @see AnnotationProcessingASTTransformation
+ * @see org.gcontracts.common.spi.AnnotationProcessor
  *
  * @author andre.steingress@gmail.com
  */
-public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
+public class AnnotationProcessorVisitor extends BaseVisitor {
 
     private ProcessingContextInformation pci;
 
-    public AnnotationProcessingASTTransformationsVisitor(final SourceUnit sourceUnit, final ReaderSource source, final ProcessingContextInformation pci) {
+    public AnnotationProcessorVisitor(final SourceUnit sourceUnit, final ReaderSource source, final ProcessingContextInformation pci) {
         super(sourceUnit, source);
         Validate.notNull(pci);
 
         this.pci = pci;
     }
 
-    protected AnnotationProcessingASTTransformationsVisitor() {}
+    protected AnnotationProcessorVisitor() {}
 
     @Override
     public void visitClass(ClassNode type) {
@@ -79,12 +80,12 @@ public class AnnotationProcessingASTTransformationsVisitor extends BaseVisitor {
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(annotatedNode, ContractElement.class.getName());
 
         for (AnnotationNode annotationNode : annotationNodes)  {
-            final org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation annotationProcessingAnno = (org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation) annotationNode.getClassNode().getTypeClass().getAnnotation(org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation.class);
-            Class<? extends AnnotationProcessingASTTransformation>[] classes = annotationProcessingAnno.value();
+            final AnnotationProcessorImplementation annotationProcessingAnno = (AnnotationProcessorImplementation) annotationNode.getClassNode().getTypeClass().getAnnotation(AnnotationProcessorImplementation.class);
+            Class<? extends AnnotationProcessor>[] classes = annotationProcessingAnno.value();
 
-            for (Class<? extends AnnotationProcessingASTTransformation> clz : classes)  {
+            for (Class<? extends AnnotationProcessor> clz : classes)  {
                 try {
-                    final AnnotationProcessingASTTransformation processor = clz.newInstance();
+                    final AnnotationProcessor processor = clz.newInstance();
                     if (annotatedNode instanceof ClassNode)  {
                         processor.process(pci, (ClassNode) annotatedNode);
                     } else if (annotatedNode instanceof MethodNode)  {

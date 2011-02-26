@@ -27,7 +27,7 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.Invariant;
-import org.gcontracts.common.base.BaseAnnotationProcessingASTTransformation;
+import org.gcontracts.common.base.BaseAnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.ClassInvariantGenerator;
 import org.gcontracts.util.Validate;
@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * @author andre.steingress@gmail.com
  */
-public class ClassInvariantAnnotationProcessor extends BaseAnnotationProcessingASTTransformation {
+public class ClassInvariantAnnotationProcessor extends BaseAnnotationProcessor {
 
     protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
 

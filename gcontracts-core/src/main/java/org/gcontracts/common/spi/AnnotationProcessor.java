@@ -20,27 +20,19 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.common.base;
+package org.gcontracts.common.spi;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.Parameter;
-import org.gcontracts.common.spi.AnnotationProcessingASTTransformation;
-import org.gcontracts.common.spi.ProcessingContextInformation;
 
 /**
- * Implements {@link AnnotationProcessingASTTransformation} and provides hooks for concrete
- * {@link org.codehaus.groovy.ast.AnnotatedNode} implementations.
- *
- * @see AnnotationProcessingASTTransformation
- *
  * @author andre.steingress@gmail.com
  */
-public abstract class BaseAnnotationProcessingASTTransformation implements AnnotationProcessingASTTransformation {
+public interface AnnotationProcessor {
 
-    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode, Parameter parameter) {}
+    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter);
+    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode);
+    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode);
 
-    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {}
-
-    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
 }

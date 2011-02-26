@@ -20,46 +20,15 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.annotations;
+package org.gcontracts.annotations.meta;
 
-import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
-import org.gcontracts.annotations.meta.Precondition;
-import org.gcontracts.common.impl.RequiresAnnotationProcessor;
-
-import java.lang.annotation.ElementType;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
 
-/**
- * <p>
- * Represents a <b>method's precondition</b>.
- * </p>
- *
- * <p>
- * A method's precondition is executed <i>before</i> a method call. A
- * successor's precondition weakens the precondition of its parent class, e.g. if A.someMethod
- * declares a precondition and B.someMethod overrides the method the preconditions are combined with a boolean OR.
- * </p>
- * <p>
- * Example:
- *
- * <pre>
- *   @Requires({ argument1 != argument2 && argument2 > = 0 })
- *   def void someOperation(def argument1, def argument2)  {
- *     ...
- *   }
- * </pre>
- * </p>
- *
- * @author andre.steingress@gmail.com
- */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
+@Documented
 
-@Precondition
-@AnnotationProcessorImplementation(RequiresAnnotationProcessor.class)
-public @interface Requires {
-    Class value();
-}
+@ContractElement
+public @interface Precondition {}

@@ -1,0 +1,17 @@
+dependsOn(':gcontracts-core')
+
+project(":gcontracts-spring") {
+  def springVersion = "3.0.5.RELEASE"
+
+  dependencies {
+    compile project(':gcontracts-core')
+
+    testCompile "org.springframework:spring-context:$springVersion"
+    testCompile "org.springframework:spring-core:$springVersion"
+  }
+}
+
+test {
+  // exclude basic test case classes
+  excludes = ['org/gcontracts/spring/BaseTestClass*']
+}

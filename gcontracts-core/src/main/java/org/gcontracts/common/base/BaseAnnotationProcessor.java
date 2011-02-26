@@ -20,46 +20,27 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.annotations;
+package org.gcontracts.common.base;
 
-import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
-import org.gcontracts.annotations.meta.Precondition;
-import org.gcontracts.common.impl.RequiresAnnotationProcessor;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.Parameter;
+import org.gcontracts.common.spi.AnnotationProcessor;
+import org.gcontracts.common.spi.ProcessingContextInformation;
 
 /**
- * <p>
- * Represents a <b>method's precondition</b>.
- * </p>
+ * Implements {@link org.gcontracts.common.spi.AnnotationProcessor} and provides hooks for concrete
+ * {@link org.codehaus.groovy.ast.AnnotatedNode} implementations.
  *
- * <p>
- * A method's precondition is executed <i>before</i> a method call. A
- * successor's precondition weakens the precondition of its parent class, e.g. if A.someMethod
- * declares a precondition and B.someMethod overrides the method the preconditions are combined with a boolean OR.
- * </p>
- * <p>
- * Example:
- *
- * <pre>
- *   @Requires({ argument1 != argument2 && argument2 > = 0 })
- *   def void someOperation(def argument1, def argument2)  {
- *     ...
- *   }
- * </pre>
- * </p>
+ * @see org.gcontracts.common.spi.AnnotationProcessor
  *
  * @author andre.steingress@gmail.com
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
+public abstract class BaseAnnotationProcessor implements AnnotationProcessor {
 
-@Precondition
-@AnnotationProcessorImplementation(RequiresAnnotationProcessor.class)
-public @interface Requires {
-    Class value();
+    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode, Parameter parameter) {}
+
+    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {}
+
+    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
 }

@@ -20,19 +20,14 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.common.spi;
+package org.gcontracts.annotations.meta;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.Parameter;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-/**
- * @author andre.steingress@gmail.com
- */
-public interface AnnotationProcessingASTTransformation {
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 
-    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter);
-    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode);
-    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode);
-
-}
+@ContractElement
+public @interface ClassInvariant {}

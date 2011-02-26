@@ -22,7 +22,7 @@
  */
 package org.gcontracts.annotations.common;
 
-import org.gcontracts.annotations.meta.AnnotationProcessingASTTransformation;
+import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.impl.NotNullAnnotationProcessor;
 
@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER})
 
 @ContractElement
-@AnnotationProcessingASTTransformation(NotNullAnnotationProcessor.class)
+@AnnotationProcessorImplementation(NotNullAnnotationProcessor.class)
 public @interface NotNull {
 
 }

@@ -20,7 +20,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.common.impl;
+package org.gcontracts.sample;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
@@ -33,20 +33,14 @@ import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.gcontracts.common.base.BaseAnnotationProcessor;
+import org.gcontracts.common.base.BaseAnnotationProcessingASTTransformation;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.util.Validate;
 
 /**
- * Implementation of {@link org.gcontracts.common.spi.AnnotationProcessor} which checks
- * {@link Parameter} instances for null values when {@link org.gcontracts.annotations.common.NotNull} is
- * specified on them.
- *
- * @see org.gcontracts.common.base.BaseAnnotationProcessor
- *
  * @author andre.steingress@gmail.com
  */
-public class NotNullAnnotationProcessor extends BaseAnnotationProcessor {
+public class NotEmptyAnnotationProcessor extends BaseAnnotationProcessingASTTransformation {
 
     @Override
     public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode, Parameter targetAnnotatedNode) {
