@@ -43,7 +43,7 @@ uploadArchives {
     }
 
     pom.project {
-      name 'GContracts - Contract-Oriented Programming for Groovy'
+      name 'GContracts - Programming by Contract for Groovy'
       packaging 'jar'
       description 'GContracts provides annotations to implement interface contracts aka design by contract in Groovy classes.'
       url 'http://github.com/andresteingress/gcontracts'
