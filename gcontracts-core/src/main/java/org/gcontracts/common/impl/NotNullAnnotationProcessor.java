@@ -27,29 +27,32 @@ import org.codehaus.groovy.ast.expr.BinaryExpression;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.expr.VariableExpression;
-import org.codehaus.groovy.ast.stmt.AssertStatement;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.gcontracts.common.base.BaseAnnotationProcessor;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.Contract;
-import org.gcontracts.util.Validate;
+import org.gcontracts.domain.Precondition;
 
 /**
  * Implementation of {@link org.gcontracts.common.spi.AnnotationProcessor} which checks
  * {@link Parameter} instances for null values when {@link org.gcontracts.annotations.common.NotNull} is
  * specified on them.
  *
- * @see org.gcontracts.common.base.BaseAnnotationProcessor
- *
  * @author ast
  */
-public class NotNullAnnotationProcessor implements AnnotationProcessor {
+public class NotNullAnnotationProcessor extends AnnotationProcessor {
 
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, AnnotationNode annotationNode) {
-        // TODO: BaseAnnotationProcessor has no access to current method node
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, MethodNode methodNode, AnnotationNode annotationNode) {
+        if (!processingContextInformation.isPreconditionsEnabled()) return;
+
+        BooleanExpression booleanExpression = new BooleanExpression(new BinaryExpression(
+            new VariableExpression((Parameter) annotatedNode),
+            Token.newSymbol(Types.COMPARE_NOT_EQUAL, -1, -1),
+            ConstantExpression.NULL
+        ));
+
+        contract.addPrecondition(methodNode, new Precondition(booleanExpression));
     }
 }

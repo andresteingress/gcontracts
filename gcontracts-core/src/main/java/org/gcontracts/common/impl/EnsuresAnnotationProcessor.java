@@ -27,10 +27,8 @@ import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
-import org.gcontracts.common.base.BaseAnnotationProcessor;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
-import org.gcontracts.domain.ClassInvariant;
 import org.gcontracts.domain.Contract;
 import org.gcontracts.domain.Postcondition;
 import org.gcontracts.util.ExpressionUtil;
@@ -38,7 +36,7 @@ import org.gcontracts.util.ExpressionUtil;
 /**
  * @author ast
  */
-public class EnsuresAnnotationProcessor implements AnnotationProcessor {
+public class EnsuresAnnotationProcessor extends AnnotationProcessor {
 
     protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
 

@@ -62,7 +62,7 @@ public class SpringContractsLifecycle extends BaseLifecycle {
     public void afterProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {
         if (!CandidateChecks.isContractsCandidate(classNode)) return;
         if (!(Boolean) processingContextInformation.get(IS_SPRING_STEREOTYPE)) return;
-        if (processingContextInformation.classInvariantClassNodes().isEmpty()) return;
+        if (processingContextInformation.contract().hasDefaultClassInvariant()) return;
 
         createPostConstructMethodForSpringBeans(processingContextInformation, classNode);
     }

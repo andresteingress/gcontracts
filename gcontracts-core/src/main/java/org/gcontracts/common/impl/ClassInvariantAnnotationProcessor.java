@@ -35,7 +35,7 @@ import org.gcontracts.util.ExpressionUtil;
 /**
  * @author ast
  */
-public class ClassInvariantAnnotationProcessor implements AnnotationProcessor {
+public class ClassInvariantAnnotationProcessor extends AnnotationProcessor {
 
     protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
 

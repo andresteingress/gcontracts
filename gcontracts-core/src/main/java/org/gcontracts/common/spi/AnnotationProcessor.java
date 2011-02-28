@@ -28,8 +28,8 @@ import org.gcontracts.domain.Contract;
 /**
  * @author ast
  */
-public interface AnnotationProcessor {
+public abstract class AnnotationProcessor {
 
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final AnnotationNode annotationNode);
-
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final AnnotationNode annotationNode) {}
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final MethodNode methodNode, final AnnotationNode annotationNode) {}
 }

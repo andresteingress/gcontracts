@@ -83,8 +83,14 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
             for (Class<? extends AnnotationProcessor> clz : classes)  {
                 try {
+
                     final AnnotationProcessor processor = clz.newInstance();
-                    processor.process(pci, pci.contract(), annotatedNode, annotationNode);
+                    if (methodNode == null)  {
+                        processor.process(pci, pci.contract(), annotatedNode, annotationNode);
+                    } else {
+                        processor.process(pci, pci.contract(), annotatedNode, methodNode, annotationNode);
+                    }
+
                 } catch (InstantiationException e) {
                     getSourceUnit().getErrorCollector().addError(Message.create("Could not instantiate " + clz, getSourceUnit()), false);
                 } catch (IllegalAccessException e) {
