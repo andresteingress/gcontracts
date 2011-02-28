@@ -62,7 +62,99 @@ public class PostconditionGenerator extends BaseGenerator {
      * @param method the {@link org.codehaus.groovy.ast.MethodNode} for assertion injection
      * @param closureExpression the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
      */
+    @Deprecated
     public void generatePostconditionAssertionStatement(MethodNode method, ClosureExpression closureExpression)  {
+
+        final BlockStatement methodBlock = (BlockStatement) method.getCode();
+
+        // if return type is not void, than a "result" variable is provided in the postcondition expression
+        final List<Statement> statements = methodBlock.getStatements();
+        if (statements.size() > 0)  {
+            final BlockStatement postconditionCheck = new BlockStatement();
+
+            if (method.getReturnType() != ClassHelper.VOID_TYPE)  {
+                Statement lastStatement = statements.get(statements.size() - 1);
+
+                ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(method.getDeclaringClass(), method, lastStatement);
+                if (returnStatement != null) statements.remove(statements.size() - 1);
+
+                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
+
+                // backup the current assertion in a synthetic method
+                AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, true, returnStatement != null);
+
+                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertionIfStatement.getLineNumber(), true, returnStatement != null);
+                if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
+
+                postconditionCheck.addStatement(assertionIfStatement);
+
+                VariableExpression resultVariable = null;
+
+                if (returnStatement != null)  {
+                    // Assign the return statement expression to a local variable of type Object
+                    resultVariable = new VariableExpression("result");
+                    ExpressionStatement resultVariableStatement = new ExpressionStatement(
+                    new DeclarationExpression(resultVariable,
+                            Token.newSymbol(Types.ASSIGN, -1, -1),
+                            returnStatement.getExpression()));
+
+                    postconditionCheck.getStatements().add(0, resultVariableStatement);
+                }
+
+                // Assign the return statement expression to a local variable of type Object
+                VariableExpression oldVariable = new VariableExpression("old");
+                ExpressionStatement oldVariabeStatement = new ExpressionStatement(
+                new DeclarationExpression(oldVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
+
+                methodBlock.getStatements().add(0, oldVariabeStatement);
+                methodBlock.addStatements(postconditionCheck.getStatements());
+                if (returnStatement != null) methodBlock.addStatement(new ReturnStatement(resultVariable));
+            } else if (method instanceof ConstructorNode) {
+
+                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
+
+                // backup the current assertion in a synthetic method
+                AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, false, false);
+
+                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertionIfStatement.getLineNumber(), false, false);
+
+                if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
+
+                postconditionCheck.addStatement(assertionIfStatement);
+                methodBlock.addStatements(postconditionCheck.getStatements());
+
+            } else {
+
+                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
+
+                // backup the current assertion in a synthetic method
+                AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, true, false);
+
+                final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertionIfStatement.getLineNumber(), true, false);
+
+                if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
+
+                postconditionCheck.addStatement(assertionIfStatement);
+
+                // Assign the return statement expression to a local variable of type Object
+                VariableExpression oldVariable = new VariableExpression("old");
+                ExpressionStatement oldVariabeStatement = new ExpressionStatement(
+                new DeclarationExpression(oldVariable,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
+
+                methodBlock.getStatements().add(0, oldVariabeStatement);
+                methodBlock.addStatements(postconditionCheck.getStatements());
+            }
+        }
+    }
+
+    public void generatePostconditionAssertionStatement(MethodNode method, BooleanExpression closureExpression)  {
 
         final BlockStatement methodBlock = (BlockStatement) method.getCode();
 

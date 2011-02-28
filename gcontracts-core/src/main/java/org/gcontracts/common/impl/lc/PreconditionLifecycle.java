@@ -38,7 +38,7 @@ public class PreconditionLifecycle extends BaseLifecycle {
     public void afterProcessingMethodNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {
         if (!processingContextInformation.isPreconditionsEnabled()) return;
         if (!CandidateChecks.isPreOrPostconditionCandidate(classNode, methodNode)) return;
-        if (processingContextInformation.preconditionMethodNodes().contains(methodNode)) return;
+        if (processingContextInformation.contract().preconditions().containsKey(methodNode)) return;
 
         final PreconditionGenerator preconditionGenerator = new PreconditionGenerator(processingContextInformation.readerSource());
         preconditionGenerator.generateDefaultPreconditionStatement(classNode, methodNode);

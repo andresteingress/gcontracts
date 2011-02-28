@@ -53,7 +53,7 @@ public class LifecycleBeforeTransformationVisitor extends BaseVisitor {
     public void visitClass(ClassNode node) {
         super.visitClass(node);
 
-        ArrayList<MethodNode> methods = new ArrayList<MethodNode>(node.getAllDeclaredMethods());
+        ArrayList<MethodNode> methods = new ArrayList<MethodNode>(node.getMethods());
         ArrayList<MethodNode> constructors = new ArrayList<MethodNode>(node.getDeclaredConstructors());
 
         for (Lifecycle lifecyle : LifecycleImplementationLoader.load(Lifecycle.class, getClass().getClassLoader()))  {

@@ -22,45 +22,30 @@
  */
 package org.gcontracts.common.impl;
 
+import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
-import org.codehaus.groovy.control.io.ReaderSource;
-import org.gcontracts.annotations.Invariant;
-import org.gcontracts.common.base.BaseAnnotationProcessor;
+import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
-import org.gcontracts.generation.ClassInvariantGenerator;
-import org.gcontracts.util.Validate;
-
-import java.util.List;
+import org.gcontracts.domain.ClassInvariant;
+import org.gcontracts.domain.Contract;
+import org.gcontracts.util.ExpressionUtil;
 
 /**
  * @author andre.steingress@gmail.com
  */
-public class ClassInvariantAnnotationProcessor extends BaseAnnotationProcessor {
+public class ClassInvariantAnnotationProcessor implements AnnotationProcessor {
 
     protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
 
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode) {
-        Validate.notNull(processingContextInformation);
-        Validate.notNull(classNode);
-
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, AnnotationNode annotationNode ) {
         if (!processingContextInformation.isClassInvariantsEnabled()) return;
 
-        addClassInvariant(processingContextInformation, classNode);
-    }
+        BooleanExpression booleanExpression = ExpressionUtil.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME));
+        if (booleanExpression == null) return;
 
-    public void addClassInvariant(final ProcessingContextInformation processingContextInformation, final ClassNode type) {
-        final ReaderSource source = processingContextInformation.readerSource();
-        final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
-
-        List<AnnotationNode> annotations = type.getAnnotations();
-        for (AnnotationNode annotation: annotations)  {
-            if (annotation.getClassNode().getName().equals(Invariant.class.getName()))  {
-                classInvariantGenerator.generateInvariantAssertionStatement(type, (ClosureExpression) annotation.getMember(CLOSURE_ATTRIBUTE_NAME), false);
-                processingContextInformation.classInvariantClassNodes().add(type);
-            }
-        }
+        contract.setClassInvariant(new ClassInvariant(booleanExpression));
     }
 }

@@ -57,6 +57,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
      * @param classInvariant the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
      * @oaram isDefaultInvariant specifies whether this is used to generate a default invariant
      */
+    @Deprecated
     public void generateInvariantAssertionStatement(final ClassNode type, final ClosureExpression classInvariant, boolean isDefaultInvariant)  {
 
         // adding super-calls to invariants of parent classes
@@ -64,6 +65,27 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
         final BlockStatement assertBlockStatement = new BlockStatement();
         final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariant);
+        if (isDefaultInvariant)  {
+            // set a dummy message expression in order to avoid NP in Groovy 1.8 rc1
+            invariantAssertionStatement.setMessageExpression(new ConstantExpression(""));
+        }
+
+        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement(ClassHelper.makeWithoutCaching(ClassInvariantViolation.class), "<class invariant> " + type.getName() + "\n\n", invariantAssertionStatement));
+
+        final BlockStatement blockStatement = new BlockStatement();
+        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
+        blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
+
+        // add a local protected method with the invariant closure - this is needed for invariant checks in inheritance lines
+        type.addMethod(getInvariantMethodName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.Boolean_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, blockStatement);
+    }
+
+    public void generateInvariantAssertionStatement(final ClassNode type, final BooleanExpression classInvariant, boolean isDefaultInvariant)  {
+
+        BooleanExpression classInvariantExpression = addCallsToSuperClassInvariants(type, classInvariant);
+
+        final BlockStatement assertBlockStatement = new BlockStatement();
+        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariantExpression);
         if (isDefaultInvariant)  {
             // set a dummy message expression in order to avoid NP in Groovy 1.8 rc1
             invariantAssertionStatement.setMessageExpression(new ConstantExpression(""));
@@ -109,6 +131,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param closure the current class-invariant as {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      */
+    @Deprecated
     public void addCallsToSuperClassInvariants(final ClassNode type, final ClosureExpression closure)  {
 
         final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
@@ -124,6 +147,21 @@ public class ClassInvariantGenerator extends BaseGenerator {
         expressionStatement.setExpression(
                  new BinaryExpression(
                          new BooleanExpression(expression),
+                         Token.newSymbol(Types.LOGICAL_AND, -1, -1),
+                         new BooleanExpression(new MethodCallExpression(VariableExpression.THIS_EXPRESSION, methodName, ArgumentListExpression.EMPTY_ARGUMENTS))));
+    }
+
+    public BooleanExpression addCallsToSuperClassInvariants(final ClassNode type, final BooleanExpression closure)  {
+
+        final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
+        if (nextClassWithInvariant == null) return closure;
+
+        final String methodName = getInvariantMethodName(nextClassWithInvariant);
+
+
+        return new BooleanExpression(
+                 new BinaryExpression(
+                         closure.getExpression(),
                          Token.newSymbol(Types.LOGICAL_AND, -1, -1),
                          new BooleanExpression(new MethodCallExpression(VariableExpression.THIS_EXPRESSION, methodName, ArgumentListExpression.EMPTY_ARGUMENTS))));
     }

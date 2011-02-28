@@ -22,17 +22,14 @@
  */
 package org.gcontracts.common.spi;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.*;
+import org.gcontracts.domain.Contract;
 
 /**
  * @author andre.steingress@gmail.com
  */
 public interface AnnotationProcessor {
 
-    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter);
-    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode, final MethodNode methodNode);
-    public void process(final ProcessingContextInformation processingContextInformation, final ClassNode classNode);
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final AnnotationNode annotationNode);
 
 }

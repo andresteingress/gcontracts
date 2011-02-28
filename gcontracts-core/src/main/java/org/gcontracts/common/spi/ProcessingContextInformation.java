@@ -29,6 +29,7 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.syntax.SyntaxException;
+import org.gcontracts.domain.Contract;
 import org.gcontracts.util.Validate;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.Map;
  */
 public class ProcessingContextInformation {
 
+    private Contract contract;
     private SourceUnit sourceUnit;
     private ReaderSource source;
 
@@ -49,15 +51,12 @@ public class ProcessingContextInformation {
     private boolean postconditionsEnabled = true;
     private boolean classInvariantsEnabled = true;
 
-    private List<MethodNode> preconditionMethodNodes = new ArrayList<MethodNode>();
-    private List<MethodNode> postconditionMethodNodes = new ArrayList<MethodNode>();
-    private List<ClassNode> classInvariantClassNodes = new ArrayList<ClassNode>();
-
     private Map<String, Object> extra = new HashMap<String, Object>();
 
-    public ProcessingContextInformation(SourceUnit sourceUnit, ReaderSource source)  {
-        // Validate.notNull(source);
+    public ProcessingContextInformation(ClassNode classNode, SourceUnit sourceUnit, ReaderSource source)  {
+        Validate.notNull(classNode);
 
+        this.contract = new Contract(classNode);
         this.sourceUnit = sourceUnit;
         this.source = source;
     }
@@ -68,9 +67,8 @@ public class ProcessingContextInformation {
     public boolean isPreconditionsEnabled() { return preconditionsEnabled; }
     public boolean isPostconditionsEnabled() { return postconditionsEnabled; }
     public boolean isClassInvariantsEnabled() { return classInvariantsEnabled; }
-    public List<MethodNode> preconditionMethodNodes() { return preconditionMethodNodes; }
-    public List<MethodNode> postconditionMethodNodes() { return postconditionMethodNodes; }
-    public List<ClassNode> classInvariantClassNodes() { return classInvariantClassNodes; }
+
+    public Contract contract() { return contract; }
     public ReaderSource readerSource() { return source; }
     public SourceUnit sourceUnit() { return sourceUnit; }
 

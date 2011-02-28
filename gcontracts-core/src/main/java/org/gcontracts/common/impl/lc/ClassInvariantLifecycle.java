@@ -35,20 +35,9 @@ import org.gcontracts.generation.ClassInvariantGenerator;
 public class ClassInvariantLifecycle extends BaseLifecycle {
 
     @Override
-    public void afterProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {
-        if (!processingContextInformation.isClassInvariantsEnabled()) return;
-        if (!CandidateChecks.isContractsCandidate(classNode)) return;
-
-        final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(processingContextInformation.readerSource());
-        if (processingContextInformation.classInvariantClassNodes().isEmpty())  {
-            classInvariantGenerator.generateDefaultInvariantAssertionMethod(classNode);
-        }
-    }
-
-    @Override
     public void afterProcessingMethodNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {
          if (!CandidateChecks.isPreOrPostconditionCandidate(classNode, methodNode)) return;
-         if (processingContextInformation.classInvariantClassNodes().isEmpty()) return;
+         if (processingContextInformation.contract().hasDefaultClassInvariant()) return;
 
          final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(processingContextInformation.readerSource());
          classInvariantGenerator.addInvariantAssertionStatement(classNode, methodNode);
@@ -58,7 +47,7 @@ public class ClassInvariantLifecycle extends BaseLifecycle {
     public void afterProcessingContructorNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode constructorNode) {
          if (!CandidateChecks.isPreOrPostconditionCandidate(classNode, constructorNode)) return;
          if (!processingContextInformation.isConstructorAssertionsEnabled()) return;
-         if (processingContextInformation.classInvariantClassNodes().isEmpty()) return;
+         if (processingContextInformation.contract().hasDefaultClassInvariant()) return;
 
          final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(processingContextInformation.readerSource());
          classInvariantGenerator.addInvariantAssertionStatement(classNode, constructorNode);

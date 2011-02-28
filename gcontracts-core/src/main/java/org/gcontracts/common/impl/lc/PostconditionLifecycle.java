@@ -41,7 +41,7 @@ public class PostconditionLifecycle extends BaseLifecycle {
 
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(processingContextInformation.readerSource());
 
-        if (processingContextInformation.postconditionMethodNodes().contains(methodNode))  {
+        if (processingContextInformation.contract().postconditions().containsKey(methodNode))  {
             postconditionGenerator.addOldVariablesMethod(classNode);
         } else {
             postconditionGenerator.generateDefaultPostconditionStatement(classNode, methodNode);

@@ -24,6 +24,7 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.ast.expr.ConstructorCallExpression;
 import org.codehaus.groovy.ast.expr.MethodCallExpression;
@@ -50,7 +51,41 @@ public class PreconditionGenerator extends BaseGenerator {
      * @param method the {@link org.codehaus.groovy.ast.MethodNode} for assertion injection
      * @param closureExpression the {@link org.codehaus.groovy.ast.expr.ClosureExpression} containing the assertion expression
      */
+    @Deprecated
     public void generatePreconditionAssertionStatement(final ClassNode type, final MethodNode method, final ClosureExpression closureExpression)  {
+
+        final BlockStatement modifiedMethodCode = new BlockStatement();
+
+        final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, closureExpression);
+        final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
+
+        // backup the current assertion in a synthetic method
+        AssertStatementCreationUtility.addAssertionMethodNode("precondition", method, assertionStatement, false, false);
+
+        final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(method, assertionIfStatement.getLineNumber());
+        if (methodCallToSuperPrecondition != null) {
+            AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPrecondition, Token.newSymbol(Types.LOGICAL_OR, -1, -1));
+        }
+
+        modifiedMethodCode.addStatement(assertionIfStatement);
+        if (method.getCode() instanceof BlockStatement)  {
+
+            BlockStatement methodBlock = (BlockStatement) method.getCode();
+            for (Statement statement : methodBlock.getStatements())  {
+                if (statement instanceof ExpressionStatement && ((ExpressionStatement) statement).getExpression() instanceof ConstructorCallExpression)  {
+                    modifiedMethodCode.getStatements().add(0, statement);
+                } else {
+                    modifiedMethodCode.getStatements().add(statement);
+                }
+            }
+        } else {
+            modifiedMethodCode.addStatement(method.getCode());
+        }
+
+        method.setCode(modifiedMethodCode);
+    }
+
+    public void generatePreconditionAssertionStatement(final MethodNode method, final BooleanExpression closureExpression)  {
 
         final BlockStatement modifiedMethodCode = new BlockStatement();
 

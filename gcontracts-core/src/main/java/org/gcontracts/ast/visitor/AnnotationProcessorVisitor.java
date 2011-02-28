@@ -62,7 +62,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         visitAnnotatedNode(type, null, null);
 
         List<MethodNode> methodNodes = new ArrayList<MethodNode>();
-        methodNodes.addAll(type.getAllDeclaredMethods());
+        methodNodes.addAll(type.getMethods());
         methodNodes.addAll(type.getDeclaredConstructors());
 
         for (MethodNode methodNode : methodNodes)  {
@@ -86,14 +86,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
             for (Class<? extends AnnotationProcessor> clz : classes)  {
                 try {
                     final AnnotationProcessor processor = clz.newInstance();
-                    if (annotatedNode instanceof ClassNode)  {
-                        processor.process(pci, (ClassNode) annotatedNode);
-                    } else if (annotatedNode instanceof MethodNode)  {
-                        MethodNode annotatedMethodNode = (MethodNode) annotatedNode;
-                        processor.process(pci, classNode, annotatedMethodNode);
-                    } else if (annotatedNode instanceof Parameter)  {
-                        processor.process(pci, classNode, methodNode, (Parameter) annotatedNode);
-                    }
+                    processor.process(pci, pci.contract(), annotatedNode, annotationNode);
                 } catch (InstantiationException e) {
                     getSourceUnit().getErrorCollector().addError(Message.create("Could not instantiate " + clz, getSourceUnit()), false);
                 } catch (IllegalAccessException e) {

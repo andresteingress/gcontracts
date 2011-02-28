@@ -22,9 +22,7 @@
  */
 package org.gcontracts.common.impl;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.BinaryExpression;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
@@ -34,7 +32,9 @@ import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.common.base.BaseAnnotationProcessor;
+import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
+import org.gcontracts.domain.Contract;
 import org.gcontracts.util.Validate;
 
 /**
@@ -46,17 +46,10 @@ import org.gcontracts.util.Validate;
  *
  * @author andre.steingress@gmail.com
  */
-public class NotNullAnnotationProcessor extends BaseAnnotationProcessor {
+public class NotNullAnnotationProcessor implements AnnotationProcessor {
 
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode, Parameter targetAnnotatedNode) {
-        AssertStatement assertStatement = new AssertStatement(new BooleanExpression(new BinaryExpression(new VariableExpression(targetAnnotatedNode), Token.newSymbol(Types.COMPARE_NOT_EQUAL, -1, -1), ConstantExpression.NULL)));
-        assertStatement.setMessageExpression(new ConstantExpression("Parameter '" + targetAnnotatedNode.getName() + "' must not be null (marked with @NotNull)!"));
-        assertStatement.setSourcePosition(targetAnnotatedNode);
-
-        Validate.isTrue(methodNode.getCode() instanceof BlockStatement);
-
-        BlockStatement blockStatement = (BlockStatement) methodNode.getCode();
-        blockStatement.getStatements().add(0, assertStatement);
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, AnnotationNode annotationNode) {
+        // TODO: BaseAnnotationProcessor has no access to current method node
     }
 }

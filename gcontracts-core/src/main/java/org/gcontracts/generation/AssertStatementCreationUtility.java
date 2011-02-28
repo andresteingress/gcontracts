@@ -59,6 +59,7 @@ public final class AssertStatementCreationUtility {
      *
      * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      */
+    @Deprecated
     public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final ClosureExpression closureExpression)  {
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
@@ -69,6 +70,17 @@ public final class AssertStatementCreationUtility {
         assertStatement.setLastLineNumber(closureExpression.getLastLineNumber());
         assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
         
+        return assertStatement;
+    }
+
+    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final BooleanExpression closureExpression)  {
+
+        final AssertStatement assertStatement = new AssertStatement(closureExpression);
+        assertStatement.setLineNumber(closureExpression.getLineNumber());
+        assertStatement.setColumnNumber(closureExpression.getColumnNumber());
+        assertStatement.setLastLineNumber(closureExpression.getLastLineNumber());
+        assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
+
         return assertStatement;
     }
 
@@ -94,16 +106,25 @@ public final class AssertStatementCreationUtility {
      *
      * @return a new {@link org.codehaus.groovy.ast.stmt.IfStatement} which holds the assertion
      */
+    @Deprecated
     public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, ClosureExpression closureExpression) {
 
         final Expression expression = getFirstExpression(closureExpression);
         if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
 
         final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression));
-        assertStatement.setLineNumber(closureExpression.getLineNumber());
-        assertStatement.setColumnNumber(closureExpression.getColumnNumber());
-        assertStatement.setLastLineNumber(closureExpression.getLastLineNumber());
-        assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
+        assertStatement.setSourcePosition(closureExpression);
+
+        final BlockStatement assertionBlockStatement = new BlockStatement();
+        assertionBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<" + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement));
+
+        return new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertionBlockStatement, new BlockStatement());
+    }
+
+    public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, BooleanExpression closureExpression) {
+
+        final AssertStatement assertStatement = new AssertStatement(closureExpression);
+        assertStatement.setSourcePosition(closureExpression);
 
         final BlockStatement assertionBlockStatement = new BlockStatement();
         assertionBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<" + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement));
@@ -148,10 +169,7 @@ public final class AssertStatementCreationUtility {
         final BlockStatement assertBlockStatement = new BlockStatement();
 
         final AssertStatement newAssertStatement = new AssertStatement(booleanExpression);
-        newAssertStatement.setLineNumber(assertStatement.getLineNumber());
-        newAssertStatement.setColumnNumber(assertStatement.getColumnNumber());
-        newAssertStatement.setLastColumnNumber(assertStatement.getLastColumnNumber());
-        newAssertStatement.setLastLineNumber(assertStatement.getLastLineNumber());
+        newAssertStatement.setSourcePosition(assertStatement);
         newAssertStatement.setMessageExpression(ConstantExpression.NULL);
         
         assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<inherited " + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", newAssertStatement));
