@@ -38,7 +38,7 @@ import java.util.List;
  *
  * @author ast
  */
-public class ExpressionUtil {
+public class ExpressionUtils {
 
     /**
      * Returns the first {@link org.codehaus.groovy.ast.expr.BooleanExpression} in the given {@link org.codehaus.groovy.ast.expr.ClosureExpression}.

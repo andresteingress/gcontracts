@@ -31,7 +31,7 @@ import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.Contract;
 import org.gcontracts.domain.Postcondition;
-import org.gcontracts.util.ExpressionUtil;
+import org.gcontracts.util.ExpressionUtils;
 
 /**
  * @author ast
@@ -44,7 +44,7 @@ public class EnsuresAnnotationProcessor extends AnnotationProcessor {
     public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, AnnotationNode annotationNode) {
         if (!processingContextInformation.isPostconditionsEnabled()) return;
 
-        BooleanExpression booleanExpression = ExpressionUtil.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME));
+        BooleanExpression booleanExpression = ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME));
         if (booleanExpression == null) return;
 
         contract.addPostcondition((MethodNode) annotatedNode, new Postcondition(booleanExpression));
