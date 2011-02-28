@@ -85,11 +85,11 @@ public class PreconditionGenerator extends BaseGenerator {
         method.setCode(modifiedMethodCode);
     }
 
-    public void generatePreconditionAssertionStatement(final MethodNode method, final BooleanExpression closureExpression)  {
+    public void generatePreconditionAssertionStatement(final MethodNode method, final BooleanExpression booleanExpression)  {
 
         final BlockStatement modifiedMethodCode = new BlockStatement();
 
-        final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, closureExpression);
+        final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, booleanExpression);
         final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
         // backup the current assertion in a synthetic method

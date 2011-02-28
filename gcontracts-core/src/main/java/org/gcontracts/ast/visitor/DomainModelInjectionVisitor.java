@@ -58,12 +58,12 @@ import java.util.Map;
  *
  * @author andre.steingress@gmail.com
  */
-public class ContractDomainModelInjectionVisitor extends BaseVisitor {
+public class DomainModelInjectionVisitor extends BaseVisitor {
 
     private final ProcessingContextInformation pci;
     private final Contract contract;
 
-    public ContractDomainModelInjectionVisitor(final SourceUnit sourceUnit, final ReaderSource source, final ProcessingContextInformation pci) {
+    public DomainModelInjectionVisitor(final SourceUnit sourceUnit, final ReaderSource source, final ProcessingContextInformation pci) {
         super(sourceUnit, source);
         Validate.notNull(pci);
         Validate.notNull(pci.contract());

@@ -121,10 +121,10 @@ public final class AssertStatementCreationUtility {
         return new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertionBlockStatement, new BlockStatement());
     }
 
-    public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, BooleanExpression closureExpression) {
+    public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, BooleanExpression booleanExpression) {
 
-        final AssertStatement assertStatement = new AssertStatement(closureExpression);
-        assertStatement.setSourcePosition(closureExpression);
+        final AssertStatement assertStatement = new AssertStatement(booleanExpression);
+        assertStatement.setSourcePosition(booleanExpression);
 
         final BlockStatement assertionBlockStatement = new BlockStatement();
         assertionBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<" + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement));

@@ -24,7 +24,9 @@ public class ExpressionUtil {
             if (stmt instanceof ExpressionStatement && ((ExpressionStatement) stmt).getExpression() instanceof BooleanExpression)  {
                 return (BooleanExpression) ((ExpressionStatement) stmt).getExpression();
             } else if (stmt instanceof ExpressionStatement)  {
-                return new BooleanExpression(((ExpressionStatement) stmt).getExpression());
+                BooleanExpression result = new BooleanExpression(((ExpressionStatement) stmt).getExpression());
+                result.setSourcePosition(stmt);
+                return result;
             }
         }
 
