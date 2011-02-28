@@ -30,6 +30,7 @@ import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.ClassInvariant;
 import org.gcontracts.domain.Contract;
+import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.ExpressionUtils;
 
 /**

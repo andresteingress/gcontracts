@@ -45,7 +45,19 @@ public class CandidateChecks {
      * @return whether the given <tt>type</tt> is a candidate for applying contract assertions
      */
     public static boolean isContractsCandidate(final ClassNode type)  {
-        return !type.isSynthetic() && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
+        return (!type.isSynthetic() ||
+                type.getNameWithoutPackage().startsWith("$GContracts")) && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
+    }
+
+    /**
+     * Checks whether the given {@link org.codehaus.groovy.ast.ClassNode} is a candidate
+     * for applying interface contracts.
+     *
+     * @param type the {@link org.codehaus.groovy.ast.ClassNode} to be checked
+     * @return whether the given <tt>type</tt> is a candidate for applying interface contract assertions
+     */
+    public static boolean isInterfaceContractsCandidate(final ClassNode type)  {
+        return type.isInterface() && !type.isSynthetic() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
     }
 
         /**

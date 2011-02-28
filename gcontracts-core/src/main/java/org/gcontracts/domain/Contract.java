@@ -42,12 +42,15 @@ public class Contract {
     private final Map<MethodNode, Precondition> preconditionMap;
     private final Map<MethodNode, Postcondition> postconditionMap;
 
+    private final Map<ClassNode, Contract> interfaceContractMap;
+
     public Contract(final ClassNode classNode)  {
         Validate.notNull(classNode);
 
         this.classNode = classNode;
         this.preconditionMap = new HashMap<MethodNode, Precondition>();
         this.postconditionMap = new HashMap<MethodNode, Postcondition>();
+        this.interfaceContractMap = new HashMap<ClassNode, Contract>();
     }
 
     public ClassNode classNode() { return classNode; }
@@ -55,6 +58,33 @@ public class Contract {
     public void setClassInvariant(final ClassInvariant classInvariant)  {
         Validate.notNull(classInvariant);
         this.classInvariant = classInvariant;
+    }
+
+    public void addInterfaceContract(final Contract interfaceContract)  {
+        Validate.notNull(interfaceContract);
+        Validate.notNull(interfaceContract.classInvariant());
+
+        if (!interfaceContractMap.containsKey(interfaceContract.classNode()))  {
+            interfaceContractMap.put(interfaceContract.classNode(), interfaceContract);
+
+            for (Map.Entry<MethodNode, Precondition> preconditionEntry : interfaceContract.preconditions().entrySet())  {
+
+                MethodNode interfaceMethodNode = preconditionEntry.getKey();
+                MethodNode implementedMethodNode = classNode.getMethod(interfaceMethodNode.getName(), interfaceMethodNode.getParameters());
+
+                if (implementedMethodNode != null)
+                    addPrecondition(implementedMethodNode, preconditionEntry.getValue());
+            }
+
+            for (Map.Entry<MethodNode, Postcondition> postconditionEntry : interfaceContract.postconditions().entrySet())  {
+
+                MethodNode interfaceMethodNode = postconditionEntry.getKey();
+                MethodNode implementedMethodNode = classNode.getMethod(interfaceMethodNode.getName(), interfaceMethodNode.getParameters());
+
+                if (implementedMethodNode != null)
+                    addPostcondition(implementedMethodNode, postconditionEntry.getValue());
+            }
+        }
     }
 
     public void addPrecondition(final MethodNode methodNode, final Precondition precondition)  {

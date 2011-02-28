@@ -34,6 +34,9 @@ import org.gcontracts.ast.visitor.AnnotationProcessorVisitor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  * Custom AST transformation that removes closure annotations of {@link org.gcontracts.annotations.Invariant},
@@ -58,6 +61,9 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         final ModuleNode moduleNode = unit.getAST();
 
         ReaderSource source = getReaderSource(unit);
+        final List<ClassNode> classNodes = new ArrayList<ClassNode>(moduleNode.getClasses());
+
+        pregenerateDummyInterfaceImplementations(unit, source, classNodes);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
@@ -75,6 +81,14 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
             new ContractElementErasingVisitor(unit, source).visitClass(classNode);
+        }
+    }
+
+    private void pregenerateDummyInterfaceImplementations(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
+        for (final ClassNode classNode : classNodes)  {
+            if (!CandidateChecks.isInterfaceContractsCandidate(classNode)) continue;
+
+            new InterfaceVisitor(unit, source).visitClass(classNode);
         }
     }
 }

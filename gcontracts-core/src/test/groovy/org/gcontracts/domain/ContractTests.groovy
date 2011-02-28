@@ -1,16 +1,20 @@
 package org.gcontracts.domain
 
 import junit.framework.TestCase
-import org.codehaus.groovy.ast.builder.AstStringCompiler
-import org.codehaus.groovy.control.CompilePhase
+import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.builder.AstStringCompiler
 import org.codehaus.groovy.ast.expr.BooleanExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
-import org.codehaus.groovy.ast.Parameter
-import org.codehaus.groovy.ast.MethodNode
-import org.gcontracts.common.impl.RequiresAnnotationProcessor
+import org.codehaus.groovy.control.CompilePhase
 
 class ContractTests extends TestCase {
+
+    interface Stackable {
+
+    }
 
     void test_create_simple_contract()  {
 
@@ -69,5 +73,39 @@ class ContractTests extends TestCase {
         assertTrue(contract.preconditions().get(methodNode).booleanExpression().getLastLineNumber() == -1)
         assertTrue(contract.preconditions().get(methodNode).booleanExpression().getColumnNumber() == -1)
         assertTrue(contract.preconditions().get(methodNode).booleanExpression().getLastColumnNumber() == -1)
+    }
+
+    void test_add_interface_contract()  {
+
+        def source = '''
+        import org.gcontracts.annotations.*
+
+        class Tester implements MyContract {
+
+           void some_method(def param)  {}
+        }
+
+        interface MyContract  {
+
+           @Requires({ param != null })
+           void some_method(def param)
+        }
+'''
+
+        AstStringCompiler astStringCompiler = new AstStringCompiler()
+        def astNodes = astStringCompiler.compile(source, CompilePhase.SEMANTIC_ANALYSIS, false)
+        ClassNode classNode = astNodes[1]
+        assertNotNull(classNode)
+
+        ClassNode myContractInterface = astNodes[2]
+
+        def contract = new Contract(classNode)
+        def interfaceContract = new Contract(myContractInterface)
+        interfaceContract.addPrecondition(myContractInterface.getMethod("some_method", [new Parameter(ClassHelper.OBJECT_TYPE, "param")] as Parameter[]),
+            new Precondition(new BooleanExpression(new ConstantExpression(true))))
+
+        contract.addInterfaceContract(interfaceContract)
+
+        assertEquals(1, contract.preconditions().size())
     }
 }

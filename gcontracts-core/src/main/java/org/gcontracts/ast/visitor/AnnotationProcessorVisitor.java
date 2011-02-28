@@ -30,6 +30,7 @@ import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
+import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
 
@@ -57,6 +58,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
     @Override
     public void visitClass(ClassNode type) {
+        if (!CandidateChecks.isContractsCandidate(type)) return;
+
         visitAnnotatedNode(type, null, null);
 
         List<MethodNode> methodNodes = new ArrayList<MethodNode>();
