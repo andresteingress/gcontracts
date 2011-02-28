@@ -50,8 +50,6 @@ public abstract class BaseVisitor extends ClassCodeVisitorSupport {
         this.source = source;
     }
 
-    protected BaseVisitor() {}
-
     @Override
     protected SourceUnit getSourceUnit() {
         return null;

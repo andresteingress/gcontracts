@@ -51,19 +51,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Visits the given {@link ClassNode} and injects the current {@link org.gcontracts.domain.Contract} to byte
- * code.
+ * Visits the given {@link ClassNode} and injects the current {@link org.gcontracts.domain.Contract} to the current AST
+ * nodes.
  *
  * @see org.gcontracts.domain.Contract
  *
  * @author andre.steingress@gmail.com
  */
-public class ContractFinalizerVisitor extends BaseVisitor {
+public class ContractDomainModelInjectionVisitor extends BaseVisitor {
 
     private final ProcessingContextInformation pci;
     private final Contract contract;
 
-    public ContractFinalizerVisitor(final SourceUnit sourceUnit, final ReaderSource source, final ProcessingContextInformation pci) {
+    public ContractDomainModelInjectionVisitor(final SourceUnit sourceUnit, final ReaderSource source, final ProcessingContextInformation pci) {
         super(sourceUnit, source);
         Validate.notNull(pci);
         Validate.notNull(pci.contract());
@@ -88,6 +88,8 @@ public class ContractFinalizerVisitor extends BaseVisitor {
     }
 
     public void addClassInvariant(final ClassNode type, final ClassInvariant classInvariant) {
+        if (!pci.isClassInvariantsEnabled()) return;
+
         final ReaderSource source = pci.readerSource();
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
 

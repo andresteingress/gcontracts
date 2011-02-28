@@ -46,9 +46,9 @@ import java.util.List;
  *
  * @author andre.steingress@gmail.com
  */
-public class ContractsErasingVisitor extends BaseVisitor {
+public class ContractElementErasingVisitor extends BaseVisitor {
 
-    public ContractsErasingVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
+    public ContractElementErasingVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
     }
 

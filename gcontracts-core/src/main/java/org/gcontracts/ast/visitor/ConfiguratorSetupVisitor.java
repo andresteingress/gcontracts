@@ -49,10 +49,6 @@ public class ConfiguratorSetupVisitor extends BaseVisitor {
         super(sourceUnit, source);
     }
 
-    protected ConfiguratorSetupVisitor() {
-        super();
-    }
-
     @Override
     public void visitClass(ClassNode node) {
         addConfigurationVariable(node);

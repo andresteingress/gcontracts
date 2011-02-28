@@ -47,8 +47,6 @@ public class LifecycleAfterTransformationVisitor extends BaseVisitor {
         this.pci = pci;
     }
 
-    protected LifecycleAfterTransformationVisitor() {}
-
     @Override
     public void visitClass(ClassNode node) {
         super.visitClass(node);

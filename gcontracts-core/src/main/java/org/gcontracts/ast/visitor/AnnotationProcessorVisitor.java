@@ -55,8 +55,6 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         this.pci = pci;
     }
 
-    protected AnnotationProcessorVisitor() {}
-
     @Override
     public void visitClass(ClassNode type) {
         visitAnnotatedNode(type, null, null);

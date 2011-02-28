@@ -69,12 +69,12 @@ public class GContractsASTTransformation extends BaseASTTransformation {
             new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
 
             new AnnotationProcessorVisitor(unit, source, pci).visitClass(classNode);
-            new ContractFinalizerVisitor(unit, source, pci).visitClass(classNode);
+            new ContractDomainModelInjectionVisitor(unit, source, pci).visitClass(classNode);
 
             new LifecycleAfterTransformationVisitor(unit, source, pci).visitClass(classNode);
 
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
-            new ContractsErasingVisitor(unit, source).visitClass(classNode);
+            new ContractElementErasingVisitor(unit, source).visitClass(classNode);
         }
     }
 }
