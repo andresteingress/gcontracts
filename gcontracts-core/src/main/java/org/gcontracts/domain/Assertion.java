@@ -51,6 +51,10 @@ public abstract class Assertion<T extends Assertion> {
 
     public void renew(BooleanExpression booleanExpression)  {
         Validate.notNull(booleanExpression);
+
+        // don't renew the source position to keep the new assertion expression without source code replacement
+        // booleanExpression.setSourcePosition(this.booleanExpression);
+
         this.booleanExpression = booleanExpression;
     }
 

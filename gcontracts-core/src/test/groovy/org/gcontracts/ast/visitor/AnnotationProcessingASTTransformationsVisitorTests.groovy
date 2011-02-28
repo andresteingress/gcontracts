@@ -111,6 +111,34 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
 
     }
 
+    def void test_requires_method_with_not_null_parameter() {
+
+        def source = '''
+    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.common.*
+
+    class Tester {
+
+        @Requires({ param1 == null })
+        def method(@NotNull param1, param2) {}
+    }'''
+
+        GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        Class clz = loader.parseClass(source)
+        assertNotNull(clz)
+
+        try {
+            def tester = clz.newInstance()
+            tester.method(null, null)
+        } catch (AssertionError ae) {
+            ae.printStackTrace()
+            return
+        }
+
+        fail("AssertionError must have been thrown")
+
+    }
+
     def void test_default_ensures_method() {
 
         def source = '''
