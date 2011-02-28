@@ -3,7 +3,7 @@ package org.gcontracts.tests.post
 import org.gcontracts.tests.basic.BaseTestClass
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class ResultAndOldVariablePostconditionTests extends BaseTestClass {
 

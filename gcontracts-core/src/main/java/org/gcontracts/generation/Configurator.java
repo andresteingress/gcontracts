@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public final class Configurator {
 

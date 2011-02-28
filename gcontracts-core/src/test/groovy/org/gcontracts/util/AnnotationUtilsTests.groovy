@@ -10,7 +10,7 @@ import org.gcontracts.annotations.meta.ContractElement
 import org.gcontracts.tests.basic.BaseTestClass
 
  /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class AnnotationUtilsTests extends BaseTestClass {
 

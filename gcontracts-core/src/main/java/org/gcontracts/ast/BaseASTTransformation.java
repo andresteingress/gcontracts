@@ -33,7 +33,7 @@ import java.lang.reflect.Field;
  *
  * @see org.codehaus.groovy.transform.ASTTransformation
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public abstract class BaseASTTransformation implements ASTTransformation {
 

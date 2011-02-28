@@ -32,7 +32,7 @@ import org.codehaus.groovy.control.io.ReaderSource;
  * Base class for GContracts code generators.
  * </p>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public abstract class BaseGenerator {
 

@@ -36,7 +36,7 @@ import org.codehaus.groovy.syntax.Types;
 /**
  * Code generator for preconditions.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class PreconditionGenerator extends BaseGenerator {
 

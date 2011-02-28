@@ -39,7 +39,7 @@ import org.objectweb.asm.Opcodes;
  * Code generator for class invariants.
  * </p>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ClassInvariantGenerator extends BaseGenerator {
 

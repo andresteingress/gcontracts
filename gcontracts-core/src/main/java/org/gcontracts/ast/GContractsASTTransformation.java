@@ -46,7 +46,7 @@ import org.gcontracts.generation.CandidateChecks;
  *
  * @see AssertionError
  *
- * @author andre.steingress@gmail.com                        
+ * @author ast
  */
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class GContractsASTTransformation extends BaseASTTransformation {

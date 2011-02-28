@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import junit.framework.TestCase
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class SpringContractsLifecycleTests extends TestCase {
 

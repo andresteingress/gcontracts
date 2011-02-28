@@ -25,7 +25,7 @@ package org.gcontracts;
 /**
  * Thrown whenever a precondition violation occurs.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class PreconditionViolation extends AssertionError {
 

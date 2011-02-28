@@ -34,7 +34,7 @@ import org.codehaus.groovy.control.io.ReaderSource;
  *
  * @see org.codehaus.groovy.ast.ClassCodeVisitorSupport
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public abstract class BaseVisitor extends ClassCodeVisitorSupport {
 

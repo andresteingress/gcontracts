@@ -44,7 +44,7 @@ import org.gcontracts.util.Validate;
  *
  * @see org.gcontracts.common.base.BaseAnnotationProcessor
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class NotNullAnnotationProcessor implements AnnotationProcessor {
 

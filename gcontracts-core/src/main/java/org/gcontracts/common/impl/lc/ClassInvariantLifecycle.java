@@ -30,7 +30,7 @@ import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.ClassInvariantGenerator;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ClassInvariantLifecycle extends BaseLifecycle {
 

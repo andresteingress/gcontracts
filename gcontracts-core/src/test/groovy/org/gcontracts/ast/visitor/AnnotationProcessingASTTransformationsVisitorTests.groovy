@@ -4,7 +4,7 @@ import org.codehaus.groovy.ast.builder.AstStringCompiler
 import org.gcontracts.tests.basic.BaseTestClass
 
  /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
 

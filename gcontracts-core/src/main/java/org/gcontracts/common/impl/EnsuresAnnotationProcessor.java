@@ -36,7 +36,7 @@ import org.gcontracts.domain.Postcondition;
 import org.gcontracts.util.ExpressionUtil;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class EnsuresAnnotationProcessor implements AnnotationProcessor {
 

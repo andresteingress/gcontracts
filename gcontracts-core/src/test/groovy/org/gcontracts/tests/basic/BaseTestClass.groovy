@@ -3,7 +3,7 @@ package org.gcontracts.tests.basic
 import groovy.text.GStringTemplateEngine
 
  /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class BaseTestClass extends GroovyTestCase {
 

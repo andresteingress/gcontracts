@@ -26,7 +26,7 @@ import org.codehaus.groovy.ast.*;
 import org.gcontracts.domain.Contract;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public interface AnnotationProcessor {
 

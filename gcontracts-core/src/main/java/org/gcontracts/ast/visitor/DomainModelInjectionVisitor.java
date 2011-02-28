@@ -56,7 +56,7 @@ import java.util.Map;
  *
  * @see org.gcontracts.domain.Contract
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class DomainModelInjectionVisitor extends BaseVisitor {
 

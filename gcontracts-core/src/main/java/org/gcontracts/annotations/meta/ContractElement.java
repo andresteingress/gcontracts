@@ -34,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see org.gcontracts.annotations.common.NotNull
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

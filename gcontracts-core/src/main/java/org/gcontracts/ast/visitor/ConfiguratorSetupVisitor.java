@@ -41,7 +41,7 @@ import org.objectweb.asm.Opcodes;
  *
  * @see Configurator
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ConfiguratorSetupVisitor extends BaseVisitor {
 

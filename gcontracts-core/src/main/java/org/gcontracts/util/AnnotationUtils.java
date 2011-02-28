@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Helper methods for reading/getting {@link org.codehaus.groovy.ast.AnnotationNode} instances.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class AnnotationUtils {
 

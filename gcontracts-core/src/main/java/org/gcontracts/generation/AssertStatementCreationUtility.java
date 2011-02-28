@@ -47,7 +47,7 @@ import java.util.List;
  * @see org.codehaus.groovy.ast.stmt.AssertStatement
  * @see AssertionError
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public final class AssertStatementCreationUtility {
 

@@ -34,7 +34,7 @@ import org.gcontracts.common.spi.ProcessingContextInformation;
  *
  * @see org.gcontracts.common.spi.AnnotationProcessor
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public abstract class BaseAnnotationProcessor implements AnnotationProcessor {
 

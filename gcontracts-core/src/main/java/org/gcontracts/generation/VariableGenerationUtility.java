@@ -32,7 +32,7 @@ import org.codehaus.groovy.syntax.Types;
 import org.objectweb.asm.Opcodes;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class VariableGenerationUtility {
 

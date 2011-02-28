@@ -33,7 +33,7 @@ import org.codehaus.groovy.ast.PropertyNode;
  * requirements. E.g. whether a class node is a class invariant candidate or not.
  * </p>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class CandidateChecks {
 

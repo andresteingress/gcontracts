@@ -36,7 +36,7 @@ import org.objectweb.asm.Opcodes;
  * assertion generation mechanism and adapt it to specific requirements of the Spring
  * application container.<p/>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class SpringContractsLifecycle extends BaseLifecycle {
 

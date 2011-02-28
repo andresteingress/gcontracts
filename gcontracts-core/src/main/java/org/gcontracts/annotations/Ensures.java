@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  * </pre>
  * </p>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD})

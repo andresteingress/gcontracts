@@ -25,7 +25,7 @@ package org.gcontracts;
 /**
  * Thrown whenever a postcondition violation occurs.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class PostconditionViolation extends AssertionError {
 

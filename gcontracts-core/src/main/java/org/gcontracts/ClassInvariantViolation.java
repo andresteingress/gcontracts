@@ -25,7 +25,7 @@ package org.gcontracts;
 /**
  * Thrown whenever a class invariant violation occurs.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ClassInvariantViolation extends AssertionError {
 

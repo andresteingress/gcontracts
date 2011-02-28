@@ -34,7 +34,7 @@ import org.gcontracts.util.Validate;
 import java.util.ArrayList;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class LifecycleBeforeTransformationVisitor extends BaseVisitor {
 

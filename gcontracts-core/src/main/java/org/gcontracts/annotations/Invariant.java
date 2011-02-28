@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  * with the actual class's invariant (by using a logical AND).
  * </p>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

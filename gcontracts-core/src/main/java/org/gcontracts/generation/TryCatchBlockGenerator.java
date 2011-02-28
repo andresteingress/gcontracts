@@ -35,7 +35,7 @@ import org.codehaus.groovy.syntax.Types;
  * Creates a try-catch block around a given {@link org.codehaus.groovy.ast.stmt.AssertStatement} and catches
  * a {@link org.codehaus.groovy.transform.powerassert.PowerAssertionError} to reuse the generated visual output.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class TryCatchBlockGenerator {
 

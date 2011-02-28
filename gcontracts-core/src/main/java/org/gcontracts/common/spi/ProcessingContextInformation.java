@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ProcessingContextInformation {
 

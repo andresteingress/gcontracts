@@ -33,7 +33,7 @@ import org.gcontracts.domain.Contract;
 import org.gcontracts.util.ExpressionUtil;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ClassInvariantAnnotationProcessor implements AnnotationProcessor {
 

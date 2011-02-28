@@ -25,7 +25,7 @@ package org.gcontracts.util;
 /**
  * Internal utility class for in-code assertion checks.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class Validate {
 

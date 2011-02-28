@@ -3,7 +3,7 @@ package org.gcontracts.tests.other
 import org.gcontracts.tests.basic.BaseTestClass
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class AbstractClassTests extends BaseTestClass {
 

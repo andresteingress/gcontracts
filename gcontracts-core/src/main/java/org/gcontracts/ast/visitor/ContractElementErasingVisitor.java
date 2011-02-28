@@ -44,7 +44,7 @@ import java.util.List;
  *
  * @see BaseVisitor
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ContractElementErasingVisitor extends BaseVisitor {
 

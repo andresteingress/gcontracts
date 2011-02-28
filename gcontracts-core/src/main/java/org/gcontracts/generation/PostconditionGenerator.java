@@ -36,7 +36,7 @@ import java.util.List;
  * Code generator for postconditions.
  * </p>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class PostconditionGenerator extends BaseGenerator {
 

@@ -28,7 +28,7 @@ import org.gcontracts.common.spi.Lifecycle;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public abstract class BaseLifecycle implements Lifecycle {
 

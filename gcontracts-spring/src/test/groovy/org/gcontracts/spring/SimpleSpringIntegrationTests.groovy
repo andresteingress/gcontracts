@@ -1,7 +1,7 @@
 package org.gcontracts.spring
 
  /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class SimpleSpringIntegrationTests extends BaseTestClass {
 

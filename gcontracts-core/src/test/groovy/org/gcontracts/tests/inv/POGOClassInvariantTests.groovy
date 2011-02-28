@@ -7,7 +7,7 @@ import org.gcontracts.tests.basic.BaseTestClass
  *
  * @see org.gcontracts.annotations.Ensures
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 
 class POGOClassInvariantTests extends BaseTestClass {

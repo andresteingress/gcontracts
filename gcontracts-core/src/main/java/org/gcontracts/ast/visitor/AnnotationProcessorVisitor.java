@@ -42,7 +42,7 @@ import java.util.List;
  *
  * @see org.gcontracts.common.spi.AnnotationProcessor
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class AnnotationProcessorVisitor extends BaseVisitor {
 

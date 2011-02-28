@@ -20,7 +20,7 @@ enum C {
  *
  * @see CandidateChecks
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class CandidateChecksTests extends GroovyTestCase {
 

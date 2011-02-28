@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * def method(@NotNull String someParam, @NotNull anotherParam) { ... }
  * </pre>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})

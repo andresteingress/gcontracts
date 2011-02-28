@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * Represents a contract between a supplier and a customer of a class.
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class Contract {
 

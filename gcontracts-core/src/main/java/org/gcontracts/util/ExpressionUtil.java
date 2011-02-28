@@ -36,7 +36,7 @@ import java.util.List;
  * @see ClosureExpression
  * @see BooleanExpression
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ExpressionUtil {
 

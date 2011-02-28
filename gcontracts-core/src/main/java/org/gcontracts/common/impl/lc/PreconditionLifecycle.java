@@ -30,7 +30,7 @@ import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.PreconditionGenerator;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class PreconditionLifecycle extends BaseLifecycle {
 

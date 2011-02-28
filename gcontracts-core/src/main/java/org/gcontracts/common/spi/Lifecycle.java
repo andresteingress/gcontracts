@@ -26,7 +26,7 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 
 /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public interface Lifecycle {
 
