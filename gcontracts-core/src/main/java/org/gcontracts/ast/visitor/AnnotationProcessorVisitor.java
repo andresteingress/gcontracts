@@ -23,6 +23,7 @@
 package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.control.messages.Message;
@@ -32,6 +33,7 @@ import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
+import org.gcontracts.util.ExpressionUtils;
 import org.gcontracts.util.Validate;
 
 import java.util.ArrayList;
@@ -60,6 +62,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
     public void visitClass(ClassNode type) {
         if (!CandidateChecks.isContractsCandidate(type)) return;
 
+        visitInterfaces(type, type.getInterfaces());
+
         visitAnnotatedNode(type, null, null);
 
         List<MethodNode> methodNodes = new ArrayList<MethodNode>();
@@ -75,31 +79,81 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         }
     }
 
+    private void visitInterfaces(ClassNode classNode, ClassNode[] interfaces) {
+        for (ClassNode interfaceClassNode : interfaces)  {
+            List<MethodNode> methodNodes = new ArrayList<MethodNode>();
+            methodNodes.addAll(interfaceClassNode.getMethods());
+
+            // @ContractElement annotations are by now only supported on method interfaces
+            for (MethodNode interfaceMethodNode : methodNodes)  {
+                MethodNode implementingMethodNode = classNode.getMethod(interfaceMethodNode.getName(), interfaceMethodNode.getParameters());
+                if (implementingMethodNode == null) continue;
+
+                final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(interfaceMethodNode, ContractElement.class.getName());
+                for (AnnotationNode annotationNode : annotationNodes)  {
+                    final AnnotationProcessor annotationProcessor = createAnnotationProcessor(annotationNode);
+
+                    if (annotationProcessor != null && annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClassExpression)  {
+
+                        ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
+                                VariableExpression.THIS_EXPRESSION,
+                                VariableExpression.THIS_EXPRESSION);
+
+                        ArgumentListExpression closureArgumentList = new ArgumentListExpression();
+
+                        for (Parameter parameter : implementingMethodNode.getParameters())  {
+                            closureArgumentList.addExpression(new VariableExpression(parameter));
+                        }
+
+                        closureArgumentList.addExpression(new VariableExpression("result"));
+                        closureArgumentList.addExpression(new VariableExpression("old"));
+
+                        MethodCallExpression doCall = new MethodCallExpression(
+                                new MethodCallExpression(
+                                        annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME),
+                                        "newInstance",
+                                        closureConstructorArgumentList
+                                ),
+                                "call",
+                                closureArgumentList
+                        );
+
+                        annotationProcessor.process(pci, pci.contract(), implementingMethodNode, new BooleanExpression(doCall));
+                    }
+                }
+            }
+        }
+    }
+
     private void visitAnnotatedNode(AnnotatedNode annotatedNode, ClassNode classNode, MethodNode methodNode) {
         Validate.notNull(annotatedNode);
 
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(annotatedNode, ContractElement.class.getName());
 
         for (AnnotationNode annotationNode : annotationNodes)  {
-            final AnnotationProcessorImplementation annotationProcessingAnno = (AnnotationProcessorImplementation) annotationNode.getClassNode().getTypeClass().getAnnotation(AnnotationProcessorImplementation.class);
-            Class<? extends AnnotationProcessor>[] classes = annotationProcessingAnno.value();
+            AnnotationProcessor processor = createAnnotationProcessor(annotationNode);
+            if (processor == null) continue;
 
-            for (Class<? extends AnnotationProcessor> clz : classes)  {
-                try {
-
-                    final AnnotationProcessor processor = clz.newInstance();
-                    if (methodNode == null)  {
-                        processor.process(pci, pci.contract(), annotatedNode, annotationNode);
-                    } else {
-                        processor.process(pci, pci.contract(), annotatedNode, methodNode, annotationNode);
-                    }
-
-                } catch (InstantiationException e) {
-                    getSourceUnit().getErrorCollector().addError(Message.create("Could not instantiate " + clz, getSourceUnit()), false);
-                } catch (IllegalAccessException e) {
-                    getSourceUnit().getErrorCollector().addError(Message.create("Could not access " + clz, getSourceUnit()), false);
-                }
+            if (methodNode == null)  {
+                processor.process(pci, pci.contract(), annotatedNode, ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME)));
+            } else {
+                processor.process(pci, pci.contract(), annotatedNode, methodNode, ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME)));
             }
         }
+    }
+
+    private AnnotationProcessor createAnnotationProcessor(AnnotationNode annotationNode) {
+        final AnnotationProcessorImplementation annotationProcessingAnno = (AnnotationProcessorImplementation) annotationNode.getClassNode().getTypeClass().getAnnotation(AnnotationProcessorImplementation.class);
+        final Class clz = annotationProcessingAnno.value();
+
+        try {
+            return (AnnotationProcessor) clz.newInstance();
+        } catch (InstantiationException e) {
+            getSourceUnit().getErrorCollector().addError(Message.create("Could not instantiate " + clz, getSourceUnit()), false);
+        } catch (IllegalAccessException e) {
+            getSourceUnit().getErrorCollector().addError(Message.create("Could not access " + clz, getSourceUnit()), false);
+        }
+
+        return null;
     }
 }

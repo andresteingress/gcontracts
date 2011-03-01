@@ -40,5 +40,5 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AnnotationProcessorImplementation {
-    Class<? extends AnnotationProcessor>[] value();
+    Class<? extends AnnotationProcessor> value();
 }

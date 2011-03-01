@@ -23,28 +23,20 @@
 package org.gcontracts.common.impl;
 
 import org.codehaus.groovy.ast.AnnotatedNode;
-import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.ClassInvariant;
 import org.gcontracts.domain.Contract;
-import org.gcontracts.generation.CandidateChecks;
-import org.gcontracts.util.ExpressionUtils;
 
 /**
  * @author ast
  */
 public class ClassInvariantAnnotationProcessor extends AnnotationProcessor {
 
-    protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
-
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, AnnotationNode annotationNode ) {
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, BooleanExpression booleanExpression) {
         if (!processingContextInformation.isClassInvariantsEnabled()) return;
-
-        BooleanExpression booleanExpression = ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME));
         if (booleanExpression == null) return;
 
         contract.setClassInvariant(new ClassInvariant(booleanExpression));

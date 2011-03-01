@@ -79,16 +79,20 @@ class ContractTests extends TestCase {
 
         def source = '''
         import org.gcontracts.annotations.*
+        import org.gcontracts.tests.basic.*
 
-        class Tester implements MyContract {
+        class Tester implements MyInterface {
 
-           void some_method(def param)  {}
+           def add(def param1)  { return param1 }
+           def removeOne(def param1) { return param1 - 1 }
         }
 
-        interface MyContract  {
+        interface MyInterface {
+           @Requires({ x != null })
+           def add(def x)
 
-           @Requires({ param != null })
-           void some_method(def param)
+           @Ensures({ result -> result == (x-1) })
+           def removeOne(def x)
         }
 '''
 
@@ -97,15 +101,20 @@ class ContractTests extends TestCase {
         ClassNode classNode = astNodes[1]
         assertNotNull(classNode)
 
-        ClassNode myContractInterface = astNodes[2]
-
         def contract = new Contract(classNode)
-        def interfaceContract = new Contract(myContractInterface)
-        interfaceContract.addPrecondition(myContractInterface.getMethod("some_method", [new Parameter(ClassHelper.OBJECT_TYPE, "param")] as Parameter[]),
-            new Precondition(new BooleanExpression(new ConstantExpression(true))))
+        def methodNode = classNode.getMethod("add", [new Parameter(ClassHelper.OBJECT_TYPE, "param")] as Parameter[])
 
-        contract.addInterfaceContract(interfaceContract)
+        contract.addInterfacePrecondition(methodNode, new Precondition(new BooleanExpression(ConstantExpression.TRUE)))
 
         assertEquals(1, contract.preconditions().size())
+
+        GroovyClassLoader gcl = new GroovyClassLoader(getClass().getClassLoader())
+        def clz = gcl.parseClass(source)
+
+        assertNotNull(clz)
+
+        def tester = clz.newInstance()
+        tester.add(2)
+        tester.removeOne(2)
     }
 }

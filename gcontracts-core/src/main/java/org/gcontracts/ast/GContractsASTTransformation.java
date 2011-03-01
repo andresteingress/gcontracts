@@ -63,7 +63,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         ReaderSource source = getReaderSource(unit);
         final List<ClassNode> classNodes = new ArrayList<ClassNode>(moduleNode.getClasses());
 
-        pregenerateDummyInterfaceImplementations(unit, source, classNodes);
+        pregenerateClosureAnnotations(unit, source, classNodes);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
@@ -84,7 +84,10 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         }
     }
 
-    private void pregenerateDummyInterfaceImplementations(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
+    /**
+     * Pregeneration of annotation closures to closure classes (needs to be done manually before Groovy 1.8).
+     */
+    private void pregenerateClosureAnnotations(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
         for (final ClassNode classNode : classNodes)  {
             if (!CandidateChecks.isInterfaceContractsCandidate(classNode)) continue;
 

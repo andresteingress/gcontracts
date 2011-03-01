@@ -44,10 +44,10 @@ import org.gcontracts.domain.Precondition;
 public class NotNullAnnotationProcessor extends AnnotationProcessor {
 
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, MethodNode methodNode, AnnotationNode annotationNode) {
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, MethodNode methodNode, BooleanExpression booleanExpression) {
         if (!processingContextInformation.isPreconditionsEnabled()) return;
 
-        BooleanExpression booleanExpression = new BooleanExpression(new BinaryExpression(
+        booleanExpression = new BooleanExpression(new BinaryExpression(
             new VariableExpression((Parameter) annotatedNode),
             Token.newSymbol(Types.COMPARE_NOT_EQUAL, -1, -1),
             ConstantExpression.NULL

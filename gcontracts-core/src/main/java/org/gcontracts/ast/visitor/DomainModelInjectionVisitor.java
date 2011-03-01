@@ -22,32 +22,20 @@
  */
 package org.gcontracts.ast.visitor;
 
-import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.codehaus.groovy.control.messages.Message;
-import org.gcontracts.annotations.Ensures;
-import org.gcontracts.annotations.Invariant;
-import org.gcontracts.annotations.Requires;
-import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
-import org.gcontracts.annotations.meta.ContractElement;
-import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.ClassInvariant;
 import org.gcontracts.domain.Contract;
 import org.gcontracts.domain.Postcondition;
 import org.gcontracts.domain.Precondition;
-import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.ClassInvariantGenerator;
 import org.gcontracts.generation.PostconditionGenerator;
 import org.gcontracts.generation.PreconditionGenerator;
-import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**

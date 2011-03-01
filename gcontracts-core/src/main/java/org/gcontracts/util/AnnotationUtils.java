@@ -101,6 +101,7 @@ public class AnnotationUtils {
      *
      * @param annotatedNode an {@link org.codehaus.groovy.ast.AnnotatedNode} from which the annotations are checked
      * @param metaAnnotationClassName the name of the meta annotation
+     * @return a list of {@link AnnotationNode} instances which implement the given <tt>metaAnnotationClass</tt>
      */
     public static List<AnnotationNode> hasMetaAnnotations(AnnotatedNode annotatedNode, String metaAnnotationClassName)  {
 

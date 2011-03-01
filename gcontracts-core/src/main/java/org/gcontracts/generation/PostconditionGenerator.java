@@ -154,7 +154,7 @@ public class PostconditionGenerator extends BaseGenerator {
         }
     }
 
-    public void generatePostconditionAssertionStatement(MethodNode method, BooleanExpression closureExpression)  {
+    public void generatePostconditionAssertionStatement(MethodNode method, BooleanExpression booleanExpression)  {
 
         final BlockStatement methodBlock = (BlockStatement) method.getCode();
 
@@ -169,7 +169,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(method.getDeclaringClass(), method, lastStatement);
                 if (returnStatement != null) statements.remove(statements.size() - 1);
 
-                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
+                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, booleanExpression);
                 final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
@@ -205,7 +205,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 if (returnStatement != null) methodBlock.addStatement(new ReturnStatement(resultVariable));
             } else if (method instanceof ConstructorNode) {
 
-                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
+                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, booleanExpression);
                 final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
@@ -220,7 +220,7 @@ public class PostconditionGenerator extends BaseGenerator {
 
             } else {
 
-                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, closureExpression);
+                final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, booleanExpression);
                 final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method

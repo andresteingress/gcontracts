@@ -24,22 +24,17 @@ package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.ClassExpression;
-import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ReturnStatement;
-import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.gcontracts.annotations.Ensures;
-import org.gcontracts.annotations.Invariant;
-import org.gcontracts.annotations.Requires;
 import org.gcontracts.annotations.meta.ContractElement;
-import org.gcontracts.ast.visitor.BaseVisitor;
+import org.gcontracts.classgen.asm.ClosureWriter;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
-import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,7 +52,8 @@ import java.util.List;
  */
 public class InterfaceVisitor extends BaseVisitor {
 
-    private boolean hasContractElement = false;
+    private ClassNode classNode;
+    private final ClosureWriter closureWriter = new ClosureWriter();
 
     public InterfaceVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
@@ -67,59 +63,40 @@ public class InterfaceVisitor extends BaseVisitor {
     public void visitClass(ClassNode node) {
         if (!CandidateChecks.isInterfaceContractsCandidate(node)) return;
 
-        super.visitClass(node);
+        classNode = node;
 
-        if (hasContractElement)  {
-            generateDummyImplementation(node);
-        }
+        super.visitClass(node);
     }
 
     @Override
     public void visitAnnotations(AnnotatedNode node) {
-        hasContractElement = hasContractElement || AnnotationUtils.hasMetaAnnotations(node, ContractElement.class.getName()).size() > 0;
-    }
+        if (!(node instanceof MethodNode)) return;
 
-    private void generateDummyImplementation(ClassNode node) {
+        final MethodNode methodNode = (MethodNode) node;
+        final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName());
+        if (annotationNodes.size() > 0)  {
+            for (AnnotationNode annotationNode : annotationNodes)  {
+                ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
+                if (closureExpression == null) continue;
 
-        String packageName = node.getPackageName() != null ? node.getPackageName() + "." : "";
-        ClassNode dummyClass = new ClassNode(
-                packageName + "$GContracts_Dummy_" + node.getNameWithoutPackage(),
-                Opcodes.ACC_PRIVATE,
-                node);
+                List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
-        node.getModule().addClass(dummyClass);
 
-        for (MethodNode methodNode : node.getMethods())  {
-            if (methodNode.isSynthetic()) continue;
-            if (methodNode.isStatic()) continue;
+                parameters.addAll(new ArrayList<Parameter>(Arrays.asList(methodNode.getParameters())));
 
-            int modifiers = methodNode.getModifiers();
+                ClosureExpression rewrittenClosureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), closureExpression.getCode());
+                rewrittenClosureExpression.setSourcePosition(closureExpression);
+                rewrittenClosureExpression.setDeclaringClass(closureExpression.getDeclaringClass());
+                rewrittenClosureExpression.setSynthetic(true);
+                rewrittenClosureExpression.setVariableScope(closureExpression.getVariableScope());
+                rewrittenClosureExpression.setType(closureExpression.getType());
 
-            if (methodNode.isVoidMethod())  {
+                ClassNode closureClassNode = closureWriter.createClosureClass(classNode, rewrittenClosureExpression, Opcodes.ACC_PUBLIC);
+                classNode.getModule().addClass(closureClassNode);
 
-                MethodNode generatedMethodNode = dummyClass.addMethod(
-                        methodNode.getName(),
-                        modifiers,
-                        methodNode.getReturnType(),
-                        methodNode.getParameters(),
-                        methodNode.getExceptions(),
-                        new BlockStatement());
-
-                generatedMethodNode.setSynthetic(false);
-                generatedMethodNode.addAnnotations(methodNode.getAnnotations());
-            } else {
-
-                 MethodNode generatedMethodNode = dummyClass.addMethod(
-                        methodNode.getName(),
-                         modifiers,
-                        methodNode.getReturnType(),
-                        methodNode.getParameters(),
-                        methodNode.getExceptions(),
-                        new ReturnStatement(ConstantExpression.NULL));
-
-                generatedMethodNode.setSynthetic(false);
-                generatedMethodNode.addAnnotations(methodNode.getAnnotations());
+                annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(closureClassNode));
             }
         }
+        super.visitAnnotations(node);
     }
 }
