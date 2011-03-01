@@ -23,7 +23,6 @@
 package org.gcontracts.annotations.common;
 
 import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
-import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.annotations.meta.Precondition;
 import org.gcontracts.common.impl.NotNullAnnotationProcessor;
 

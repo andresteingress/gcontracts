@@ -5,7 +5,7 @@ import org.gcontracts.tests.basic.BaseTestClass
 /**
  * @author ast
  */
-class InterfaceInheritanceTests extends BaseTestClass {
+class SimpleInterfaceInheritanceTests extends BaseTestClass {
 
   def source_stackable = '''
 package tests
@@ -21,7 +21,11 @@ interface Stackable {
   void multi_push(def item1, def item2)
 }
 
-interface SomeOtherInterface extends Stackable {}
+interface SomeOtherInterface extends Stackable {
+
+  @Requires({ item != null })
+  void push(def item)
+}
 '''
 
   def source_stack = '''

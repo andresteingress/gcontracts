@@ -29,6 +29,7 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.classgen.asm.ClosureWriter;
+import org.gcontracts.domain.Postcondition;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
@@ -76,6 +77,8 @@ public class InterfaceVisitor extends BaseVisitor {
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName());
         if (annotationNodes.size() > 0)  {
             for (AnnotationNode annotationNode : annotationNodes)  {
+                boolean isPostcondition = AnnotationUtils.hasMetaAnnotations(annotationNode.getClassNode(), Postcondition.class.getName()).size() > 0;
+
                 ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
                 if (closureExpression == null) continue;
 
@@ -90,7 +93,7 @@ public class InterfaceVisitor extends BaseVisitor {
                 rewrittenClosureExpression.setVariableScope(closureExpression.getVariableScope());
                 rewrittenClosureExpression.setType(closureExpression.getType());
 
-                ClassNode closureClassNode = closureWriter.createClosureClass(classNode, methodNode, rewrittenClosureExpression, Opcodes.ACC_PUBLIC);
+                ClassNode closureClassNode = closureWriter.createClosureClass(classNode, methodNode, rewrittenClosureExpression, isPostcondition, Opcodes.ACC_PUBLIC);
                 classNode.getModule().addClass(closureClassNode);
 
                 annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(closureClassNode));
