@@ -81,7 +81,6 @@ public class InterfaceVisitor extends BaseVisitor {
 
                 List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
-
                 parameters.addAll(new ArrayList<Parameter>(Arrays.asList(methodNode.getParameters())));
 
                 ClosureExpression rewrittenClosureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), closureExpression.getCode());
@@ -91,7 +90,7 @@ public class InterfaceVisitor extends BaseVisitor {
                 rewrittenClosureExpression.setVariableScope(closureExpression.getVariableScope());
                 rewrittenClosureExpression.setType(closureExpression.getType());
 
-                ClassNode closureClassNode = closureWriter.createClosureClass(classNode, rewrittenClosureExpression, Opcodes.ACC_PUBLIC);
+                ClassNode closureClassNode = closureWriter.createClosureClass(classNode, methodNode, rewrittenClosureExpression, Opcodes.ACC_PUBLIC);
                 classNode.getModule().addClass(closureClassNode);
 
                 annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, new ClassExpression(closureClassNode));

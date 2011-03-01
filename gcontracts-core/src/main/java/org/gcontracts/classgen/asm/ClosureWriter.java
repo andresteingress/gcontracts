@@ -23,7 +23,7 @@ public class ClosureWriter {
 
     private int closureCount = 1;
 
-    public ClassNode createClosureClass(ClassNode classNode, ClosureExpression expression, int mods) {
+    public ClassNode createClosureClass(ClassNode classNode, MethodNode methodNode, ClosureExpression expression, int mods) {
         ClassNode outerClass = getOutermostClass(classNode);
         String name = outerClass.getName() + "$" + getClosureInnerName(outerClass, classNode);
 
@@ -31,7 +31,10 @@ public class ClosureWriter {
         removeParameter("old", parametersTemp);
         removeParameter("result", parametersTemp);
 
-        parametersTemp.add(new Parameter(ClassHelper.DYNAMIC_TYPE, "result"));
+        if (methodNode.getReturnType() != ClassHelper.VOID_TYPE)  {
+            parametersTemp.add(new Parameter(ClassHelper.DYNAMIC_TYPE, "result"));
+        }
+
         parametersTemp.add(new Parameter(ClassHelper.DYNAMIC_TYPE, "old"));
 
         Parameter[] parameters = parametersTemp.toArray(new Parameter[parametersTemp.size()]);

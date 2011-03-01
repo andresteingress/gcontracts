@@ -58,26 +58,6 @@ public class Contract {
         this.classInvariant = classInvariant;
     }
 
-    public void addInterfacePrecondition(final MethodNode methodNode, final Precondition precondition)  {
-        Validate.notNull(methodNode);
-        Validate.notNull(precondition);
-
-        MethodNode implementedMethodNode = classNode.getMethod(methodNode.getName(), methodNode.getParameters());
-        if (implementedMethodNode != null && !preconditions().containsKey(implementedMethodNode))  {
-            addPrecondition(implementedMethodNode, precondition);
-        }
-    }
-
-    public void addInterfacePostcondition(final MethodNode methodNode, final Postcondition postcondition)  {
-        Validate.notNull(methodNode);
-        Validate.notNull(postcondition);
-
-        MethodNode implementedMethodNode = classNode.getMethod(methodNode.getName(), methodNode.getParameters());
-        if (implementedMethodNode != null && !postconditions().containsKey(implementedMethodNode))  {
-            addPostcondition(implementedMethodNode, postcondition);
-        }
-    }
-
     public void addPrecondition(final MethodNode methodNode, final Precondition precondition)  {
         Validate.notNull(methodNode);
         Validate.notNull(precondition);
@@ -85,7 +65,7 @@ public class Contract {
         if (!preconditionMap.containsKey(methodNode))  {
             preconditionMap.put(methodNode, precondition);
         } else {
-            preconditionMap.get(methodNode).and(precondition);
+            preconditionMap.get(methodNode).or(precondition);
         }
     }
 

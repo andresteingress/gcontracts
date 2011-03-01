@@ -79,7 +79,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         }
     }
 
-    private void visitInterfaces(ClassNode classNode, ClassNode[] interfaces) {
+    private void visitInterfaces(final ClassNode classNode, final ClassNode[] interfaces) {
         for (ClassNode interfaceClassNode : interfaces)  {
             List<MethodNode> methodNodes = new ArrayList<MethodNode>();
             methodNodes.addAll(interfaceClassNode.getMethods());
@@ -90,6 +90,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 if (implementingMethodNode == null) continue;
 
                 final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(interfaceMethodNode, ContractElement.class.getName());
+
                 for (AnnotationNode annotationNode : annotationNodes)  {
                     final AnnotationProcessor annotationProcessor = createAnnotationProcessor(annotationNode);
 
@@ -105,7 +106,10 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                             closureArgumentList.addExpression(new VariableExpression(parameter));
                         }
 
-                        closureArgumentList.addExpression(new VariableExpression("result"));
+                        if (interfaceMethodNode.getReturnType() != ClassHelper.VOID_TYPE)  {
+                            closureArgumentList.addExpression(new VariableExpression("result"));
+                        }
+
                         closureArgumentList.addExpression(new VariableExpression("old"));
 
                         MethodCallExpression doCall = new MethodCallExpression(
@@ -122,6 +126,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                     }
                 }
             }
+
+            visitInterfaces(classNode, interfaceClassNode.getInterfaces());
         }
     }
 
