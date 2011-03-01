@@ -36,7 +36,7 @@ import org.objectweb.asm.Opcodes;
  */
 public class VariableGenerationUtility {
 
-    public static final String OLD_VARIABLES_METHOD = "computeOldVariables";
+    public static final String OLD_VARIABLES_METHOD = "$_gc_computeOldVariables";
 
     /**
      * Creates a synthetic method handling generation of the <tt>old</tt> variable map. If a super class declares
