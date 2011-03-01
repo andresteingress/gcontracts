@@ -126,6 +126,16 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                         );
 
                         annotationProcessor.process(pci, pci.contract(), implementingMethodNode, new BooleanExpression(doCall));
+
+                        // if the implementation method has no annotation, we need to set a dummy marker in order to find parent pre/postconditions
+                        if (AnnotationUtils.hasMetaAnnotations(implementingMethodNode, annotationNode.getClassNode().getName()).size() == 0)  {
+                            AnnotationNode annotationMarker = new AnnotationNode(annotationNode.getClassNode());
+                            annotationMarker.setMember(CLOSURE_ATTRIBUTE_NAME, ConstantExpression.NULL);
+                            annotationMarker.setRuntimeRetention(true);
+                            annotationMarker.setSourceRetention(false);
+
+                            implementingMethodNode.addAnnotation(annotationMarker);
+                        }
                     }
                 }
             }
@@ -141,7 +151,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
         for (AnnotationNode annotationNode : annotationNodes)  {
             AnnotationProcessor processor = createAnnotationProcessor(annotationNode);
-            if (processor == null) continue;
+            if (processor == null || !(annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClosureExpression)) continue;
 
             if (methodNode == null)  {
                 processor.process(pci, pci.contract(), annotatedNode, ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME)));
