@@ -19,6 +19,9 @@ interface Stackable {
 
   @Requires({ item1 != null && item2 != null })
   void multi_push(def item1, def item2)
+
+  @Ensures({ result != null && old != null })
+  def isEmpty()
 }
 '''
 
@@ -77,6 +80,10 @@ class Stack implements Stackable  {
   def void modifyClassInvariant()  {
     anotherName = null
   }
+
+  def isEmpty()  {
+    return list.size() == 0
+  }
 }
 '''
 
@@ -93,6 +100,13 @@ class Stack implements Stackable  {
     shouldFail AssertionError, {
         stack.push null
     }
+  }
+
+  void test_old_variable_in_postcondition()  {
+    add_class_to_classpath(source_stackable)
+    def stack = create_instance_of(source_stack)
+
+    assertTrue(stack.isEmpty())
   }
 
 }

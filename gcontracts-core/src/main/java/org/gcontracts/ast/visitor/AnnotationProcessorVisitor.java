@@ -31,7 +31,6 @@ import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
-import org.gcontracts.domain.Postcondition;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.ExpressionUtils;
@@ -96,7 +95,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                     final AnnotationProcessor annotationProcessor = createAnnotationProcessor(annotationNode);
 
                     if (annotationProcessor != null && annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClassExpression)  {
-                        boolean isPostcondition = AnnotationUtils.hasMetaAnnotations(annotationNode.getClassNode(), Postcondition.class.getName()).size() > 0;
+                        boolean isPostcondition = AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), org.gcontracts.annotations.meta.Postcondition.class.getName());
 
                         ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
                                 VariableExpression.THIS_EXPRESSION,

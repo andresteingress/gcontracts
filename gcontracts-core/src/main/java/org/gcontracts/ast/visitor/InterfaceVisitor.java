@@ -29,7 +29,6 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.classgen.asm.ClosureWriter;
-import org.gcontracts.domain.Postcondition;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
@@ -77,7 +76,7 @@ public class InterfaceVisitor extends BaseVisitor {
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName());
         if (annotationNodes.size() > 0)  {
             for (AnnotationNode annotationNode : annotationNodes)  {
-                boolean isPostcondition = AnnotationUtils.hasMetaAnnotations(annotationNode.getClassNode(), Postcondition.class.getName()).size() > 0;
+                boolean isPostcondition = AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), org.gcontracts.annotations.meta.Postcondition.class.getName());
 
                 ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
                 if (closureExpression == null) continue;
