@@ -47,6 +47,8 @@ public class ExpressionUtils {
      * @return the first {@link org.codehaus.groovy.ast.expr.Expression} found in the given {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      */
     public static BooleanExpression getBooleanExpression(ClosureExpression closureExpression)  {
+        if (closureExpression == null) return null;
+
         final BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
         final List<Statement> statementList = closureBlockStatement.getStatements();
 
