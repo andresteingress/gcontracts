@@ -22,12 +22,16 @@
  */
 package org.gcontracts.generation;
 
-import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.ClassHelper;
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.ConstructorNode;
+import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.gcontracts.ast.visitor.BaseVisitor;
 
 import java.util.List;
 
@@ -101,13 +105,17 @@ public class PostconditionGenerator extends BaseGenerator {
                 }
 
                 // Assign the return statement expression to a local variable of type Object
-                VariableExpression oldVariable = new VariableExpression("old");
+                final VariableExpression oldVariableExpression = new VariableExpression("old");
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
-                new DeclarationExpression(oldVariable,
+                new BinaryExpression(oldVariableExpression,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
 
-                methodBlock.getStatements().add(0, oldVariabeStatement);
+                final BlockStatement oldVariableIfBlock = new BlockStatement();
+                oldVariableIfBlock.addStatement(oldVariabeStatement);
+
+                methodBlock.getStatements().add(0, new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), oldVariableIfBlock, new BlockStatement()));
+                methodBlock.getStatements().add(0, new ExpressionStatement(new DeclarationExpression(oldVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.NULL)));
                 methodBlock.addStatements(postconditionCheck.getStatements());
                 if (returnStatement != null) methodBlock.addStatement(new ReturnStatement(resultVariable));
             } else if (method instanceof ConstructorNode) {
@@ -140,13 +148,17 @@ public class PostconditionGenerator extends BaseGenerator {
                 postconditionCheck.addStatement(assertionIfStatement);
 
                 // Assign the return statement expression to a local variable of type Object
-                VariableExpression oldVariable = new VariableExpression("old");
+                final VariableExpression oldVariableExpression = new VariableExpression("old");
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
-                new DeclarationExpression(oldVariable,
+                new BinaryExpression(oldVariableExpression,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
 
-                methodBlock.getStatements().add(0, oldVariabeStatement);
+                final BlockStatement oldVariableIfBlock = new BlockStatement();
+                oldVariableIfBlock.addStatement(oldVariabeStatement);
+
+                methodBlock.getStatements().add(0, new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), oldVariableIfBlock, new BlockStatement()));
+                methodBlock.getStatements().add(0, new ExpressionStatement(new DeclarationExpression(oldVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.NULL)));
                 methodBlock.addStatements(postconditionCheck.getStatements());
             }
         }
@@ -191,9 +203,9 @@ public class PostconditionGenerator extends BaseGenerator {
                 }
 
                 // Assign the return statement expression to a local variable of type Object
-                VariableExpression oldVariable = new VariableExpression("old");
+                VariableExpression oldVariableExpression = new VariableExpression("old");
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
-                new DeclarationExpression(oldVariable,
+                new DeclarationExpression(oldVariableExpression,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
 
@@ -210,9 +222,9 @@ public class PostconditionGenerator extends BaseGenerator {
                 if (methodCallToSuperPostcondition == null) return;
 
                 // Assign the return statement expression to a local variable of type Object
-                VariableExpression oldVariable = new VariableExpression("old");
+                VariableExpression oldVariableExpression = new VariableExpression("old");
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
-                new DeclarationExpression(oldVariable,
+                new DeclarationExpression(oldVariableExpression,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
                         new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
 
