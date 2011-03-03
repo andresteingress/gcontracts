@@ -56,10 +56,8 @@ class B extends A  {
   def void test_inherited_precondition()  {
     add_class_to_classpath source1
 
-    shouldFail AssertionError, {
-       def bInstance = create_instance_of(source2, ["test"])
-       bInstance.some_operation null
-    }
+    def bInstance = create_instance_of(source2, ["test"])
+    bInstance.some_operation null
   }
 
 }
