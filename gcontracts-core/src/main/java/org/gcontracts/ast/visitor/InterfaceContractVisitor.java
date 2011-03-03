@@ -26,8 +26,10 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClassExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.meta.ContractElement;
@@ -102,6 +104,7 @@ public class InterfaceContractVisitor extends BaseVisitor {
                 BlockStatement blockStatement = (BlockStatement) closureExpression.getCode();
                 blockStatement.getStatements().clear();
                 blockStatement.addStatement(AssertStatementCreationUtility.createInheritedAssertStatement(assertionType, methodNode, assertStatement));
+                blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
 
                 ClosureExpression rewrittenClosureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), blockStatement);
                 rewrittenClosureExpression.setSourcePosition(closureExpression);
