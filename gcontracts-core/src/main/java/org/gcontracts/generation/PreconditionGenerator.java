@@ -100,6 +100,9 @@ public class PreconditionGenerator extends BaseGenerator {
             AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPrecondition, Token.newSymbol(Types.LOGICAL_OR, -1, -1));
         }
 
+        // if this is an abstract method, just add the precondition method and we're done
+        if (method.isAbstract()) return;
+
         modifiedMethodCode.addStatement(assertionIfStatement);
         if (method.getCode() instanceof BlockStatement)  {
 

@@ -89,6 +89,8 @@ public class PostconditionGenerator extends BaseGenerator {
                 final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertionIfStatement.getLineNumber(), true, returnStatement != null);
                 if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
 
+                if (method.isAbstract()) return;
+
                 postconditionCheck.addStatement(assertionIfStatement);
 
                 VariableExpression resultVariable = null;
@@ -129,6 +131,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertionIfStatement.getLineNumber(), false, false);
 
                 if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
+                if (method.isAbstract()) return;
 
                 postconditionCheck.addStatement(assertionIfStatement);
                 methodBlock.addStatements(postconditionCheck.getStatements());
@@ -144,6 +147,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 final MethodCallExpression methodCallToSuperPostcondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPostcondition(method, assertionIfStatement.getLineNumber(), true, false);
 
                 if (methodCallToSuperPostcondition != null) AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPostcondition, Token.newSymbol(Types.LOGICAL_AND, -1, -1));
+                if (method.isAbstract()) return;
 
                 postconditionCheck.addStatement(assertionIfStatement);
 
