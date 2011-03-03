@@ -69,6 +69,7 @@ public abstract class Assertion<T extends Assertion> {
                                 other.booleanExpression()
                         )
                 );
+        newBooleanExpression.setSourcePosition(booleanExpression());
 
         renew(newBooleanExpression);
     }
@@ -84,6 +85,7 @@ public abstract class Assertion<T extends Assertion> {
                                 other.booleanExpression()
                         )
                 );
+        newBooleanExpression.setSourcePosition(booleanExpression());
 
         renew(newBooleanExpression);
     }

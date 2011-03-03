@@ -16,14 +16,11 @@ interface Stackable {
 
   @Requires({ item != null })
   void push(def item)
-
-  @Requires({ item1 != null && item2 != null })
-  void multi_push(def item1, def item2)
 }
 
 interface SomeOtherInterface extends Stackable {
 
-  @Requires({ item != null })
+  @Requires({ item > 1 })
   void push(def item)
 }
 '''
@@ -48,40 +45,10 @@ class Stack implements SomeOtherInterface  {
     this.list = list
   }
 
+  @Requires({ item > 2 })
   @Ensures({ list[-1] == item })
   def void push(def item)  {
     list.add item
-  }
-
-  def void multi_push(def item1, def item2)  {
-    push item1
-    push item2
-  }
-
-//  @Requires({ list.size() > 0 })
-//  @Ensures({ result != null })
-//  def Object pop()  {
-//    list[-1]
-//  }
-
-  @Ensures({ result -> result == list.size() })
-  def int size()  {
-    return list.size()
-  }
-
-  @Ensures({ result -> comp1 != null && comp2 != null && result > 0 })
-  def int size(def comp1, comp2)  {
-      return comp1 + comp2
-  }
-
-  @Ensures({ result -> result == 'tostring'})
-  @Override
-  def String toString()  {
-    return 'tostring'
-  }
-
-  def void modifyClassInvariant()  {
-    anotherName = null
   }
 }
 '''
@@ -126,6 +93,16 @@ class C extends B {
     shouldFail AssertionError, {
         stack.push null
     }
+
+    shouldFail AssertionError, {
+        stack.push 1
+    }
+
+    shouldFail AssertionError, {
+        stack.push 2
+    }
+
+    stack.push(null)
   }
 
   void test_postcondition_in_indirect_parent_interface()  {

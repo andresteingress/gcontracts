@@ -23,14 +23,19 @@
 package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClassExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.stmt.AssertStatement;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.classgen.asm.ClosureWriter;
+import org.gcontracts.generation.AssertStatementCreationUtility;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
+import org.gcontracts.util.ExpressionUtils;
 import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
@@ -38,10 +43,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>
- * Visits interface and looks for <tt>@Requires</tt> or <tt>@Ensures</tt> and adds a dummy implementation
- * of that interface if pre- or postconditions have been found.
- * </p>
+ * Visits interfaces and looks for <tt>@Requires</tt> or <tt>@Ensures</tt> and creates {@link groovy.lang.Closure}
+ * classes for the annotation closures.<p/>
+ *
+ * The annotation closure classes are used later on to check interface contract pre- and post-conditions in
+ * implementation classes.
  *
  * @see org.gcontracts.annotations.Requires
  * @see org.gcontracts.annotations.Ensures
@@ -87,7 +93,17 @@ public class InterfaceContractVisitor extends BaseVisitor {
 
                 parameters.addAll(new ArrayList<Parameter>(Arrays.asList(methodNode.getParameters())));
 
-                ClosureExpression rewrittenClosureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), closureExpression.getCode());
+                final BooleanExpression booleanExpression = ExpressionUtils.getBooleanExpression(closureExpression);
+                if (booleanExpression == null) continue;
+
+                final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement(booleanExpression);
+                final String assertionType = isPostcondition ? "postcondition" : "precondition";
+
+                BlockStatement blockStatement = (BlockStatement) closureExpression.getCode();
+                blockStatement.getStatements().clear();
+                blockStatement.addStatement(AssertStatementCreationUtility.createInheritedAssertStatement(assertionType, methodNode, assertStatement));
+
+                ClosureExpression rewrittenClosureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), blockStatement);
                 rewrittenClosureExpression.setSourcePosition(closureExpression);
                 rewrittenClosureExpression.setDeclaringClass(closureExpression.getDeclaringClass());
                 rewrittenClosureExpression.setSynthetic(true);

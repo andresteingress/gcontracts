@@ -81,7 +81,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 if (returnStatement != null) statements.remove(statements.size() - 1);
 
                 final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, booleanExpression);
-                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatementFromGeneratedTryCatch(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
                 AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, true, returnStatement != null);
@@ -123,7 +123,7 @@ public class PostconditionGenerator extends BaseGenerator {
             } else if (method instanceof ConstructorNode) {
 
                 final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, booleanExpression);
-                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatementFromGeneratedTryCatch(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
                 AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, false, false);
@@ -139,7 +139,7 @@ public class PostconditionGenerator extends BaseGenerator {
             } else {
 
                 final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("postcondition", method, booleanExpression);
-                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatement(assertionIfStatement);
+                final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatementFromGeneratedTryCatch(assertionIfStatement);
 
                 // backup the current assertion in a synthetic method
                 AssertStatementCreationUtility.addAssertionMethodNode("postcondition", method, assertionStatement, true, false);

@@ -62,8 +62,6 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
     public void visitClass(ClassNode type) {
         if (!CandidateChecks.isContractsCandidate(type)) return;
 
-        visitInterfaces(type, type.getInterfaces());
-
         visitAnnotatedNode(type, null, null);
 
         List<MethodNode> methodNodes = new ArrayList<MethodNode>();
@@ -77,6 +75,10 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 visitAnnotatedNode(parameter, type, methodNode);
             }
         }
+
+        // the prescedence is important - the local assertion needs to be the first to be evaulated in
+        // the boolean expression (because interface annotation closures itself contain the assert statement)
+        visitInterfaces(type, type.getInterfaces());
     }
 
     private void visitInterfaces(final ClassNode classNode, final ClassNode[] interfaces) {
@@ -125,7 +127,10 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                                 closureArgumentList
                         );
 
-                        annotationProcessor.process(pci, pci.contract(), implementingMethodNode, new BooleanExpression(doCall));
+                        final BooleanExpression booleanExpression = new BooleanExpression(doCall);
+                        booleanExpression.setSourcePosition(annotationNode);
+
+                        annotationProcessor.process(pci, pci.contract(), implementingMethodNode, booleanExpression);
 
                         // if the implementation method has no annotation, we need to set a dummy marker in order to find parent pre/postconditions
                         if (AnnotationUtils.hasMetaAnnotations(implementingMethodNode, annotationNode.getClassNode().getName()).size() == 0)  {

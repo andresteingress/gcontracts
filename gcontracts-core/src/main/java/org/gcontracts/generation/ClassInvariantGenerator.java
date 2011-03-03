@@ -61,7 +61,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
         BooleanExpression classInvariantExpression = addCallsToSuperClassInvariants(type, classInvariant);
 
         final BlockStatement assertBlockStatement = new BlockStatement();
-        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getInvariantAssertionStatement(type, classInvariantExpression);
+        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getAssertionStatement(classInvariantExpression);
         if (isDefaultInvariant)  {
             // set a dummy message expression in order to avoid NP in Groovy 1.8 rc1
             invariantAssertionStatement.setMessageExpression(new ConstantExpression(""));

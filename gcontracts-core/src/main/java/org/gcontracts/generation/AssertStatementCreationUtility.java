@@ -22,7 +22,6 @@
  */
 package org.gcontracts.generation;
 
-import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
@@ -52,34 +51,16 @@ import java.util.List;
 public final class AssertStatementCreationUtility {
 
     /**
-     * Reusable method for creating assert statements for the given <tt>invariantField</tt>.
+     * Reusable method for creating assert statements for the given <tt>booleanExpression</tt>.
      *
-     * @param classNode the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
+     * @param booleanExpression the assertion's {@link org.codehaus.groovy.ast.expr.BooleanExpression}
      *
      * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      */
-    @Deprecated
-    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final ClosureExpression closureExpression)  {
-        final Expression expression = getFirstExpression(closureExpression);
-        if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
+    public static AssertStatement getAssertionStatement(final BooleanExpression booleanExpression)  {
 
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression));
-        assertStatement.setLineNumber(closureExpression.getLineNumber());
-        assertStatement.setColumnNumber(closureExpression.getColumnNumber());
-        assertStatement.setLastLineNumber(closureExpression.getLastLineNumber());
-        assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
-        
-        return assertStatement;
-    }
-
-    public static AssertStatement getInvariantAssertionStatement(final ClassNode classNode, final BooleanExpression closureExpression)  {
-
-        final AssertStatement assertStatement = new AssertStatement(closureExpression);
-        assertStatement.setLineNumber(closureExpression.getLineNumber());
-        assertStatement.setColumnNumber(closureExpression.getColumnNumber());
-        assertStatement.setLastLineNumber(closureExpression.getLastLineNumber());
-        assertStatement.setLastColumnNumber(closureExpression.getLastColumnNumber());
+        final AssertStatement assertStatement = new AssertStatement(booleanExpression);
+        assertStatement.setSourcePosition(booleanExpression);
 
         return assertStatement;
     }
@@ -97,31 +78,16 @@ public final class AssertStatementCreationUtility {
     }
 
     /**
-     * Reusable method for creating assert statements for the given <tt>closureExpression</tt>, injected in the
+     * Reusable method for creating assert statements for the given <tt>booleanExpression</tt>, injected in the
      * given <tt>method</tt> and with optional closure parameters.
      *
      * @param assertionType the name of the constraint, used for assertion messages
      * @param method the current {@link org.codehaus.groovy.ast.MethodNode}
-     * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
+     * @param booleanExpression the assertion's {@link org.codehaus.groovy.ast.expr.BooleanExpression}
      *
      * @return a new {@link org.codehaus.groovy.ast.stmt.IfStatement} which holds the assertion
      */
-    @Deprecated
-    public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, ClosureExpression closureExpression) {
-
-        final Expression expression = getFirstExpression(closureExpression);
-        if (expression == null) throw new GroovyBugError("Assertion closure does not contain assertion expression!");
-
-        final AssertStatement assertStatement = new AssertStatement(new BooleanExpression(expression));
-        assertStatement.setSourcePosition(closureExpression);
-
-        final BlockStatement assertionBlockStatement = new BlockStatement();
-        assertionBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<" + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement));
-
-        return new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertionBlockStatement, new BlockStatement());
-    }
-
-    public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, BooleanExpression booleanExpression) {
+    public static IfStatement getAssertionStatement(final String assertionType, MethodNode method, final BooleanExpression booleanExpression) {
 
         final AssertStatement assertStatement = new AssertStatement(booleanExpression);
         assertStatement.setSourcePosition(booleanExpression);
@@ -138,7 +104,7 @@ public final class AssertStatementCreationUtility {
      * @param stmt the statement to read the {@link org.codehaus.groovy.ast.stmt.AssertStatement}
      * @return the {@link org.codehaus.groovy.ast.stmt.AssertStatement} or <tt>null</tt>
      */
-    public static AssertStatement getAssertStatement(final Statement stmt)  {
+    public static AssertStatement getAssertStatementFromGeneratedTryCatch(final Statement stmt)  {
         if (!(stmt instanceof IfStatement)) return null;
 
         IfStatement ifStatement = (IfStatement) stmt;
@@ -172,7 +138,7 @@ public final class AssertStatementCreationUtility {
         newAssertStatement.setSourcePosition(assertStatement);
         newAssertStatement.setMessageExpression(ConstantExpression.NULL);
         
-        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<inherited " + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", newAssertStatement));
+        assertBlockStatement.addStatement(createInheritedAssertStatement(assertionType, method, newAssertStatement));
 
         // add return value "true" so valid assertions in sub assertion statements get through
         methodBlockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
@@ -197,6 +163,19 @@ public final class AssertStatementCreationUtility {
 
         final MethodNode preconditionMethodNode = declaringClass.addMethod(assertionMethodName, Opcodes.ACC_PROTECTED, ClassHelper.Boolean_TYPE, parameterArray, ClassNode.EMPTY_ARRAY, methodBlockStatement);
         preconditionMethodNode.setSynthetic(true);
+    }
+
+    /**
+     * Creates a try-catch block for the given <tt>assertStatement</tt> where the assertion message contains
+     * the message for inherited assertions.
+     *
+     * @param assertionType  either "precondition" or "postcondition"
+     * @param method the current {@link MethodNode}
+     * @param assertStatement the {@link AssertStatement}
+     * @return  the generated {@link TryCatchStatement}
+     */
+    public static Statement createInheritedAssertStatement(String assertionType, MethodNode method, AssertStatement assertStatement) {
+        return TryCatchBlockGenerator.generateTryCatchStatement("precondition".equals(assertionType) ? ClassHelper.makeWithoutCaching(PreconditionViolation.class) : ClassHelper.makeWithoutCaching(PostconditionViolation.class), "<inherited " + assertionType + "> " + method.getDeclaringClass().getName() + "." + method.getName() + "(" + getMethodParameterString(method) + ")\n\n", assertStatement);
     }
 
     /**
