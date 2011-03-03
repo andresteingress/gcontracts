@@ -40,6 +40,6 @@ public class EnsuresAnnotationProcessor extends AnnotationProcessor {
         if (!processingContextInformation.isPostconditionsEnabled()) return;
         if (booleanExpression == null) return;
 
-        contract.addPostcondition((MethodNode) annotatedNode, new Postcondition(booleanExpression));
+        contract.postconditions().and((MethodNode) annotatedNode, new Postcondition(booleanExpression));
     }
 }

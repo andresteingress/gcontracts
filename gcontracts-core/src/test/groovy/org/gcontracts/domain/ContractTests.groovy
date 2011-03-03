@@ -36,7 +36,7 @@ class ContractTests extends TestCase {
         Contract contract = new Contract(classNode)
 
         Precondition precondition = new Precondition(new BooleanExpression(new ConstantExpression(true)))
-        contract.addPrecondition(classNode.getMethod("some_method", [] as Parameter[]), precondition)
+        contract.preconditions().or(classNode.getMethod("some_method", [] as Parameter[]), precondition)
 
         assertEquals(1, contract.preconditions().size())
     }
@@ -48,8 +48,8 @@ class ContractTests extends TestCase {
         Precondition precondition1 = new Precondition(new BooleanExpression(new ConstantExpression(true)))
         Precondition precondition2 = new Precondition(new BooleanExpression(new ConstantExpression(true)))
 
-        contract.addPrecondition(methodNode, precondition1)
-        contract.addPrecondition(methodNode, precondition2)
+        contract.preconditions().or(methodNode, precondition1)
+        contract.preconditions().or(methodNode, precondition2)
 
         assertEquals(1, contract.preconditions().size())
         assertTrue(contract.preconditions().get(methodNode).booleanExpression().expression.operation.type == Types.LOGICAL_OR)
@@ -62,10 +62,25 @@ class ContractTests extends TestCase {
         Postcondition postcondition = new Postcondition(new BooleanExpression(new ConstantExpression(true)))
         Postcondition postcondition1 = new Postcondition(new BooleanExpression(new ConstantExpression(true)))
 
-        contract.addPostcondition(methodNode, postcondition)
-        contract.addPostcondition(methodNode, postcondition1)
+        contract.postconditions().and(methodNode, postcondition)
+        contract.postconditions().and(methodNode, postcondition1)
 
         assertEquals(1, contract.postconditions().size())
         assertTrue(contract.postconditions().get(methodNode).booleanExpression().expression.operation.type == Types.LOGICAL_AND)
     }
+
+    void test_joining_preconditions()  {
+
+        Contract contract = new Contract(classNode)
+
+        Precondition precondition1 = new Precondition(new BooleanExpression(new ConstantExpression(true)))
+        Precondition precondition2 = new Precondition(new BooleanExpression(new ConstantExpression(true)))
+
+        contract.preconditions().join(methodNode, precondition1)
+        contract.preconditions().join(methodNode, precondition2)
+
+        assertEquals(1, contract.preconditions().size())
+        assertTrue(contract.preconditions().get(methodNode).booleanExpression().expression.operation.type == Types.LOGICAL_AND)
+    }
+
 }

@@ -156,12 +156,16 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
         for (AnnotationNode annotationNode : annotationNodes)  {
             AnnotationProcessor processor = createAnnotationProcessor(annotationNode);
-            if (processor == null || !(annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClosureExpression)) continue;
+            if (processor == null) continue;
 
-            if (methodNode == null)  {
-                processor.process(pci, pci.contract(), annotatedNode, ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME)));
+            if (annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClosureExpression)  {
+                if (methodNode == null)  {
+                    processor.process(pci, pci.contract(), annotatedNode, ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME)));
+                } else {
+                    processor.process(pci, pci.contract(), annotatedNode, methodNode, ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME)));
+                }
             } else {
-                processor.process(pci, pci.contract(), annotatedNode, methodNode, ExpressionUtils.getBooleanExpression((ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME)));
+                processor.process(pci, pci.contract(), annotatedNode, methodNode);
             }
         }
     }

@@ -32,6 +32,7 @@ import org.gcontracts.domain.Contract;
  */
 public abstract class AnnotationProcessor {
 
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final MethodNode methodNode) {}
     public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final BooleanExpression booleanExpression) {}
     public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final MethodNode methodNode, final BooleanExpression booleanExpression) {}
 }

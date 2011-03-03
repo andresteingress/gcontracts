@@ -64,11 +64,11 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
     public void visitClass(ClassNode type) {
         addClassInvariant(type, contract.classInvariant());
 
-        for (Map.Entry<MethodNode, Precondition> entry : contract.preconditions().entrySet())  {
+        for (Map.Entry<MethodNode, Precondition> entry : contract.preconditions())  {
             addPrecondition(entry.getKey(), entry.getValue());
         }
 
-        for (Map.Entry<MethodNode, Postcondition> entry : contract.postconditions().entrySet())  {
+        for (Map.Entry<MethodNode, Postcondition> entry : contract.postconditions())  {
             addPostcondition(entry.getKey(), entry.getValue());
         }
 

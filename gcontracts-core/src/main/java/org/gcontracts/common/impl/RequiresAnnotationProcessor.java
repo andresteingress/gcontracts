@@ -40,6 +40,6 @@ public class RequiresAnnotationProcessor extends AnnotationProcessor {
         if (!processingContextInformation.isPreconditionsEnabled()) return;
         if (booleanExpression == null) return;
 
-        contract.addPrecondition((MethodNode) annotatedNode, new Precondition(booleanExpression));
+        contract.preconditions().or((MethodNode) annotatedNode, new Precondition(booleanExpression));
     }
 }
