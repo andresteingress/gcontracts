@@ -30,7 +30,6 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.ast.visitor.*;
-import org.gcontracts.ast.visitor.AnnotationProcessorVisitor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 
@@ -55,6 +54,17 @@ import java.util.List;
 public class GContractsASTTransformation extends BaseASTTransformation {
 
     /**
+     * Pregeneration of annotation closures to closure classes (needs to be done manually before Groovy 1.8).
+     */
+    private void generateAnnotationClosureClasses(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
+        final AnnotationClosureVisitor annotationClosureVisitor = new AnnotationClosureVisitor(unit, source);
+
+        for (final ClassNode classNode : classNodes)  {
+            annotationClosureVisitor.visitClass(classNode);
+        }
+    }
+
+    /**
      * {@link org.codehaus.groovy.transform.ASTTransformation#visit(org.codehaus.groovy.ast.ASTNode[], org.codehaus.groovy.control.SourceUnit)}
      */
     public void visit(ASTNode[] nodes, SourceUnit unit) {
@@ -63,14 +73,18 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         ReaderSource source = getReaderSource(unit);
         final List<ClassNode> classNodes = new ArrayList<ClassNode>(moduleNode.getClasses());
 
-        pregenerateClosureAnnotations(unit, source, classNodes);
+        generateAnnotationClosureClasses(unit, source, classNodes);
+
+        // at this point all classes in this module should not contain closure expressions as annotation arguments
+        final ConfiguratorSetupVisitor configuratorSetupVisitor = new ConfiguratorSetupVisitor(unit, source);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
+            // there is nothing to do for interfaces
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
             final ProcessingContextInformation pci = new ProcessingContextInformation(classNode, unit, source);
 
-            new ConfiguratorSetupVisitor(unit, source).visitClass(classNode);
+            configuratorSetupVisitor.visitClass(classNode);
 
             new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
 
@@ -78,20 +92,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
             new DomainModelInjectionVisitor(unit, source, pci).visitClass(classNode);
 
             new LifecycleAfterTransformationVisitor(unit, source, pci).visitClass(classNode);
-
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
-            new ContractElementErasingVisitor(unit, source).visitClass(classNode);
-        }
-    }
-
-    /**
-     * Pregeneration of annotation closures to closure classes (needs to be done manually before Groovy 1.8).
-     */
-    private void pregenerateClosureAnnotations(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
-        for (final ClassNode classNode : classNodes)  {
-            if (!CandidateChecks.isInterfaceContractsCandidate(classNode)) continue;
-
-            new InterfaceContractVisitor(unit, source).visitClass(classNode);
         }
     }
 }

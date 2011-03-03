@@ -59,8 +59,8 @@ class ContractTests extends TestCase {
 
         Contract contract = new Contract(classNode)
 
-        Postcondition postcondition = new Postcondition(new BooleanExpression(new ConstantExpression(true)))
-        Postcondition postcondition1 = new Postcondition(new BooleanExpression(new ConstantExpression(true)))
+        Postcondition postcondition = new Postcondition(new BooleanExpression(new ConstantExpression(true)), false)
+        Postcondition postcondition1 = new Postcondition(new BooleanExpression(new ConstantExpression(true)), false)
 
         contract.postconditions().and(methodNode, postcondition)
         contract.postconditions().and(methodNode, postcondition1)

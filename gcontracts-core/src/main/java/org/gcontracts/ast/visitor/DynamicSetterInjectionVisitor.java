@@ -23,11 +23,9 @@
 package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.BinaryExpression;
-import org.codehaus.groovy.ast.expr.FieldExpression;
-import org.codehaus.groovy.ast.expr.VariableExpression;
+import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.IfStatement;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
@@ -35,7 +33,6 @@ import org.codehaus.groovy.runtime.MetaClassHelper;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.generation.BaseGenerator;
-import org.gcontracts.generation.AssertStatementCreationUtility;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
@@ -55,7 +52,7 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
 
     private static final String SPRING_STEREOTYPE_PACKAGE = "org.springframework.stereotype";
 
-    private IfStatement invariantAssertionBlockStatement;
+    private BlockStatement invariantAssertionBlockStatement;
 
     public DynamicSetterInjectionVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
@@ -98,9 +95,10 @@ public class DynamicSetterInjectionVisitor extends BaseVisitor {
         final MethodNode invariantMethodNode = BaseGenerator.getInvariantMethodNode(classNode);
         if (invariantMethodNode == null || AnnotationUtils.hasAnnotationOfType(classNode, SPRING_STEREOTYPE_PACKAGE)) return;
 
-        invariantAssertionBlockStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethodNode);
-
-        if (invariantAssertionBlockStatement == null) return;
+        invariantAssertionBlockStatement = new BlockStatement();
+        invariantAssertionBlockStatement.addStatement(new ExpressionStatement(
+                new MethodCallExpression(VariableExpression.THIS_EXPRESSION, invariantMethodNode.getName(), ArgumentListExpression.EMPTY_ARGUMENTS)
+        ));
 
         List<ConstructorNode> declaredConstructors = classNode.getDeclaredConstructors();
         if (declaredConstructors == null || declaredConstructors.isEmpty())  {

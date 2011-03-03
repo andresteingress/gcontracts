@@ -39,10 +39,20 @@ import org.codehaus.groovy.syntax.Types;
  */
 public class TryCatchBlockGenerator {
 
-   public static Statement generateTryCatchStatement(final ClassNode assertionErrorClass, final String message, final AssertStatement assertStatement)  {
+   public static BlockStatement generateTryCatchBlock(final ClassNode assertionErrorClass, final String message, final AssertStatement assertStatement)  {
 
-       final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertStatement, new EmptyStatement());
-       final BlockStatement catchBlock = new BlockStatement();
+       final String $_gc_closure_result = "$_gc_closure_result";
+
+       final VariableExpression variableExpression = new VariableExpression($_gc_closure_result, ClassHelper.Boolean_TYPE);
+
+       // if the assert statement is successful the return variable will be true else false
+       final BlockStatement overallBlock = new BlockStatement();
+       overallBlock.addStatement(new ExpressionStatement(new DeclarationExpression(variableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
+
+       final BlockStatement assertBlockStatement = new BlockStatement();
+       assertBlockStatement.addStatement(assertStatement);
+       assertBlockStatement.addStatement(new ExpressionStatement(new BinaryExpression(variableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.TRUE)));
+
        final Class powerAssertionErrorClass = loadPowerAssertionErrorClass();
        
        if (powerAssertionErrorClass == null) throw new GroovyBugError("GContracts >= 1.1.2 needs Groovy 1.7 or above!");
@@ -56,15 +66,17 @@ public class TryCatchBlockGenerator {
        )));
 
 
-       ThrowStatement throwStatement = new ThrowStatement(new VariableExpression("newError", assertionErrorClass));
-
+       final BlockStatement catchBlock = new BlockStatement();
        catchBlock.addStatement(expr);
        catchBlock.addStatement(exp2);
-       catchBlock.addStatement(throwStatement);
 
+       final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertBlockStatement, new EmptyStatement());
        tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error"), catchBlock));
 
-       return tryCatchStatement;
+       overallBlock.addStatement(tryCatchStatement);
+       overallBlock.addStatement(new ReturnStatement(variableExpression));
+
+       return overallBlock;
    }
 
     private static Class loadPowerAssertionErrorClass() {

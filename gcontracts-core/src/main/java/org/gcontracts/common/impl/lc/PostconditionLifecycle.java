@@ -23,6 +23,7 @@
 package org.gcontracts.common.impl.lc;
 
 import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.gcontracts.common.base.BaseLifecycle;
 import org.gcontracts.common.spi.ProcessingContextInformation;
@@ -35,13 +36,22 @@ import org.gcontracts.generation.PostconditionGenerator;
 public class PostconditionLifecycle extends BaseLifecycle {
 
     @Override
+    public void afterProcessingContructorNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode constructorNode) {
+        generatePostcondition(processingContextInformation, classNode, constructorNode);
+    }
+
+    @Override
     public void afterProcessingMethodNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {
+        generatePostcondition(processingContextInformation, classNode, methodNode);
+    }
+
+    private void generatePostcondition(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {
         if (!processingContextInformation.isPostconditionsEnabled()) return;
         if (!CandidateChecks.isPreOrPostconditionCandidate(classNode, methodNode)) return;
 
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(processingContextInformation.readerSource());
 
-        if (processingContextInformation.contract().postconditions().contains(methodNode))  {
+        if (processingContextInformation.contract().postconditions().contains(methodNode) && !(methodNode instanceof ConstructorNode))  {
             postconditionGenerator.addOldVariablesMethod(classNode);
         } else {
             postconditionGenerator.generateDefaultPostconditionStatement(classNode, methodNode);

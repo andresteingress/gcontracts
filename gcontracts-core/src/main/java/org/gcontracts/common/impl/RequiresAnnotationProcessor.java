@@ -22,7 +22,7 @@
  */
 package org.gcontracts.common.impl;
 
-import org.codehaus.groovy.ast.AnnotatedNode;
+import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.gcontracts.common.spi.AnnotationProcessor;
@@ -36,10 +36,10 @@ import org.gcontracts.domain.Precondition;
 public class RequiresAnnotationProcessor extends AnnotationProcessor {
 
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, BooleanExpression booleanExpression) {
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, ClassNode classNode, MethodNode methodNode, BooleanExpression booleanExpression) {
         if (!processingContextInformation.isPreconditionsEnabled()) return;
         if (booleanExpression == null) return;
 
-        contract.preconditions().or((MethodNode) annotatedNode, new Precondition(booleanExpression));
+        contract.preconditions().or(methodNode, new Precondition(booleanExpression));
     }
 }

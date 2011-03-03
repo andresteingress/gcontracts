@@ -22,8 +22,9 @@
  */
 package org.gcontracts.common.spi;
 
-import org.codehaus.groovy.ast.AnnotatedNode;
+import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.gcontracts.domain.Contract;
 
@@ -32,7 +33,7 @@ import org.gcontracts.domain.Contract;
  */
 public abstract class AnnotationProcessor {
 
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final MethodNode methodNode) {}
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final BooleanExpression booleanExpression) {}
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final AnnotatedNode annotatedNode, final MethodNode methodNode, final BooleanExpression booleanExpression) {}
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final BooleanExpression booleanExpression) {}
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final BooleanExpression booleanExpression) {}
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter, final BooleanExpression booleanExpression) {}
 }

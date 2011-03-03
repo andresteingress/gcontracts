@@ -22,10 +22,21 @@
  */
 package org.gcontracts.generation;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.ast.stmt.IfStatement;
+import org.codehaus.groovy.ast.stmt.TryCatchStatement;
 import org.codehaus.groovy.control.io.ReaderSource;
+import org.codehaus.groovy.syntax.Token;
+import org.codehaus.groovy.syntax.Types;
+import org.gcontracts.ViolationTracker;
+import org.gcontracts.ast.visitor.BaseVisitor;
+import org.gcontracts.util.AnnotationUtils;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
 
 /**
  * <p>
@@ -42,7 +53,7 @@ public abstract class BaseGenerator {
 
     public BaseGenerator(final ReaderSource source)  {
         this.source = source;
-    }                                     
+    }
 
     /**
      * @param classNode the {@link org.codehaus.groovy.ast.ClassNode} used to look up the invariant closure field
@@ -60,5 +71,97 @@ public abstract class BaseGenerator {
      */
     public static MethodNode getInvariantMethodNode(final ClassNode classNode)  {
         return classNode.getDeclaredMethod(getInvariantMethodName(classNode), Parameter.EMPTY_ARRAY);
+    }
+
+    protected BlockStatement wrapAssertionBooleanExpression(BooleanExpression classInvariantExpression) {
+        final BlockStatement assertBlockStatement = new BlockStatement();
+        final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
+
+        assertBlockStatement.addStatement(new ExpressionStatement(
+               new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "init", ArgumentListExpression.EMPTY_ARGUMENTS))
+        );
+
+        final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
+        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result,
+                Token.newSymbol(Types.ASSIGN, -1, -1),
+                classInvariantExpression
+        )));
+
+        BlockStatement finallyBlockStatement = new BlockStatement();
+        finallyBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "deinit", ArgumentListExpression.EMPTY_ARGUMENTS)));
+
+        assertBlockStatement.addStatement(
+                new IfStatement(
+                        new BooleanExpression(
+                                new BinaryExpression(
+                                        new NotExpression($_gc_result),
+                                        Token.newSymbol(Types.LOGICAL_AND, -1, -1),
+                                        new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "violationsOccured", ArgumentListExpression.EMPTY_ARGUMENTS)
+                                )
+                        ),
+                        new TryCatchStatement(
+                                new ExpressionStatement(new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "rethrowFirst", ArgumentListExpression.EMPTY_ARGUMENTS)),
+                                finallyBlockStatement
+                        ),
+                        new BlockStatement()
+                )
+        );
+
+        final BlockStatement blockStatement = new BlockStatement();
+        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
+
+        return blockStatement;
+    }
+
+    // TODO: what about constructor method nodes - does it find a constructor node in the super class?
+    protected BooleanExpression addCallsToSuperMethodNodeAnnotationClosure(final ClassNode type, final MethodNode methodNode, final Class<? extends Annotation> annotationType, BooleanExpression booleanExpression, boolean isPostcondition)  {
+
+        final List<AnnotationNode> nextContractElementAnnotations = AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(type.getSuperClass(), methodNode, ClassHelper.makeWithoutCaching(annotationType));
+        if (nextContractElementAnnotations.isEmpty()) return booleanExpression;
+
+        for (AnnotationNode nextContractElementAnnotation : nextContractElementAnnotations)  {
+            ClassExpression classExpression = (ClassExpression) nextContractElementAnnotation.getMember(BaseVisitor.CLOSURE_ATTRIBUTE_NAME);
+            if (classExpression == null) continue;
+
+            ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
+                    VariableExpression.THIS_EXPRESSION,
+                    VariableExpression.THIS_EXPRESSION);
+
+
+            ArgumentListExpression callArgumentList = new ArgumentListExpression();
+            for (Parameter parameter : methodNode.getParameters())  {
+                callArgumentList.addExpression(new VariableExpression(parameter));
+            }
+
+            if (isPostcondition && methodNode.getReturnType() != ClassHelper.VOID_TYPE && !(methodNode instanceof ConstructorNode))  {
+                callArgumentList.addExpression(new VariableExpression("result"));
+            }
+
+            if (isPostcondition && !(methodNode instanceof ConstructorNode)) {
+                callArgumentList.addExpression(new VariableExpression("old"));
+            }
+
+            MethodCallExpression doCall = new MethodCallExpression(
+                    new MethodCallExpression(
+                            classExpression,
+                            "newInstance",
+                            closureConstructorArgumentList
+                    ),
+                    "call",
+                    callArgumentList
+            );
+
+            final BooleanExpression rightExpression = new BooleanExpression(doCall);
+            booleanExpression.setSourcePosition(nextContractElementAnnotation);
+
+            booleanExpression = new BooleanExpression(
+                    new BinaryExpression(
+                            booleanExpression,
+                            isPostcondition ? Token.newSymbol(Types.LOGICAL_AND, -1, -1) : Token.newSymbol(Types.LOGICAL_OR, -1, -1),
+                            rightExpression)
+            );
+        }
+
+        return booleanExpression;
     }
 }

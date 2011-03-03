@@ -75,7 +75,8 @@ class Descendant extends Parent {
 '''
 
   def void test_redefined_precondition() throws Exception {
-    create_instance_of(source_parent)
+    // create_instance_of(source_parent)
+      add_class_to_classpath(source_parent)
     def child = create_instance_of(source_descendant)
 
     child.some_operation1(1, 1)

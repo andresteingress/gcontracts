@@ -12,17 +12,12 @@ package tests
 
 import org.gcontracts.annotations.*
 
-interface Stackable {
+abstract class Stackable {
 
   @Requires({ item != null })
-  void push(def item)
+  abstract void push(def item)
 }
 
-interface SomeOtherInterface extends Stackable {
-
-  @Requires({ item > 1 })
-  void push(def item)
-}
 '''
 
   def source_stack = '''
@@ -31,7 +26,7 @@ package tests
 import org.gcontracts.annotations.*
 
 @Invariant({ list != null && anotherName != null })
-class Stack implements SomeOtherInterface  {
+class Stack extends Stackable {
 
   protected def list
   def anotherName = ""
@@ -94,15 +89,8 @@ class C extends B {
         stack.push null
     }
 
-    shouldFail AssertionError, {
-        stack.push 1
-    }
-
-    shouldFail AssertionError, {
-        stack.push 2
-    }
-
-    stack.push(null)
+    stack.push 1
+    stack.push 2
   }
 
   void test_postcondition_in_indirect_parent_interface()  {

@@ -27,7 +27,7 @@ package org.gcontracts;
  *
  * @author ast
  */
-public class ClassInvariantViolation extends AssertionError {
+public class ClassInvariantViolation extends AssertionViolation {
 
     public ClassInvariantViolation() {
     }

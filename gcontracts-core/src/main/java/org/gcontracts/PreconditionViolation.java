@@ -27,7 +27,7 @@ package org.gcontracts;
  *
  * @author ast
  */
-public class PreconditionViolation extends AssertionError {
+public class PreconditionViolation extends AssertionViolation {
 
     public PreconditionViolation() {
     }

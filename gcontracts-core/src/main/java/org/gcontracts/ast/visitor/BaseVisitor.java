@@ -40,7 +40,7 @@ public abstract class BaseVisitor extends ClassCodeVisitorSupport {
 
     public static final String GCONTRACTS_ENABLED_VAR = "$GCONTRACTS_ENABLED";
 
-    protected static final String CLOSURE_ATTRIBUTE_NAME = "value";
+    public static final String CLOSURE_ATTRIBUTE_NAME = "value";
 
     protected SourceUnit sourceUnit;
     protected ReaderSource source;

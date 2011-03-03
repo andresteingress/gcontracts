@@ -23,7 +23,6 @@
 package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.PropertyNode;
 
@@ -45,8 +44,7 @@ public class CandidateChecks {
      * @return whether the given <tt>type</tt> is a candidate for applying contract assertions
      */
     public static boolean isContractsCandidate(final ClassNode type)  {
-        return (!type.isSynthetic() ||
-                type.getNameWithoutPackage().startsWith("$GContracts")) && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
+        return !type.isSynthetic() && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
     }
 
     /**
@@ -58,28 +56,6 @@ public class CandidateChecks {
      */
     public static boolean isInterfaceContractsCandidate(final ClassNode type)  {
         return type.isInterface() && !type.isSynthetic() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
-    }
-
-        /**
-     * Decides whether the given <tt>constructorNode</tt> is a candidate for class invariant injection.
-     *
-     * @param constructorNode the {@link org.codehaus.groovy.ast.ConstructorNode} to check
-     * @return whether the <tt>constructorNode</tt> is a candidate for injecting the class invariant or not
-     */
-    public static boolean isClassInvariantCandidate(final ConstructorNode constructorNode)  {
-        return constructorNode != null &&
-                constructorNode.isPublic() && !constructorNode.isStatic() && !constructorNode.isSynthetic();
-    }
-
-    /**
-     * Decides whether the given <tt>methodNode</tt> is a candidate for class invariant injection.
-     *
-     * @param methodNode the {@link org.codehaus.groovy.ast.MethodNode} to check
-     * @return whether the <tt>methodNode</tt> is a candidate for injecting the class invariant or not
-     */
-    public static boolean isClassInvariantCandidate(final MethodNode methodNode)  {
-        return methodNode != null &&
-                methodNode.isPublic() && !methodNode.isStatic() && !methodNode.isAbstract();
     }
 
     /**
@@ -102,6 +78,14 @@ public class CandidateChecks {
      */
     public static boolean isPreOrPostconditionCandidate(final ClassNode type, final MethodNode method)  {
         if (method.isSynthetic() || method.isStatic() || method.isAbstract() || !method.isPublic()) return false;
+        if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
+        if (method.getDeclaringClass() != type) return false;
+
+        return true;
+    }
+
+    public static boolean couldBeContractElementMethodNode(final ClassNode type, final MethodNode method)  {
+        if (method.isSynthetic() || method.isStatic() || !method.isPublic()) return false;
         if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
         if (method.getDeclaringClass() != type) return false;
 

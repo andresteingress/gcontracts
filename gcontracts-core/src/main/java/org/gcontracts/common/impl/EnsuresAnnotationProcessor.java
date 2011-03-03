@@ -22,7 +22,8 @@
  */
 package org.gcontracts.common.impl;
 
-import org.codehaus.groovy.ast.AnnotatedNode;
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.gcontracts.common.spi.AnnotationProcessor;
@@ -30,16 +31,20 @@ import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.Contract;
 import org.gcontracts.domain.Postcondition;
 
+import java.util.List;
+
 /**
  * @author ast
  */
 public class EnsuresAnnotationProcessor extends AnnotationProcessor {
 
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, Contract contract, AnnotatedNode annotatedNode, BooleanExpression booleanExpression) {
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, ClassNode classNode, MethodNode methodNode, BooleanExpression booleanExpression) {
         if (!processingContextInformation.isPostconditionsEnabled()) return;
         if (booleanExpression == null) return;
 
-        contract.postconditions().and((MethodNode) annotatedNode, new Postcondition(booleanExpression));
+        final List<ConstructorNode> declaredConstructors = classNode.getDeclaredConstructors();
+
+        contract.postconditions().and(methodNode, new Postcondition(booleanExpression, declaredConstructors.contains(methodNode)));
     }
 }

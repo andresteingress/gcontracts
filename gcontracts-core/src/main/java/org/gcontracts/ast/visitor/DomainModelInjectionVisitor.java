@@ -62,30 +62,28 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
 
     @Override
     public void visitClass(ClassNode type) {
-        addClassInvariant(type, contract.classInvariant());
+        injectClassInvariant(type, contract.classInvariant());
 
         for (Map.Entry<MethodNode, Precondition> entry : contract.preconditions())  {
-            addPrecondition(entry.getKey(), entry.getValue());
+            injectPrecondition(entry.getKey(), entry.getValue());
         }
 
         for (Map.Entry<MethodNode, Postcondition> entry : contract.postconditions())  {
-            addPostcondition(entry.getKey(), entry.getValue());
+            injectPostcondition(entry.getKey(), entry.getValue());
         }
-
-
     }
 
-    public void addClassInvariant(final ClassNode type, final ClassInvariant classInvariant) {
+    public void injectClassInvariant(final ClassNode type, final ClassInvariant classInvariant) {
         if (!pci.isClassInvariantsEnabled()) return;
 
         final ReaderSource source = pci.readerSource();
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
 
-        classInvariantGenerator.generateInvariantAssertionStatement(type, classInvariant.booleanExpression(), contract.hasDefaultClassInvariant());
+        classInvariantGenerator.generateInvariantAssertionStatement(type, classInvariant.booleanExpression());
     }
 
-    public void addPrecondition(final MethodNode method, final Precondition precondition) {
-        if (!pci.isPreconditionsEnabled()) return;
+    public void injectPrecondition(final MethodNode method, final Precondition precondition) {
+        if (!pci.isPreconditionsEnabled() || method.isAbstract()) return;
 
         final ReaderSource source = pci.readerSource();
         final PreconditionGenerator preconditionGenerator = new PreconditionGenerator(source);
@@ -93,12 +91,12 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
         preconditionGenerator.generatePreconditionAssertionStatement(method, precondition.booleanExpression());
     }
 
-    public void addPostcondition(final MethodNode method, final Postcondition postcondition) {
-        if (!pci.isPostconditionsEnabled()) return;
+    public void injectPostcondition(final MethodNode method, final Postcondition postcondition) {
+        if (!pci.isPostconditionsEnabled() || method.isAbstract()) return;
 
         final ReaderSource source = pci.readerSource();
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(source);
 
-        postconditionGenerator.generatePostconditionAssertionStatement(method, postcondition.booleanExpression());
+        postconditionGenerator.generatePostconditionAssertionStatement(method, postcondition.booleanExpression(), postcondition.isPartOfConstructor());
     }
 }

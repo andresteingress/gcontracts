@@ -29,9 +29,16 @@ import org.codehaus.groovy.ast.expr.BooleanExpression;
  */
 public class Postcondition extends Assertion<Postcondition> {
 
+    private boolean isPartOfConstructor = false;
+
     public Postcondition() {}
 
-    public Postcondition(BooleanExpression booleanExpression) {
+    public Postcondition(BooleanExpression booleanExpression, boolean isPartOfConstructor) {
         super(booleanExpression);
+        this.isPartOfConstructor = isPartOfConstructor;
+    }
+
+    public boolean isPartOfConstructor() {
+        return isPartOfConstructor;
     }
 }

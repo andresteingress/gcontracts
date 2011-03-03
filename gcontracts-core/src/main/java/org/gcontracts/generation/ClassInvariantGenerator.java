@@ -28,11 +28,13 @@ import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.gcontracts.ClassInvariantViolation;
-import org.gcontracts.annotations.Invariant;
+import org.gcontracts.annotations.meta.ClassInvariant;
 import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
 
 /**
  * <p>
@@ -54,50 +56,53 @@ public class ClassInvariantGenerator extends BaseGenerator {
      *
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
      * @param classInvariant the {@link org.codehaus.groovy.ast.expr.BooleanExpression} containing the assertion expression
-     * @param isDefaultInvariant specifies whether this is used to generate a default invariant
      */
-    public void generateInvariantAssertionStatement(final ClassNode type, final BooleanExpression classInvariant, boolean isDefaultInvariant)  {
+    public void generateInvariantAssertionStatement(final ClassNode type, final BooleanExpression classInvariant)  {
 
-        BooleanExpression classInvariantExpression = addCallsToSuperClassInvariants(type, classInvariant);
+        BooleanExpression classInvariantExpression = addCallsToSuperAnnotationClosure(type, ClassInvariant.class, classInvariant);
 
-        final BlockStatement assertBlockStatement = new BlockStatement();
-        final AssertStatement invariantAssertionStatement = AssertStatementCreationUtility.getAssertionStatement(classInvariantExpression);
-        if (isDefaultInvariant)  {
-            // set a dummy message expression in order to avoid NP in Groovy 1.8 rc1
-            invariantAssertionStatement.setMessageExpression(new ConstantExpression(""));
-        }
-
-        assertBlockStatement.addStatement(TryCatchBlockGenerator.generateTryCatchStatement(ClassHelper.makeWithoutCaching(ClassInvariantViolation.class), "<class invariant> " + type.getName() + "\n\n", invariantAssertionStatement));
-
-        final BlockStatement blockStatement = new BlockStatement();
-        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
+        final BlockStatement blockStatement = wrapAssertionBooleanExpression(classInvariantExpression);
         blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
 
         // add a local protected method with the invariant closure - this is needed for invariant checks in inheritance lines
         type.addMethod(getInvariantMethodName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.Boolean_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, blockStatement);
     }
 
-    /**
-     * Modifies the given <tt>booleanExpression</tt> which contains that current class-invariant and adds a super-call the
-     * the class-invariant of the next parent class which has the Invarian annotation.
-     *
-     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param booleanExpression the current class-invariant as {@link org.codehaus.groovy.ast.expr.ClosureExpression}
-     *
-     * @return the modified {@link BooleanExpression}
-     */
-    public BooleanExpression addCallsToSuperClassInvariants(final ClassNode type, final BooleanExpression booleanExpression)  {
+    private BooleanExpression addCallsToSuperAnnotationClosure(final ClassNode type, final Class<? extends Annotation> annotationType, BooleanExpression booleanExpression)  {
 
-        final ClassNode nextClassWithInvariant = AnnotationUtils.getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), Invariant.class);
-        if (nextClassWithInvariant == null) return booleanExpression;
+        final List<AnnotationNode> nextContractElementAnnotations = AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(type.getSuperClass(), ClassHelper.makeWithoutCaching(annotationType));
+        if (nextContractElementAnnotations.isEmpty()) return booleanExpression;
 
-        final String methodName = getInvariantMethodName(nextClassWithInvariant);
+        for (AnnotationNode nextContractElementAnnotation : nextContractElementAnnotations)  {
+            ClassExpression classExpression = (ClassExpression) nextContractElementAnnotation.getMember(BaseVisitor.CLOSURE_ATTRIBUTE_NAME);
+            if (classExpression == null) continue;
 
-        return new BooleanExpression(
-                 new BinaryExpression(
-                         booleanExpression.getExpression(),
-                         Token.newSymbol(Types.LOGICAL_AND, -1, -1),
-                         new BooleanExpression(new MethodCallExpression(VariableExpression.THIS_EXPRESSION, methodName, ArgumentListExpression.EMPTY_ARGUMENTS))));
+            ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
+                    VariableExpression.THIS_EXPRESSION,
+                    VariableExpression.THIS_EXPRESSION);
+
+            MethodCallExpression doCall = new MethodCallExpression(
+                    new MethodCallExpression(
+                            classExpression,
+                            "newInstance",
+                            closureConstructorArgumentList
+                    ),
+                    "call",
+                    ArgumentListExpression.EMPTY_ARGUMENTS
+            );
+
+            final BooleanExpression rightExpression = new BooleanExpression(doCall);
+            booleanExpression.setSourcePosition(nextContractElementAnnotation);
+
+            booleanExpression = new BooleanExpression(
+                    new BinaryExpression(
+                            booleanExpression,
+                            Token.newSymbol(Types.LOGICAL_AND, -1, -1),
+                            rightExpression)
+            );
+        }
+
+        return booleanExpression;
     }
 
     /**
@@ -112,7 +117,13 @@ public class ClassInvariantGenerator extends BaseGenerator {
         final MethodNode invariantMethod = type.getDeclaredMethod(invariantMethodName, Parameter.EMPTY_ARRAY);
         if (invariantMethod == null) return;
 
-        final IfStatement invariantAssertionStatement = AssertStatementCreationUtility.getAssertStatementFromInvariantMethod(invariantMethod);
+        Statement invariantMethodCall = new ExpressionStatement(
+                new MethodCallExpression(
+                        VariableExpression.THIS_EXPRESSION,
+                        invariantMethod.getName(),
+                        ArgumentListExpression.EMPTY_ARGUMENTS
+                )
+        );
 
         final Statement statement = method.getCode();
         if (statement instanceof BlockStatement && method.getReturnType() != ClassHelper.VOID_TYPE && !(method instanceof ConstructorNode))  {
@@ -121,19 +132,19 @@ public class ClassInvariantGenerator extends BaseGenerator {
             final ReturnStatement returnStatement = AssertStatementCreationUtility.getReturnStatement(type, method, blockStatement);
             if (returnStatement != null)  {
                 AssertStatementCreationUtility.removeReturnStatement(blockStatement, returnStatement);
-                blockStatement.addStatement(invariantAssertionStatement);
+                blockStatement.addStatement(invariantMethodCall);
                 blockStatement.addStatement(returnStatement);
             } else {
-                blockStatement.addStatement(invariantAssertionStatement);
+                blockStatement.addStatement(invariantMethodCall);
             }
 
         } else if (statement instanceof BlockStatement) {
             final BlockStatement blockStatement = (BlockStatement) statement;
-            blockStatement.addStatement(invariantAssertionStatement);
+            blockStatement.addStatement(invariantMethodCall);
         } else {
             final BlockStatement assertionBlock = new BlockStatement();
             assertionBlock.addStatement(statement);
-            assertionBlock.addStatement(invariantAssertionStatement);
+            assertionBlock.addStatement(invariantMethodCall);
 
             method.setCode(assertionBlock);
         }

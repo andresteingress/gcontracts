@@ -35,7 +35,16 @@ import org.gcontracts.generation.PreconditionGenerator;
 public class PreconditionLifecycle extends BaseLifecycle {
 
     @Override
+    public void beforeProcessingContructorNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode constructorNode) {
+        generatePrecondition(processingContextInformation, classNode, constructorNode);
+    }
+
+    @Override
     public void afterProcessingMethodNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {
+        generatePrecondition(processingContextInformation, classNode, methodNode);
+    }
+
+    private void generatePrecondition(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {
         if (!processingContextInformation.isPreconditionsEnabled()) return;
         if (!CandidateChecks.isPreOrPostconditionCandidate(classNode, methodNode)) return;
         if (processingContextInformation.contract().preconditions().contains(methodNode)) return;

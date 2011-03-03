@@ -53,46 +53,47 @@ public class AnnotationUtils {
     }
 
     /**
-     * Gets the next {@link org.codehaus.groovy.ast.ClassNode} in the inheritance line which is annotated
-     * with the given Annotation class.
+     * Gets the next {@link org.codehaus.groovy.ast.AnnotationNode} instance in the inheritance line which is annotated
+     * with the given Annotation class <tt>anno</tt>.
      *
      * @param type the {@link org.codehaus.groovy.ast.ClassNode} to check for the annotation
      * @param anno the annotation to watch out for
-     * @return the next {@link org.codehaus.groovy.ast.ClassNode} in the inheritance line, or <tt>null</tt>
+     * @return the next {@link org.codehaus.groovy.ast.AnnotationNode} in the inheritance line, or <tt>null</tt>
      */
-    public static ClassNode getClassNodeInHierarchyWithAnnotation(ClassNode type, Class anno)  {
+    public static List<AnnotationNode> getAnnotationNodeInHierarchyWithMetaAnnotation(ClassNode type, ClassNode anno)  {
+        List<AnnotationNode> result = new ArrayList<AnnotationNode>();
         for (AnnotationNode annotation : type.getAnnotations())  {
-            if (annotation.getClassNode().getName().equals(anno.getName()))  {
-                return type;
+            if (annotation.getClassNode().getAnnotations(anno).size() > 0)  {
+                result.add(annotation);
             }
         }
 
-        if (type.getSuperClass() != null) return getClassNodeInHierarchyWithAnnotation(type.getSuperClass(), anno); else return null;
+        if (result.isEmpty() && type.getSuperClass() != null)  {
+           return getAnnotationNodeInHierarchyWithMetaAnnotation(type.getSuperClass(), anno);
+        } else  {
+           return result;
+        }
     }
 
-    /**
-     * Gets the next {@link org.codehaus.groovy.ast.MethodNode} in the inheritance line which is annotated
-     * with the given Annotation class.
-     *
-     * @param methodNode the {@link org.codehaus.groovy.ast.ClassNode} to check for the annotation
-     * @param anno the annotation to watch out for
-     * @return the next {@link org.codehaus.groovy.ast.MethodNode} in the inheritance line, or <tt>null</tt>
-     */
-    public static MethodNode getMethodNodeInHierarchyWithAnnotation(MethodNode methodNode, Class anno)  {
-        final ClassNode type = methodNode.getDeclaringClass();
-        if (type.getSuperClass() == null) return null;
+    public static List<AnnotationNode> getAnnotationNodeInHierarchyWithMetaAnnotation(ClassNode type, MethodNode originMethodNode, ClassNode anno)  {
+        List<AnnotationNode> result = new ArrayList<AnnotationNode>();
 
-        final ClassNode superClass = type.getSuperClass();
-        final MethodNode superMethod = superClass.getMethod(methodNode.getName(), methodNode.getParameters());
-        if (superMethod == null) return null;
+        while (type != null)  {
+            MethodNode methodNode = type.getMethod(originMethodNode.getName(), originMethodNode.getParameters());
+            if (methodNode != null) {
+                for (AnnotationNode annotation : methodNode.getAnnotations())  {
+                    if (annotation.getClassNode().getAnnotations(anno).size() > 0)  {
+                        result.add(annotation);
+                    }
+                }
 
-        for (AnnotationNode annotation : superMethod.getAnnotations())  {
-            if (annotation.getClassNode().getName().equals(anno.getName()))  {
-                return superMethod;
+                if (result.size() > 0) return result;
             }
+
+            type = type.getSuperClass();
         }
-        
-        return getMethodNodeInHierarchyWithAnnotation(superMethod, anno);
+
+        return result;
     }
 
     /**

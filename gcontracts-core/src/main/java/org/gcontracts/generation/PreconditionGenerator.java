@@ -25,12 +25,13 @@ package org.gcontracts.generation;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.expr.ConstructorCallExpression;
-import org.codehaus.groovy.ast.expr.MethodCallExpression;
-import org.codehaus.groovy.ast.stmt.*;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.codehaus.groovy.syntax.Token;
-import org.codehaus.groovy.syntax.Types;
+import org.gcontracts.annotations.meta.Precondition;
 
 /**
  * Code generator for preconditions.
@@ -51,24 +52,35 @@ public class PreconditionGenerator extends BaseGenerator {
      * @param booleanExpression the {@link org.codehaus.groovy.ast.expr.BooleanExpression} containing the assertion expression
      */
     public void generatePreconditionAssertionStatement(final MethodNode method, final BooleanExpression booleanExpression)  {
+        final BooleanExpression preconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Precondition.class, booleanExpression, false);
+        final BlockStatement blockStatement = wrapAssertionBooleanExpression(preconditionBooleanExpression);
 
+        addPrecondition(method, blockStatement);
+    }
+
+    /**
+     * Generates the default precondition statement for {@link org.codehaus.groovy.ast.MethodNode} instances with
+     * the {@link org.gcontracts.annotations.meta.Precondition} annotation.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param methodNode the {@link org.codehaus.groovy.ast.MethodNode} with a {@link org.gcontracts.annotations.meta.Precondition} annotation
+     */
+    public void generateDefaultPreconditionStatement(final ClassNode type, final MethodNode methodNode)  {
+
+        BooleanExpression preconditionBooleanExpression = new BooleanExpression(ConstantExpression.TRUE);
+        preconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(type, methodNode, Precondition.class, preconditionBooleanExpression, false);
+        // if precondition could not be found in parent class, let's return
+        if (preconditionBooleanExpression.getExpression() == ConstantExpression.TRUE) return;
+
+        final BlockStatement blockStatement = wrapAssertionBooleanExpression(preconditionBooleanExpression);
+        
+        addPrecondition(methodNode, blockStatement);
+    }
+
+    private void addPrecondition(MethodNode method, BlockStatement blockStatement) {
         final BlockStatement modifiedMethodCode = new BlockStatement();
+        modifiedMethodCode.addStatements(blockStatement.getStatements());
 
-        final IfStatement assertionIfStatement = AssertStatementCreationUtility.getAssertionStatement("precondition", method, booleanExpression);
-        final AssertStatement assertionStatement = AssertStatementCreationUtility.getAssertStatementFromGeneratedTryCatch(assertionIfStatement);
-
-        // backup the current assertion in a synthetic method
-        AssertStatementCreationUtility.addAssertionMethodNode("precondition", method, assertionStatement, false, false);
-
-        final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(method, assertionIfStatement.getLineNumber());
-        if (methodCallToSuperPrecondition != null) {
-            AssertStatementCreationUtility.addToAssertStatement(assertionStatement, methodCallToSuperPrecondition, Token.newSymbol(Types.LOGICAL_OR, -1, -1));
-        }
-
-        // if this is an abstract method, just add the precondition method and we're done
-        if (method.isAbstract()) return;
-
-        modifiedMethodCode.addStatement(assertionIfStatement);
         if (method.getCode() instanceof BlockStatement)  {
 
             BlockStatement methodBlock = (BlockStatement) method.getCode();
@@ -84,28 +96,5 @@ public class PreconditionGenerator extends BaseGenerator {
         }
 
         method.setCode(modifiedMethodCode);
-    }
-
-    /**
-     * Generates the default precondition statement for {@link org.codehaus.groovy.ast.MethodNode} instances with
-     * the {@link org.gcontracts.annotations.Requires} annotation.
-     *
-     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param methodNode the {@link org.codehaus.groovy.ast.MethodNode} without the {@link org.gcontracts.annotations.Requires} annotation
-     */
-    public void generateDefaultPreconditionStatement(final ClassNode type, final MethodNode methodNode)  {
-
-        final BlockStatement modifiedMethodCode = new BlockStatement();
-        final MethodCallExpression methodCallToSuperPrecondition = AssertStatementCreationUtility.getMethodCallExpressionToSuperClassPrecondition(methodNode, methodNode.getLineNumber());
-        if (methodCallToSuperPrecondition == null) return;
-        
-        modifiedMethodCode.addStatement(new ExpressionStatement(methodCallToSuperPrecondition));
-        if (methodNode.getCode() instanceof BlockStatement)  {
-            modifiedMethodCode.addStatements(((BlockStatement) methodNode.getCode()).getStatements());
-        } else {
-            modifiedMethodCode.addStatement(methodNode.getCode());    
-        }
-
-        methodNode.setCode(modifiedMethodCode);
     }
 }
