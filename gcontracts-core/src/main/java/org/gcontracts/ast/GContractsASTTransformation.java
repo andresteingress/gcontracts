@@ -91,7 +91,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         for (final ClassNode classNode : classNodes)  {
             if (!CandidateChecks.isInterfaceContractsCandidate(classNode)) continue;
 
-            new InterfaceVisitor(unit, source).visitClass(classNode);
+            new InterfaceContractVisitor(unit, source).visitClass(classNode);
         }
     }
 }

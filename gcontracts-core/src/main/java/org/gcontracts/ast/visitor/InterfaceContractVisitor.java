@@ -50,12 +50,12 @@ import java.util.List;
  *
  * @author ast
  */
-public class InterfaceVisitor extends BaseVisitor {
+public class InterfaceContractVisitor extends BaseVisitor {
 
     private ClassNode classNode;
     private final ClosureWriter closureWriter = new ClosureWriter();
 
-    public InterfaceVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
+    public InterfaceContractVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
     }
 
@@ -73,6 +73,8 @@ public class InterfaceVisitor extends BaseVisitor {
         if (!(node instanceof MethodNode)) return;
 
         final MethodNode methodNode = (MethodNode) node;
+        if (!methodNode.isAbstract()) return;
+
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName());
         if (annotationNodes.size() > 0)  {
             for (AnnotationNode annotationNode : annotationNodes)  {
