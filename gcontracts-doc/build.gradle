@@ -1,0 +1,14 @@
+dependsOn(':gcontracts-core')
+
+project(":gcontracts-doc") {
+  dependencies {
+    compile project(':gcontracts-core')
+
+    compile "org.apache.ant:ant:1.8.2"
+  }
+}
+
+test {
+  // exclude basic test case classes
+  excludes = ['org/gcontracts/spring/BaseTestClass*']
+}
