@@ -1,6 +1,9 @@
 package org.gcontracts.tests.post
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -24,14 +27,14 @@ class ResultVariable {
 }
 '''
 
-  void test_string_return_value()  {
+  @Test void string_return_value()  {
 
     def instance = create_instance_of(sourceCode)
 
     assertEquals 'test', instance.return_given_argument('test')
   }
 
-  void test_null_return_value()  {
+  @Test void null_return_value()  {
 
     def instance = create_instance_of(sourceCode)
 

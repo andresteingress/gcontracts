@@ -1,6 +1,9 @@
 package org.gcontracts.tests.post
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -35,7 +38,7 @@ class A {
 }
 '''
 
-  void test_simple_boolean_expression()  {
+  @Test void simple_boolean_expression()  {
 
     def a = create_instance_of(source_postconditions)
     a.change_property_value('test')
@@ -43,7 +46,7 @@ class A {
     assertEquals 'test', a.property
   }
 
-  void test_binary_boolean_expression()  {
+  @Test void binary_boolean_expression()  {
 
     def a = create_instance_of(source_postconditions)
     a.change_property_values('test', 'test2')
@@ -52,7 +55,7 @@ class A {
     assertEquals 'test2', a.property2
   }
 
-  void test_negated_boolean_expression()  {
+  @Test void negated_boolean_expression()  {
 
     def a = create_instance_of(source_postconditions)
     a.change_property_value_not('test')

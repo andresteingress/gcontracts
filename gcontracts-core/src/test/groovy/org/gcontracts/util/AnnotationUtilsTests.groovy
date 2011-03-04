@@ -8,8 +8,11 @@ import org.codehaus.groovy.ast.builder.AstStringCompiler
 import org.codehaus.groovy.control.CompilePhase
 import org.gcontracts.annotations.meta.ContractElement
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
 
- /**
+import static org.junit.Assert.*;
+
+/**
  * @author ast
  */
 class AnnotationUtilsTests extends BaseTestClass {
@@ -24,7 +27,7 @@ class AnnotationUtilsTests extends BaseTestClass {
 
     }'''
 
-    void test_find_annotations_with_meta_annos() {
+    @Test void find_annotations_with_meta_annos() {
         AstStringCompiler astStringCompiler = new AstStringCompiler()
         def astNodes = astStringCompiler.compile(source, CompilePhase.SEMANTIC_ANALYSIS, false)
 

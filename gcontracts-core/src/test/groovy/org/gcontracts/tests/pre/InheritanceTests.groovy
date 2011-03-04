@@ -1,6 +1,9 @@
 package org.gcontracts.tests.pre
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -74,7 +77,7 @@ class Descendant extends Parent {
 }
 '''
 
-  void test_redefined_precondition() throws Exception {
+  @Test void redefined_precondition() throws Exception {
     // create_instance_of(source_parent)
       add_class_to_classpath(source_parent)
     def child = create_instance_of(source_descendant)
@@ -82,7 +85,7 @@ class Descendant extends Parent {
     child.some_operation1(1, 1)
   }
 
-  void test_redefined_precondition2() throws Exception {
+  @Test void redefined_precondition2() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -91,7 +94,7 @@ class Descendant extends Parent {
     }
   }
 
-  void test_method_call_of_super_class_in_precondition() throws Exception {
+  @Test void method_call_of_super_class_in_precondition() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -100,7 +103,7 @@ class Descendant extends Parent {
     child.some_operation2()
   }
 
-  void test_refined_precondition_with_other_param_names() throws Exception {
+  @Test void refined_precondition_with_other_param_names() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -109,7 +112,7 @@ class Descendant extends Parent {
     }
   }
 
-  void test_refined_precondition_with_other_param_names1() throws Exception {
+  @Test void refined_precondition_with_other_param_names1() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -118,7 +121,7 @@ class Descendant extends Parent {
     }
   }
 
-  void test_refined_precondition_with_other_param_names2() throws Exception {
+  @Test void refined_precondition_with_other_param_names2() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 

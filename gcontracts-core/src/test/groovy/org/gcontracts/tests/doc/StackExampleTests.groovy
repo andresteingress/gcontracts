@@ -1,6 +1,9 @@
 package org.gcontracts.tests.doc
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -109,12 +112,12 @@ class StackDescendant extends Stack implements Serializable {
 }
 '''
 
-  void test_creation()  {
+  @Test void creation()  {
     create_instance_of(source_stack)
     create_instance_of(source_stack_descendant)
   }
 
-  void test_inherited_invariant()  {
+  @Test void inherited_invariant()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 
@@ -122,7 +125,7 @@ class StackDescendant extends Stack implements Serializable {
   }
 
 
-  void test_inherited_invariant_failure()  {
+  @Test void inherited_invariant_failure()  {
     create_instance_of(source_stack)
 
     shouldFail AssertionError, {
@@ -130,7 +133,7 @@ class StackDescendant extends Stack implements Serializable {
     }
   }
 
-  void test_inherited_invariant_fail_on_method_call()  {
+  @Test void inherited_invariant_fail_on_method_call()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 
@@ -139,7 +142,7 @@ class StackDescendant extends Stack implements Serializable {
     }
   }
 
-  void test_old_variable()  {
+  @Test void old_variable()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 
@@ -147,7 +150,7 @@ class StackDescendant extends Stack implements Serializable {
   }
 
 
-  void test_old_and_result_variable()  {
+  @Test void old_and_result_variable()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 

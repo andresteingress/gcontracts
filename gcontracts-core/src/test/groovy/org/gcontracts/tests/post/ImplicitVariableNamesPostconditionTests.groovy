@@ -2,6 +2,9 @@ package org.gcontracts.tests.post
 
 import org.gcontracts.tests.basic.BaseTestClass
 
+
+import static org.junit.Assert.*;
+
 /**
  * @author ast
  */

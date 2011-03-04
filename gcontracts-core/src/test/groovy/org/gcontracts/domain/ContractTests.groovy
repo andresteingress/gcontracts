@@ -1,6 +1,5 @@
 package org.gcontracts.domain
 
-import junit.framework.TestCase
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
@@ -9,13 +8,17 @@ import org.codehaus.groovy.ast.expr.BooleanExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.syntax.Types
+import org.junit.Before
+import org.junit.Test
 
-class ContractTests extends TestCase {
+import static junit.framework.Assert.*;
+
+class ContractTests {
 
     ClassNode classNode
     MethodNode methodNode
 
-    @Override protected void setUp() {
+    @Before public void setUp() {
         def source = '''
         class Tester {
 
@@ -32,7 +35,8 @@ class ContractTests extends TestCase {
         assertNotNull(methodNode)
     }
 
-    void test_create_simple_contract()  {
+    @Test
+    void create_simple_contract()  {
         Contract contract = new Contract(classNode)
 
         Precondition precondition = new Precondition(new BooleanExpression(new ConstantExpression(true)))
@@ -41,7 +45,8 @@ class ContractTests extends TestCase {
         assertEquals(1, contract.preconditions().size())
     }
 
-    void test_anding_precondition_causes_logical_or()  {
+    @Test
+    void anding_precondition_causes_logical_or()  {
 
         Contract contract = new Contract(classNode)
 
@@ -55,7 +60,8 @@ class ContractTests extends TestCase {
         assertTrue(contract.preconditions().get(methodNode).booleanExpression().expression.operation.type == Types.LOGICAL_OR)
     }
 
-    void test_anding_postcondition_causes_logical_and()  {
+    @Test
+    void anding_postcondition_causes_logical_and()  {
 
         Contract contract = new Contract(classNode)
 
@@ -69,7 +75,8 @@ class ContractTests extends TestCase {
         assertTrue(contract.postconditions().get(methodNode).booleanExpression().expression.operation.type == Types.LOGICAL_AND)
     }
 
-    void test_joining_preconditions()  {
+    @Test
+    void joining_preconditions()  {
 
         Contract contract = new Contract(classNode)
 

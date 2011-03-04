@@ -1,16 +1,18 @@
 package org.gcontracts.tests.annotationcontracts
 
 import org.codehaus.groovy.ast.builder.AstStringCompiler
-import org.gcontracts.tests.basic.BaseTestClass
+import static junit.framework.Assert.*;
+import org.junit.Test
 
- /**
+/**
  * @author ast
  */
-class AnnotationContractTests extends BaseTestClass {
+class AnnotationContractTests {
 
     AstStringCompiler astStringCompiler = new AstStringCompiler()
 
-    void test_single_notnull_parameter() {
+    @Test
+    void single_notnull_parameter() {
 
         def source_anno = '''
 import org.gcontracts.annotations.meta.*
@@ -40,7 +42,8 @@ import org.gcontracts.annotations.meta.*
         try  { tester.method(null) } catch (AssertionError ae) {}
     }
 
-    void test_multiple_notnull_parameters() {
+    @Test
+    void multiple_notnull_parameters() {
 
         def source_anno = '''
    import org.gcontracts.annotations.meta.*
@@ -101,7 +104,8 @@ import org.gcontracts.annotations.meta.*
         fail("AssertionError must have been thrown")
     }
 
-    void test_requires_method() {
+    @Test
+    void requires_method() {
 
         def source = '''
     import org.gcontracts.annotations.*
@@ -127,7 +131,8 @@ import org.gcontracts.annotations.meta.*
         fail("AssertionError must have been thrown")
     }
 
-    void test_default_requires_method() {
+    @Test
+    void default_requires_method() {
 
         def source_anno = '''
    import org.gcontracts.annotations.meta.*
@@ -154,7 +159,8 @@ import org.gcontracts.annotations.meta.*
 
     }
 
-    void test_requires_method_with_not_null_parameter() {
+    @Test
+    void requires_method_with_not_null_parameter() {
 
         def source_custom_anno = '''
     import org.gcontracts.annotations.*
@@ -197,7 +203,8 @@ import org.gcontracts.annotations.meta.*
 
     }
 
-    void test_default_ensures_method() {
+    @Test
+    void default_ensures_method() {
 
         def source_anno = '''
    import org.gcontracts.annotations.meta.*
@@ -224,7 +231,8 @@ import org.gcontracts.annotations.meta.*
 
     }
 
-    void test_ensures_method() {
+    @Test
+    void ensures_method() {
 
         def source = '''
     import org.gcontracts.annotations.*
@@ -254,7 +262,8 @@ import org.gcontracts.annotations.meta.*
         fail("AssertionError must have been thrown")
     }
 
-    void test_class_invariant() {
+    @Test
+    void class_invariant() {
 
         def source = '''
     import org.gcontracts.annotations.*

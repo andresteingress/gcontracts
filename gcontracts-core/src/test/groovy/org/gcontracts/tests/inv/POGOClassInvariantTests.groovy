@@ -1,6 +1,9 @@
 package org.gcontracts.tests.inv
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * <tt>old</tt> variables tests for postconditions.
@@ -43,13 +46,13 @@ class DynamicSetter {
 
 '''
 
-  void test_dynamic_constructor_class_invariant()  {
+  @Test void dynamic_constructor_class_invariant()  {
     shouldFail AssertionError, {
       create_instance_of dynamic_constructor_class_code;
     }
   }
 
-  void test_dynamic_setter_methods()  {
+  @Test void dynamic_setter_methods()  {
     def instance = create_instance_of(dynamic_setter_class_code)
 
     shouldFail AssertionError, {

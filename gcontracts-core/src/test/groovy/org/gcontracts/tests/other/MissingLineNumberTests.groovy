@@ -1,6 +1,9 @@
 package org.gcontracts.tests.other
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -29,7 +32,7 @@ class MissingLineNumber {
 }
 '''
 
-  void test_line_number_in_precondition_stacktrace()  {
+  @Test void line_number_in_precondition_stacktrace()  {
 
     def var = create_instance_of(source)
 
@@ -59,7 +62,7 @@ class MissingLineNumber {
     }
   }
 
-  void test_line_number_in_class_invariant_stacktrace()  {
+  @Test void line_number_in_class_invariant_stacktrace()  {
 
     def var = create_instance_of(source)
 

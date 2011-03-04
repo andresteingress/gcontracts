@@ -1,6 +1,9 @@
 package org.gcontracts.tests.doc
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -98,29 +101,29 @@ class RootClass {
 }
 '''
   
-  void test_class_invariant()  {
+  @Test void test_class_invariant()  {
     create_instance_of(source, [1])
   }                             
 
-  void test_class_invariant_fail()  {
+  @Test void test_class_invariant_fail()  {
 
     shouldFail AssertionError, {
       create_instance_of(source, [0])
     }
   }                                                   
 
-  void test_class_invariant_with_default_constructor()  {
+  @Test void test_class_invariant_with_default_constructor()  {
     shouldFail AssertionError, { create_instance_of(source) }
   }
 
-  void test_precondition_with_multiple_arguments()  {
+  @Test void test_precondition_with_multiple_arguments()  {
 
     def root = create_instance_of(source, [1])
 
     root.some_operation 2, 2
   }
 
-  void test_precond_with_first_argument_fail()  {
+  @Test void test_precond_with_first_argument_fail()  {
 
     def root = create_instance_of(source, [1])
 
@@ -129,7 +132,7 @@ class RootClass {
     }
   }
 
-  void test_precond_with_second_argument_fail()  {
+  @Test void test_precond_with_second_argument_fail()  {
 
     def root = create_instance_of(source, [1])
 
@@ -138,19 +141,19 @@ class RootClass {
     }
   }
 
-  void test_postcond_with_single_argument()  {
+  @Test void test_postcond_with_single_argument()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation2 2
   }
 
-  void test_postcond_with_single_argument_and_old_var()  {
+  @Test void test_postcond_with_single_argument_and_old_var()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation3 2                           
   }
 
-  void test_postcond_with_single_argument_and_old_var_fail()  {
+  @Test void test_postcond_with_single_argument_and_old_var_fail()  {
     def root = create_instance_of(source, [1])
 
     shouldFail AssertionError, {
@@ -158,7 +161,7 @@ class RootClass {
     }
   }                             
 
-  void test_postcond_with_result_variable()  {
+  @Test void test_postcond_with_result_variable()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation4(1, 1)
@@ -166,7 +169,7 @@ class RootClass {
     assertEquals 2, result
   }
 
-  void test_postcond_with_result_variable_and_field()  {
+  @Test void test_postcond_with_result_variable_and_field()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation5(1, 1)
@@ -174,7 +177,7 @@ class RootClass {
     assertEquals 2, result
   }
 
-  void test_postcond_with_result_and_old_variables()  {
+  @Test void test_postcond_with_result_and_old_variables()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation6(2, 2)
@@ -190,7 +193,7 @@ class RootClass {
     assertEquals 4, result
   }
 
-  void test_postcond_with_implicit_return_statement()  {
+  @Test void test_postcond_with_implicit_return_statement()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation8(2)
@@ -198,7 +201,7 @@ class RootClass {
     assertEquals 2, result
   }
 
-  void test_postcond_with_complex_return_statement()  {
+  @Test void test_postcond_with_complex_return_statement()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation9(2, 2)
@@ -207,19 +210,19 @@ class RootClass {
   }
 
 
-  void test_multiple_preconditions()  {
+  @Test void test_multiple_preconditions()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation11 12
   }
 
-  void test_multiple_precondition_fail()  {
+  @Test void test_multiple_precondition_fail()  {
     def root = create_instance_of(source, [1])
 
     shouldFail AssertionError, { root.some_operation11 10 }
   }
 
-  void test_multiple_postconditions()  {
+  @Test void test_multiple_postconditions()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation10(new Date())

@@ -1,6 +1,9 @@
 package org.gcontracts.tests.post
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -33,13 +36,13 @@ class EnsureVariables {
 
 '''
 
-  void test_result_than_old_variable()  {
+  @Test void result_than_old_variable()  {
     def var = create_instance_of(source, ['some string'])
 
     var.concatenateColon("part1", "part2")
   }
 
-  void test_old_than_result_variable()  {
+  @Test void old_than_result_variable()  {
     def var = create_instance_of(source, ['some string'])
 
     var.concatenateColon2("part1", "part2")

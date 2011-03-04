@@ -1,6 +1,9 @@
 package org.gcontracts.tests.inv
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -166,7 +169,7 @@ class B extends A {
 '''
 
 
-  void test_two_way_inheritance_path()  {
+  @Test void two_way_inheritance_path()  {
     create_instance_of(source1, ['test'])
     create_instance_of(source2, ['test', 'test2'])
 
@@ -175,7 +178,7 @@ class B extends A {
     }
   }
 
-  void test_three_way_inheritance_path()  {
+  @Test void three_way_inheritance_path()  {
     create_instance_of(source1, ['test'])
     create_instance_of(source2, ['test', 'test2'])
     create_instance_of(source3, ['test', 'test2', 'test3'])
@@ -193,7 +196,7 @@ class B extends A {
     }
   }
 
-  void test_with_private_instance_variable_in_super_class()  {
+  @Test void with_private_instance_variable_in_super_class()  {
     create_instance_of(source11, ['test'])
     create_instance_of(source12, ['test'])
 
@@ -202,7 +205,7 @@ class B extends A {
     }
   }
 
-  void test_invariant_check_on_method_call()  {
+  @Test void invariant_check_on_method_call()  {
     create_instance_of(source1, ['test'])
     def b = create_instance_of(source2, ['test', 'test2'])
 
@@ -219,17 +222,17 @@ class B extends A {
     }
   }
 
-  void test_private_constructor_creation()  {
+  @Test void private_constructor_creation()  {
     create_instance_of(source21)
   }
 
-  void test_public_constructor_creation()  {
+  @Test void public_constructor_creation()  {
     shouldFail AssertionError, {
       create_instance_of(source21, [ 'test1', null ])
     }
   }
 
-  void test_inherited_class_invariant()  {
+  @Test void inherited_class_invariant()  {
     add_class_to_classpath(source51)
     def b = create_instance_of(source52, [])
 
@@ -239,13 +242,13 @@ class B extends A {
 
   }
 
-//  void test_with_abstract_class_invariant()  {
+//  @Test void with_abstract_class_invariant()  {
 //
 //    add_class_to_classpath(source31)
 //    def b = create_instance_of(source32)
 //  }
 //
-//  void test_recursive_class_invariant_call()  {
+//  @Test void recursive_class_invariant_call()  {
 //
 //    def a = create_instance_of(source41)
 //  }

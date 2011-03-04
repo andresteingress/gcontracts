@@ -1,6 +1,9 @@
 package org.gcontracts.tests.other
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -45,7 +48,7 @@ class B extends A  {
 }
 '''
 
-  void test_inherited_class_invariant()  {
+  @Test void inherited_class_invariant()  {
     add_class_to_classpath source1
 
     shouldFail AssertionError, {
@@ -53,7 +56,7 @@ class B extends A  {
     }
   }
 
-  void test_inherited_precondition()  {
+  @Test void inherited_precondition()  {
     add_class_to_classpath source1
 
     def bInstance = create_instance_of(source2, ["test"])

@@ -1,6 +1,9 @@
 package org.gcontracts.tests.post
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -149,7 +152,7 @@ class BetterRocket extends Rocket {
     }
 }
 '''
-  void test_simple()  {
+  @Test void simple()  {
     def rocket = create_instance_of(source2)
 
     rocket.start()
@@ -157,7 +160,7 @@ class BetterRocket extends Rocket {
 
   }
 
-  void test_inherited_postcondition_with_param()  {
+  @Test void inherited_postcondition_with_param()  {
     add_class_to_classpath(source2)
     def betterRocket = create_instance_of(source3)
 
@@ -166,7 +169,7 @@ class BetterRocket extends Rocket {
 
   }
   
-  void test_inherited_postcondition()  {
+  @Test void inherited_postcondition()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -177,7 +180,7 @@ class BetterRocket extends Rocket {
 
   }
 
-  void test_inherited_postcondition_with_fail_in_parent()  {
+  @Test void inherited_postcondition_with_fail_in_parent()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -188,7 +191,7 @@ class BetterRocket extends Rocket {
 
   }
 
-  void test_inherited_postcondition_with_old_variable()  {
+  @Test void inherited_postcondition_with_old_variable()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -196,7 +199,7 @@ class BetterRocket extends Rocket {
     child.some_operation3 0
   }
 
-  void test_inherited_postcondition_fail_with_old_variable()  {
+  @Test void inherited_postcondition_fail_with_old_variable()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -206,7 +209,7 @@ class BetterRocket extends Rocket {
     }
   }
 
-  void test_inherited_postcondition_fail()  {
+  @Test void inherited_postcondition_fail()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -216,7 +219,7 @@ class BetterRocket extends Rocket {
     }
   }
 
-  void test_inherited_postcondition_fail_with_result_variable()  {
+  @Test void inherited_postcondition_fail_with_result_variable()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -226,7 +229,7 @@ class BetterRocket extends Rocket {
     }
   }
 
-  void test_inherited_postcondition_with_result_variable()  {
+  @Test void inherited_postcondition_with_result_variable()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -234,7 +237,7 @@ class BetterRocket extends Rocket {
     child.some_operation7()
   }
 
-  void test_inherited_postcondition_with_result_and_old_variables()  {
+  @Test void inherited_postcondition_with_result_and_old_variables()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
@@ -242,7 +245,7 @@ class BetterRocket extends Rocket {
     child.some_operation8()
   }
 
-  void test_inherited_postcondition_fail_with_result_variable2()  {
+  @Test void inherited_postcondition_fail_with_result_variable2()  {
 
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)

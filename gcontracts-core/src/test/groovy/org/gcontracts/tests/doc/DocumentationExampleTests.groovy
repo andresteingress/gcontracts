@@ -1,6 +1,9 @@
 package org.gcontracts.tests.doc
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -89,22 +92,22 @@ class EiffelStack {
 '''
 
 
-  void test_stack_creation()  {
+  @Test void test_stack_creation()  {
     create_instance_of(example_eiffel_stack)
   }
 
-  void test_stack_creation_with_list()  {
+  @Test void test_stack_creation_with_list()  {
     create_instance_of(example_eiffel_stack, [[1,2,3,4]])
   }
 
-  void test_stack_put()  {
+  @Test void test_stack_put()  {
     def stack = create_instance_of(example_eiffel_stack)
     stack.put("hello world")
 
     assertTrue stack.last_item() == 'hello world'
   }
 
-  void test_stack_replace()  {
+  @Test void test_stack_replace()  {
     def stack = create_instance_of(example_eiffel_stack)
     stack.put("hello world")
     stack.replace("hallo welt")
@@ -113,7 +116,7 @@ class EiffelStack {
     assertTrue stack.count() == 1
   }
 
-  void test_stack_remove()  {
+  @Test void test_stack_remove()  {
     def stack = create_instance_of(example_eiffel_stack)
     stack.put("hello world")
     stack.remove()
@@ -121,7 +124,7 @@ class EiffelStack {
     assertTrue stack.count() == 0
   }
 
-  void test_person_creation()  {
+  @Test void test_person_creation()  {
     shouldFail AssertionError, {
        create_instance_of(example_person)
     }

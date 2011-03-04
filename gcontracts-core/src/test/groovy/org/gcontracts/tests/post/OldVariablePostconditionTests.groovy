@@ -1,6 +1,9 @@
 package org.gcontracts.tests.post
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * <tt>old</tt> variables tests for postconditions.
@@ -34,34 +37,34 @@ class OldVariable {
 }
 '''
 
-  void test_big_decimal()  {
+  @Test void big_decimal()  {
 
     def instance = create_instance_of(createSourceCodeForTemplate(templateSourceCode, [type: BigDecimal.class.getName()]), new BigDecimal(0))
     instance.setVariable new BigDecimal(1)
   }
 
 
-  void test_big_integer()  {
+  @Test void big_integer()  {
     def instance = create_instance_of(createSourceCodeForTemplate(templateSourceCode, [type: BigInteger.class.getName()]), new BigInteger(0))
     instance.setVariable new BigInteger(1)
   }
 
-  void test_string()  {
+  @Test void string()  {
     def instance = create_instance_of(createSourceCodeForTemplate(templateSourceCode, [type: String.class.getName()]), ' ')
     instance.setVariable 'test'
   }
 
-  void test_integer()  {
+  @Test void integer()  {
     def instance = create_instance_of(createSourceCodeForTemplate(templateSourceCode, [type: Integer.class.getName()]), new Integer(0))
     instance.setVariable new Integer(1)
   }
 
-  void test_float()  {
+  @Test void test_float()  {
     def instance = create_instance_of(createSourceCodeForTemplate(templateSourceCode, [type: Float.class.getName()]), new Float(0))
     instance.setVariable new Float(1)
   }
 
-  void test_calendar_date()  {
+  @Test void test_calendar_date()  {
     def now = Calendar.getInstance()
     def not_now = Calendar.getInstance()
     not_now.add(Calendar.DAY_OF_YEAR, 1)

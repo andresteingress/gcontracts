@@ -1,6 +1,9 @@
 package org.gcontracts.tests.interfaces
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -80,12 +83,12 @@ class Stack extends Stackable {
 }
 '''
 
-  void test_creation()  {
+  @Test void creation()  {
     add_class_to_classpath(source_stackable)
     create_instance_of(source_stack)
   }
 
-  void test_push_precondition()  {
+  @Test void push_precondition()  {
     add_class_to_classpath(source_stackable)
     def stack = create_instance_of(source_stack)
 

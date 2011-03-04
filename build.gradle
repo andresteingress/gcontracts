@@ -17,7 +17,7 @@ allprojects {
     version = "1.2-SNAPSHOT"
 
     asm = "asm:asm:3.2"
-    junit = "junit:junit:3.8.1"
+    junit = "junit:junit:4.8.2"
 
     description = "GContracts provides closure annotations to support Programming by Contract for Groovy"
 

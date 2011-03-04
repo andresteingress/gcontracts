@@ -1,6 +1,9 @@
 package org.gcontracts.tests.inv
 
 import org.gcontracts.tests.basic.BaseTestClass
+import org.junit.Test
+
+import static org.junit.Assert.*;
 
 /**
  * @author ast
@@ -57,7 +60,7 @@ class A {
 }
 '''
 
-  void test_class_invariant()  {
+  @Test void class_invariant()  {
     create_instance_of(source1, ['test'])
 
     shouldFail AssertionError, {
@@ -65,7 +68,7 @@ class A {
     }
   }
 
-  void test_class_invariant_with_private_instance_variable()  {
+  @Test void class_invariant_with_private_instance_variable()  {
     create_instance_of(source2, ['test'])
 
     shouldFail AssertionError, {
@@ -73,7 +76,7 @@ class A {
     }
   }
 
-  void test_class_with_constant()  {
+  @Test void class_with_constant()  {
     create_instance_of(source3, ['test'])
   }
 
