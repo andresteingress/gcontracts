@@ -32,7 +32,9 @@ import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.meta.Postcondition;
+import org.gcontracts.annotations.meta.Precondition;
 import org.gcontracts.ast.visitor.BaseVisitor;
+import org.gcontracts.util.AnnotationUtils;
 
 import java.util.List;
 
@@ -83,6 +85,12 @@ public class PostconditionGenerator extends BaseGenerator {
      */
     public void generateDefaultPostconditionStatement(final ClassNode type, final MethodNode method)  {
 
+        // if another precondition is available we'll evaluate to false
+        boolean isAnotherPostconditionAvailable = AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(type.getSuperClass(), method, ClassHelper.makeWithoutCaching(Postcondition.class)).size() > 0;
+        if (!isAnotherPostconditionAvailable) return;
+
+        // if another post-condition is available we need to add a default expression of TRUE
+        // since post-conditions are usually connected with a logical AND
         final BooleanExpression postconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Postcondition.class, new BooleanExpression(ConstantExpression.TRUE), true);
         if (postconditionBooleanExpression.getExpression() == ConstantExpression.TRUE) return;
 

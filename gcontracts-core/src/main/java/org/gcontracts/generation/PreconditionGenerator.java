@@ -22,6 +22,7 @@
  */
 package org.gcontracts.generation;
 
+import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
@@ -32,6 +33,7 @@ import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.meta.Precondition;
+import org.gcontracts.util.AnnotationUtils;
 
 /**
  * Code generator for preconditions.
@@ -67,10 +69,17 @@ public class PreconditionGenerator extends BaseGenerator {
      */
     public void generateDefaultPreconditionStatement(final ClassNode type, final MethodNode methodNode)  {
 
-        BooleanExpression preconditionBooleanExpression = new BooleanExpression(ConstantExpression.TRUE);
+        // if another precondition is available we'll evaluate to false
+        boolean isAnotherPreconditionAvailable = AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(type.getSuperClass(), methodNode, ClassHelper.makeWithoutCaching(Precondition.class)).size() > 0;
+        if (!isAnotherPreconditionAvailable) return;
+
+        // if there is another preconditio up the inheritance path, we need a default precondition with FALSE
+        // e.g. C1 <no precondition> : C2 <item != null> == false || item != null
+        BooleanExpression preconditionBooleanExpression = new BooleanExpression(ConstantExpression.FALSE);
         preconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(type, methodNode, Precondition.class, preconditionBooleanExpression, false);
         // if precondition could not be found in parent class, let's return
-        if (preconditionBooleanExpression.getExpression() == ConstantExpression.TRUE) return;
+        if (preconditionBooleanExpression.getExpression() == ConstantExpression.FALSE)
+            return;
 
         final BlockStatement blockStatement = wrapAssertionBooleanExpression(preconditionBooleanExpression);
         

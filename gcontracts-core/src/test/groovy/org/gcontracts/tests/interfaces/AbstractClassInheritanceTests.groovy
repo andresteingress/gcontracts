@@ -3,7 +3,8 @@ package org.gcontracts.tests.interfaces
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.*
+import org.gcontracts.PreconditionViolation;
 
 /**
  * @author ast
@@ -93,6 +94,8 @@ class Stack extends Stackable  {
 
     def stack = create_instance_of(source_stack)
 
-    stack.push null
+    shouldFail PreconditionViolation.class, {
+        stack.push null
+    }
   }
 }

@@ -3,7 +3,8 @@ package org.gcontracts.tests.other
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.*
+import org.gcontracts.PreconditionViolation;
 
 /**
  * @author ast
@@ -60,7 +61,10 @@ class B extends A  {
     add_class_to_classpath source1
 
     def bInstance = create_instance_of(source2, ["test"])
-    bInstance.some_operation null
+
+      shouldFail PreconditionViolation.class, {
+            bInstance.some_operation null
+      }
   }
 
 }
