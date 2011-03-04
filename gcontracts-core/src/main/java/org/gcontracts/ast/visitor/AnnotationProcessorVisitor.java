@@ -35,7 +35,9 @@ import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
+import org.objectweb.asm.Opcodes;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +80,33 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
         // visit all interfaces of this class
         visitInterfaces(type, type.getInterfaces());
+        visitAbstractBaseClassesForInterfaceMethodNodes(type, type.getSuperClass());
+    }
+
+    private void visitAbstractBaseClassesForInterfaceMethodNodes(ClassNode origin, ClassNode superClass) {
+        if (superClass == null) return;
+        if (!Modifier.isAbstract(superClass.getModifiers())) return;
+
+        for (ClassNode interfaceClassNode : superClass.getInterfaces())  {
+            List<MethodNode> methodNodes = new ArrayList<MethodNode>();
+            methodNodes.addAll(interfaceClassNode.getMethods());
+
+            for (MethodNode interfaceMethodNode : methodNodes)  {
+                final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(interfaceMethodNode, ContractElement.class.getName());
+                if (annotationNodes == null || annotationNodes.isEmpty()) continue;
+
+                MethodNode implementingMethodNode = superClass.getMethod(interfaceMethodNode.getName(), interfaceMethodNode.getParameters());
+
+                // if implementingMethodNode == null, then superClass is abstract and does not implement
+                // the current interface methodNode
+                if (implementingMethodNode != null) continue;
+
+                MethodNode implementationInOriginClassNode = origin.getMethod(interfaceMethodNode.getName(), interfaceMethodNode.getParameters());
+                if (implementationInOriginClassNode == null) continue;
+
+                handleMethodNode(implementationInOriginClassNode, annotationNodes);
+            }
+        }
     }
 
     private void visitInterfaces(final ClassNode classNode, final ClassNode[] interfaces) {

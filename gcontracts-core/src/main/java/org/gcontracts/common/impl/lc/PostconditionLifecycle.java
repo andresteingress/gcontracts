@@ -22,13 +22,16 @@
  */
 package org.gcontracts.common.impl.lc;
 
+import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.MethodNode;
+import org.gcontracts.annotations.meta.Postcondition;
 import org.gcontracts.common.base.BaseLifecycle;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.PostconditionGenerator;
+import org.gcontracts.util.AnnotationUtils;
 
 /**
  * @author ast
@@ -51,8 +54,13 @@ public class PostconditionLifecycle extends BaseLifecycle {
 
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(processingContextInformation.readerSource());
 
-        if (processingContextInformation.contract().postconditions().contains(methodNode) && !(methodNode instanceof ConstructorNode))  {
+        if (processingContextInformation.contract().postconditions().contains(methodNode)  && !(methodNode instanceof ConstructorNode))  {
             postconditionGenerator.addOldVariablesMethod(classNode);
+
+        // the method itself is not annotated but somewhere up the inheritance line exists a postcondition
+        } else if (!(methodNode instanceof ConstructorNode) && AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(classNode, methodNode, ClassHelper.makeWithoutCaching(Postcondition.class)).size() > 0)  {
+            postconditionGenerator.addOldVariablesMethod(classNode);
+            postconditionGenerator.generateDefaultPostconditionStatement(classNode, methodNode);
         } else {
             postconditionGenerator.generateDefaultPostconditionStatement(classNode, methodNode);
         }
