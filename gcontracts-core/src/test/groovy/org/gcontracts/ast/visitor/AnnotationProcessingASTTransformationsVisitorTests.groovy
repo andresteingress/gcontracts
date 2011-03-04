@@ -13,7 +13,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_single_notnull_parameter() {
 
         def source = '''
-    import org.gcontracts.annotations.common.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     class Tester {
 
@@ -32,7 +40,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_multiple_notnull_parameters() {
 
         def source = '''
-    import org.gcontracts.annotations.common.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     class Tester {
 
@@ -53,7 +69,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_constructor_params() {
 
         def source = '''
-    import org.gcontracts.annotations.common.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     class Tester {
 
@@ -72,7 +96,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_requires_method() {
 
         def source = '''
-    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     class Tester {
 
@@ -98,7 +130,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_default_requires_method() {
 
         def source = '''
-    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     class Tester {
 
@@ -113,9 +153,22 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
 
     def void test_requires_method_with_not_null_parameter() {
 
+        def source_custom_anno = '''
+    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
+
+'''
+
         def source = '''
     import org.gcontracts.annotations.*
-    import org.gcontracts.annotations.common.*
 
     class Tester {
 
@@ -124,6 +177,8 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_custom_anno)
+
         Class clz = loader.parseClass(source)
         assertNotNull(clz)
 
@@ -142,7 +197,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_default_ensures_method() {
 
         def source = '''
-    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     class Tester {
 
@@ -158,7 +221,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_ensures_method() {
 
         def source = '''
-    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     class Tester {
 
@@ -188,7 +259,15 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     def void test_class_invariant() {
 
         def source = '''
-    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+
+    @Precondition
+    @AnnotationProcessorClosure({ it != null })
+    public @interface NotNull {}
 
     @Invariant({ prop != null })
     class Tester {

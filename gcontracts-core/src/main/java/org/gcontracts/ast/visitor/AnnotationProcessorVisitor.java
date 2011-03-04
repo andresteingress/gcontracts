@@ -26,8 +26,10 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
+import org.gcontracts.annotations.meta.AnnotationProcessorClosure;
 import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
+import org.gcontracts.common.impl.AnnotationClosureProcessor;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
@@ -192,37 +194,20 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(parameter, ContractElement.class.getName());
 
         for (AnnotationNode annotationNode : annotationNodes)  {
-            AnnotationProcessor processor = createAnnotationProcessor(annotationNode);
+            AnnotationProcessor processor = createAnnotationProcessorFromClosure(annotationNode);
             if (processor == null) continue;
 
-            if (!(annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClosureExpression))  {
-                processor.process(pci, pci.contract(), methodNode.getDeclaringClass(), methodNode, parameter, null);
-            } else {
-
-                ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
-                        VariableExpression.THIS_EXPRESSION,
-                        VariableExpression.THIS_EXPRESSION);
-
-                MethodCallExpression doCall = new MethodCallExpression(
-                        new MethodCallExpression(
-                                annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME),
-                                "newInstance",
-                                closureConstructorArgumentList
-                        ),
-                        "call",
-                        ArgumentListExpression.EMPTY_ARGUMENTS
-                );
-
-                final BooleanExpression booleanExpression = new BooleanExpression(doCall);
-                booleanExpression.setSourcePosition(annotationNode);
-
-                processor.process(pci, pci.contract(), methodNode.getDeclaringClass(), methodNode, parameter, booleanExpression);
-            }
+            processor.process(pci, pci.contract(), methodNode.getDeclaringClass(), methodNode, parameter);
         }
     }
 
     private AnnotationProcessor createAnnotationProcessor(AnnotationNode annotationNode) {
+        AnnotationProcessor processor = createAnnotationProcessorFromClosure(annotationNode);
+        if (processor != null) return processor;
+
         final AnnotationProcessorImplementation annotationProcessingAnno = (AnnotationProcessorImplementation) annotationNode.getClassNode().getTypeClass().getAnnotation(AnnotationProcessorImplementation.class);
+        if (annotationProcessingAnno == null) return null;
+
         final Class clz = annotationProcessingAnno.value();
 
         try {
@@ -231,5 +216,15 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         } catch (IllegalAccessException e) {}
 
         return null;
+    }
+
+    private AnnotationProcessor createAnnotationProcessorFromClosure(AnnotationNode annotationNode) {
+        List<AnnotationNode> annotationNodes = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(AnnotationProcessorClosure.class));
+        if (annotationNodes == null || annotationNodes.isEmpty()) return null;
+
+        final ClassExpression closureClass = (ClassExpression) annotationNodes.get(0).getMember(CLOSURE_ATTRIBUTE_NAME);
+        Validate.notNull(closureClass);
+
+        return new AnnotationClosureProcessor(annotationNode, closureClass);
     }
 }

@@ -35,5 +35,6 @@ public abstract class AnnotationProcessor {
 
     public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final BooleanExpression booleanExpression) {}
     public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final BooleanExpression booleanExpression) {}
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter, final BooleanExpression booleanExpression) {}
+
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter) {}
 }

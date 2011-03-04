@@ -20,39 +20,25 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts.common.impl;
+package org.gcontracts.annotations.meta;
 
-import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.BinaryExpression;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.codehaus.groovy.ast.expr.VariableExpression;
-import org.codehaus.groovy.syntax.Token;
-import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.common.spi.AnnotationProcessor;
-import org.gcontracts.common.spi.ProcessingContextInformation;
-import org.gcontracts.domain.Contract;
-import org.gcontracts.domain.Precondition;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Implementation of {@link org.gcontracts.common.spi.AnnotationProcessor} which checks
- * {@link Parameter} instances for null values when {@link org.gcontracts.annotations.common.NotNull} is
- * specified on them.
+ * A meta-annotation which is used to specify an implementation class of
+ * {@link org.gcontracts.common.spi.AnnotationProcessor}.
+ *
+ * @see org.gcontracts.common.spi.AnnotationProcessor
  *
  * @author ast
  */
-public class NotNullAnnotationProcessor extends AnnotationProcessor {
 
-    @Override
-    public void process(ProcessingContextInformation processingContextInformation, Contract contract, ClassNode classNode, MethodNode methodNode, Parameter parameter, BooleanExpression  booleanExpression) {
-        if (!processingContextInformation.isPreconditionsEnabled()) return;
-
-        booleanExpression = new BooleanExpression(new BinaryExpression(
-            new VariableExpression(parameter),
-            Token.newSymbol(Types.COMPARE_NOT_EQUAL, -1, -1),
-            ConstantExpression.NULL
-        ));
-
-        contract.preconditions().join(methodNode, new Precondition(booleanExpression));
-    }
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AnnotationProcessorClosure {
+    Class value();
 }

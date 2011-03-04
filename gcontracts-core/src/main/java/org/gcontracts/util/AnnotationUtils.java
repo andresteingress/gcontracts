@@ -109,7 +109,7 @@ public class AnnotationUtils {
         ArrayList<AnnotationNode> result = new ArrayList<AnnotationNode>();
 
         for (AnnotationNode annotationNode : annotatedNode.getAnnotations())  {
-            if (!annotationNode.getClassNode().getName().startsWith("org.gcontracts")) continue;
+            if (annotationNode.getClassNode().getName().startsWith("java.lang")) continue;
 
             // is the annotation marked with the given meta annotation?
             List<AnnotationNode> metaAnnotations = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(metaAnnotationClassName));
