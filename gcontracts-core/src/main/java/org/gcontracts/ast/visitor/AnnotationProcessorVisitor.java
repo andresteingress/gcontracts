@@ -222,9 +222,14 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         List<AnnotationNode> annotationNodes = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(AnnotationProcessorClosure.class));
         if (annotationNodes == null || annotationNodes.isEmpty()) return null;
 
-        final ClassExpression closureClass = (ClassExpression) annotationNodes.get(0).getMember(CLOSURE_ATTRIBUTE_NAME);
-        Validate.notNull(closureClass);
+        List<ClassExpression> classExpressionList = new ArrayList<ClassExpression>();
 
-        return new AnnotationClosureProcessor(annotationNode, closureClass);
+        for (AnnotationNode an : annotationNodes)  {
+            final ClassExpression closureClass = (ClassExpression) an.getMember(CLOSURE_ATTRIBUTE_NAME);
+            Validate.notNull(closureClass);
+            classExpressionList.add(closureClass);
+        }
+
+        return new AnnotationClosureProcessor(annotationNode, classExpressionList);
     }
 }

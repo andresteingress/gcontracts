@@ -172,7 +172,7 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
 
     class Tester {
 
-        @Requires({ param1 == null })
+        @Requires({ param1 > 1 })
         def method(@NotNull param1, param2) {}
     }'''
 
