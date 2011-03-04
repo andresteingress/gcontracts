@@ -18,18 +18,18 @@ class MissingLineNumber {
   private String str = "test"
 
   @Requires({ param1 != null })
-  def void operation1(def param1)  {
+  void operation1(def param1)  {
     // noop
   }
 
-  def void operation2(def param1)  {
+  void operation2(def param1)  {
     str = param1
   }
 
 }
 '''
 
-  def void test_line_number_in_precondition_stacktrace()  {
+  void test_line_number_in_precondition_stacktrace()  {
 
     def var = create_instance_of(source)
 
@@ -59,7 +59,7 @@ class MissingLineNumber {
     }
   }
 
-  def void test_line_number_in_class_invariant_stacktrace()  {
+  void test_line_number_in_class_invariant_stacktrace()  {
 
     def var = create_instance_of(source)
 

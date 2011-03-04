@@ -43,11 +43,11 @@ class Stack extends Stackable  {
   }
 
   @Ensures({ list[-1] == item })
-  def void push(def item)  {
+  void push(def item)  {
     list.add item
   }
 
-  def void multi_push(def item1, def item2)  {
+  void multi_push(def item1, def item2)  {
     push item1
     push item2
   }
@@ -74,7 +74,7 @@ class Stack extends Stackable  {
     return 'tostring'
   }
 
-  def void modifyClassInvariant()  {
+  void modifyClassInvariant()  {
     anotherName = null
   }
 }

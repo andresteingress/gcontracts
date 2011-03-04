@@ -42,7 +42,7 @@ class Stack extends Stackable {
 
   @Requires({ item > 2 })
   @Ensures({ list[-1] == item })
-  def void push(def item)  {
+  void push(def item)  {
     list.add item
   }
 }

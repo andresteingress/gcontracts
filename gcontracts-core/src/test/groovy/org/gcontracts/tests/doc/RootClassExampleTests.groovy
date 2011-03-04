@@ -29,18 +29,18 @@ class RootClass {
   }                                                  
 
   @Requires({ paramAttribute1 > 1 && paramAttribute2 > 1 })
-  def void some_operation(final Integer paramAttribute1, final Integer paramAttribute2)  {
+  void some_operation(final Integer paramAttribute1, final Integer paramAttribute2)  {
     this.field1 = paramAttribute1
     this.field2 = paramAttribute2
   }                                                                                                            
                                                    
   @Ensures({ field1 == paramAttribute1 })                     
-  def void some_operation2(final Integer paramAttribute1)  {           
+  void some_operation2(final Integer paramAttribute1)  {
     field1 = paramAttribute1
   }                                   
 
   @Ensures({ old -> old.field1 != paramAttribute1 })            
-  def void some_operation3(final Integer paramAttribute1)  {
+  void some_operation3(final Integer paramAttribute1)  {
     field1 = paramAttribute1
   }
 
@@ -82,45 +82,45 @@ class RootClass {
   }                                                  
 
   @Ensures({ old -> old.dateField1 != param1 && dateField1 == param1 })
-  def void some_operation10(def param1)  {
+  void some_operation10(def param1)  {
     dateField1 = param1
   }
 
   @Requires({ param1 > 10 })
-  def void some_operation11(def param1)  {
+  void some_operation11(def param1)  {
     field1 = param1
   }
                            
   @Ensures({ old -> old.dateField1 != param1 && dateField1 == param1 })
-  def void some_operation12(def param1)  {
+  void some_operation12(def param1)  {
     dateField1 = param1
   }
 }
 '''
   
-  def void test_class_invariant()  {
+  void test_class_invariant()  {
     create_instance_of(source, [1])
   }                             
 
-  def void test_class_invariant_fail()  {
+  void test_class_invariant_fail()  {
 
     shouldFail AssertionError, {
       create_instance_of(source, [0])
     }
   }                                                   
 
-  def void test_class_invariant_with_default_constructor()  {
+  void test_class_invariant_with_default_constructor()  {
     shouldFail AssertionError, { create_instance_of(source) }
   }
 
-  def void test_precondition_with_multiple_arguments()  {
+  void test_precondition_with_multiple_arguments()  {
 
     def root = create_instance_of(source, [1])
 
     root.some_operation 2, 2
   }
 
-  def void test_precond_with_first_argument_fail()  {
+  void test_precond_with_first_argument_fail()  {
 
     def root = create_instance_of(source, [1])
 
@@ -129,7 +129,7 @@ class RootClass {
     }
   }
 
-  def void test_precond_with_second_argument_fail()  {
+  void test_precond_with_second_argument_fail()  {
 
     def root = create_instance_of(source, [1])
 
@@ -138,19 +138,19 @@ class RootClass {
     }
   }
 
-  def void test_postcond_with_single_argument()  {
+  void test_postcond_with_single_argument()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation2 2
   }
 
-  def void test_postcond_with_single_argument_and_old_var()  {
+  void test_postcond_with_single_argument_and_old_var()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation3 2                           
   }
 
-  def void test_postcond_with_single_argument_and_old_var_fail()  {
+  void test_postcond_with_single_argument_and_old_var_fail()  {
     def root = create_instance_of(source, [1])
 
     shouldFail AssertionError, {
@@ -158,7 +158,7 @@ class RootClass {
     }
   }                             
 
-  def void test_postcond_with_result_variable()  {
+  void test_postcond_with_result_variable()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation4(1, 1)
@@ -166,7 +166,7 @@ class RootClass {
     assertEquals 2, result
   }
 
-  def void test_postcond_with_result_variable_and_field()  {
+  void test_postcond_with_result_variable_and_field()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation5(1, 1)
@@ -174,7 +174,7 @@ class RootClass {
     assertEquals 2, result
   }
 
-  def void test_postcond_with_result_and_old_variables()  {
+  void test_postcond_with_result_and_old_variables()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation6(2, 2)
@@ -182,7 +182,7 @@ class RootClass {
     assertEquals 4, result
   }
 
-  def void test_postcond_with_result_and_old_variables_switched()  {
+  void test_postcond_with_result_and_old_variables_switched()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation7(2, 2)
@@ -190,7 +190,7 @@ class RootClass {
     assertEquals 4, result
   }
 
-  def void test_postcond_with_implicit_return_statement()  {
+  void test_postcond_with_implicit_return_statement()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation8(2)
@@ -198,7 +198,7 @@ class RootClass {
     assertEquals 2, result
   }
 
-  def void test_postcond_with_complex_return_statement()  {
+  void test_postcond_with_complex_return_statement()  {
     def root = create_instance_of(source, [1])
 
     def result = root.some_operation9(2, 2)
@@ -207,19 +207,19 @@ class RootClass {
   }
 
 
-  def void test_multiple_preconditions()  {
+  void test_multiple_preconditions()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation11 12
   }
 
-  def void test_multiple_precondition_fail()  {
+  void test_multiple_precondition_fail()  {
     def root = create_instance_of(source, [1])
 
     shouldFail AssertionError, { root.some_operation11 10 }
   }
 
-  def void test_multiple_postconditions()  {
+  void test_multiple_postconditions()  {
     def root = create_instance_of(source, [1])
 
     root.some_operation10(new Date())

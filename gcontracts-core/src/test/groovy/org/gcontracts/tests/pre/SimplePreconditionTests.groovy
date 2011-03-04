@@ -19,24 +19,24 @@ class A {
   def property2
 
   @Requires({ value != null })
-  def void change_property_value(def value)  {
+  void change_property_value(def value)  {
     property = value
   }
 
   @Requires({ value != null && value2 != null })
-  def void change_property_values(def value, def value2)  {
+  void change_property_values(def value, def value2)  {
     property  = value
     property2 = value2
   }
 
   @Requires({ !(property == value) })
-  def void change_property_value_not(def value)  {
+  void change_property_value_not(def value)  {
     ;
   }
 }
 '''
 
-  def void test_simple_boolean_expression()  {
+  void test_simple_boolean_expression()  {
 
     def a = create_instance_of(source)
     a.change_property_value('test')
@@ -46,7 +46,7 @@ class A {
     }
   }
 
-  def void test_binary_boolean_expression()  {
+  void test_binary_boolean_expression()  {
 
     def a = create_instance_of(source)
     a.change_property_values('test', 'test2')
@@ -64,7 +64,7 @@ class A {
     }
   }
 
-  def void test_negated_boolean_expression()  {
+  void test_negated_boolean_expression()  {
 
     def a = create_instance_of(source)
     a.change_property_value_not('test')

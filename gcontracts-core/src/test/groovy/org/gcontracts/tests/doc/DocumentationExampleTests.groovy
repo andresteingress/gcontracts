@@ -89,22 +89,22 @@ class EiffelStack {
 '''
 
 
-  def void test_stack_creation()  {
+  void test_stack_creation()  {
     create_instance_of(example_eiffel_stack)
   }
 
-  def void test_stack_creation_with_list()  {
+  void test_stack_creation_with_list()  {
     create_instance_of(example_eiffel_stack, [[1,2,3,4]])
   }
 
-  def void test_stack_put()  {
+  void test_stack_put()  {
     def stack = create_instance_of(example_eiffel_stack)
     stack.put("hello world")
 
     assertTrue stack.last_item() == 'hello world'
   }
 
-  def void test_stack_replace()  {
+  void test_stack_replace()  {
     def stack = create_instance_of(example_eiffel_stack)
     stack.put("hello world")
     stack.replace("hallo welt")
@@ -113,7 +113,7 @@ class EiffelStack {
     assertTrue stack.count() == 1
   }
 
-  def void test_stack_remove()  {
+  void test_stack_remove()  {
     def stack = create_instance_of(example_eiffel_stack)
     stack.put("hello world")
     stack.remove()
@@ -121,7 +121,7 @@ class EiffelStack {
     assertTrue stack.count() == 0
   }
 
-  def void test_person_creation()  {
+  void test_person_creation()  {
     shouldFail AssertionError, {
        create_instance_of(example_person)
     }

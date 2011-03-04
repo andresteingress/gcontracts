@@ -40,7 +40,7 @@ class Stack implements Stackable  {
   }
 
   @Ensures({ list.last() == item })
-  def void push(def item)  {
+  void push(def item)  {
     list.add item
   }
 

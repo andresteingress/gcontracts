@@ -18,24 +18,24 @@ class A {
   def property2
 
   @Ensures({ property == value })
-  def void change_property_value(def value)  {
+  void change_property_value(def value)  {
     property = value
   }
 
   @Ensures({ property == value && property2 == value2 })
-  def void change_property_values(def value, def value2)  {
+  void change_property_values(def value, def value2)  {
     property  = value
     property2 = value2
   }
 
   @Ensures({ !(property == value) })
-  def void change_property_value_not(def value)  {
+  void change_property_value_not(def value)  {
     ;
   }
 }
 '''
 
-  def void test_simple_boolean_expression()  {
+  void test_simple_boolean_expression()  {
 
     def a = create_instance_of(source_postconditions)
     a.change_property_value('test')
@@ -43,7 +43,7 @@ class A {
     assertEquals 'test', a.property
   }
 
-  def void test_binary_boolean_expression()  {
+  void test_binary_boolean_expression()  {
 
     def a = create_instance_of(source_postconditions)
     a.change_property_values('test', 'test2')
@@ -52,7 +52,7 @@ class A {
     assertEquals 'test2', a.property2
   }
 
-  def void test_negated_boolean_expression()  {
+  void test_negated_boolean_expression()  {
 
     def a = create_instance_of(source_postconditions)
     a.change_property_value_not('test')

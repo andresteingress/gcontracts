@@ -33,13 +33,13 @@ class EnsureVariables {
 
 '''
 
-  def void test_result_than_old_variable()  {
+  void test_result_than_old_variable()  {
     def var = create_instance_of(source, ['some string'])
 
     var.concatenateColon("part1", "part2")
   }
 
-  def void test_old_than_result_variable()  {
+  void test_old_than_result_variable()  {
     def var = create_instance_of(source, ['some string'])
 
     var.concatenateColon2("part1", "part2")

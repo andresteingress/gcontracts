@@ -28,7 +28,7 @@ class OldVariable {
   }
 
   @Ensures({ old -> old.someVariable != null && old.someVariable != someVariable })
-  def void setVariable(final $type other)  {
+  void setVariable(final $type other)  {
     this.someVariable = other
   }
 }

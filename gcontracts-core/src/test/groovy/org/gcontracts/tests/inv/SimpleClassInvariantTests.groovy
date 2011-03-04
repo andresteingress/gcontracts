@@ -57,7 +57,7 @@ class A {
 }
 '''
 
-  def void test_class_invariant()  {
+  void test_class_invariant()  {
     create_instance_of(source1, ['test'])
 
     shouldFail AssertionError, {
@@ -65,7 +65,7 @@ class A {
     }
   }
 
-  def void test_class_invariant_with_private_instance_variable()  {
+  void test_class_invariant_with_private_instance_variable()  {
     create_instance_of(source2, ['test'])
 
     shouldFail AssertionError, {
@@ -73,7 +73,7 @@ class A {
     }
   }
 
-  def void test_class_with_constant()  {
+  void test_class_with_constant()  {
     create_instance_of(source3, ['test'])
   }
 

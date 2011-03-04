@@ -15,11 +15,12 @@ import org.gcontracts.tests.basic.BaseTestClass
 class AnnotationUtilsTests extends BaseTestClass {
 
     def source = '''
-    import org.gcontracts.annotations.common.*
+    import org.gcontracts.annotations.*
 
     class Tester {
 
-        def method(@NotNull param) {}
+        @Requires({ param != null })
+        def method(def param) {}
 
     }'''
 
@@ -30,7 +31,7 @@ class AnnotationUtilsTests extends BaseTestClass {
         ClassNode classNode = astNodes[1]
         MethodNode methodNode = classNode.getMethod("method", [new Parameter(ClassHelper.makeWithoutCaching("java.lang.Object"), "param")] as Parameter[] )
 
-        def annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode.getParameters()[0], ContractElement.class.getName())
+        def annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName())
         assertEquals(1, annotationNodes.size())
     }
 }

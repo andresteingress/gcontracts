@@ -29,12 +29,12 @@ class Stack  {
 
   @Requires({ item != null })
   @Ensures({ list[-1] == item })
-  def void push(def item)  {
+  void push(def item)  {
     list.add item
   }
 
   @Requires({ item1 != null && item2 != null })
-  def void multi_push(def item1, def item2)  {
+  void multi_push(def item1, def item2)  {
     push item1
     push item2
   }
@@ -61,7 +61,7 @@ class Stack  {
     return 'tostring'
   }
 
-  def void modifyClassInvariant()  {
+  void modifyClassInvariant()  {
     anotherName = null
   }
 }
@@ -86,18 +86,18 @@ class StackDescendant extends Stack implements Serializable {
   }
 
   @Override
-  def void push(def item)  {
+  void push(def item)  {
     count++
     super.push item
   }
 
-  def void push_fail(def item)  {
+  void push_fail(def item)  {
     count++
     list = null
   }
 
   @Ensures({ old -> old.count < count })
-  def void test_count()  {
+  void test_count()  {
     count++
   }
 
@@ -109,12 +109,12 @@ class StackDescendant extends Stack implements Serializable {
 }
 '''
 
-  def void test_creation()  {
+  void test_creation()  {
     create_instance_of(source_stack)
     create_instance_of(source_stack_descendant)
   }
 
-  def void test_inherited_invariant()  {
+  void test_inherited_invariant()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 
@@ -122,7 +122,7 @@ class StackDescendant extends Stack implements Serializable {
   }
 
 
-  def void test_inherited_invariant_failure()  {
+  void test_inherited_invariant_failure()  {
     create_instance_of(source_stack)
 
     shouldFail AssertionError, {
@@ -130,7 +130,7 @@ class StackDescendant extends Stack implements Serializable {
     }
   }
 
-  def void test_inherited_invariant_fail_on_method_call()  {
+  void test_inherited_invariant_fail_on_method_call()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 
@@ -139,7 +139,7 @@ class StackDescendant extends Stack implements Serializable {
     }
   }
 
-  def void test_old_variable()  {
+  void test_old_variable()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 
@@ -147,7 +147,7 @@ class StackDescendant extends Stack implements Serializable {
   }
 
 
-  def void test_old_and_result_variable()  {
+  void test_old_and_result_variable()  {
     create_instance_of(source_stack)
     def stack = create_instance_of(source_stack_descendant)
 

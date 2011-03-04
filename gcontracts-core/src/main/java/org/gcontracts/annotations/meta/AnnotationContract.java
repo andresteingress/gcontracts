@@ -22,8 +22,6 @@
  */
 package org.gcontracts.annotations.meta;
 
-import org.gcontracts.common.spi.AnnotationProcessor;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,6 +37,6 @@ import java.lang.annotation.RetentionPolicy;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AnnotationProcessorClosure {
+public @interface AnnotationContract {
     Class value();
 }

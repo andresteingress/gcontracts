@@ -24,7 +24,7 @@ enum C {
  */
 class CandidateChecksTests extends GroovyTestCase {
 
-  def void testContractsCandidateChecks()  {
+  void testContractsCandidateChecks()  {
     assertFalse CandidateChecks.isContractsCandidate(ClassHelper.make(B.class))
     assertFalse CandidateChecks.isContractsCandidate(ClassHelper.make(C.class))
     assertTrue  CandidateChecks.isContractsCandidate(ClassHelper.make(A.class))

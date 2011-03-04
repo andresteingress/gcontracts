@@ -166,7 +166,7 @@ class B extends A {
 '''
 
 
-  def void test_two_way_inheritance_path()  {
+  void test_two_way_inheritance_path()  {
     create_instance_of(source1, ['test'])
     create_instance_of(source2, ['test', 'test2'])
 
@@ -175,7 +175,7 @@ class B extends A {
     }
   }
 
-  def void test_three_way_inheritance_path()  {
+  void test_three_way_inheritance_path()  {
     create_instance_of(source1, ['test'])
     create_instance_of(source2, ['test', 'test2'])
     create_instance_of(source3, ['test', 'test2', 'test3'])
@@ -193,7 +193,7 @@ class B extends A {
     }
   }
 
-  def void test_with_private_instance_variable_in_super_class()  {
+  void test_with_private_instance_variable_in_super_class()  {
     create_instance_of(source11, ['test'])
     create_instance_of(source12, ['test'])
 
@@ -202,7 +202,7 @@ class B extends A {
     }
   }
 
-  def void test_invariant_check_on_method_call()  {
+  void test_invariant_check_on_method_call()  {
     create_instance_of(source1, ['test'])
     def b = create_instance_of(source2, ['test', 'test2'])
 
@@ -219,17 +219,17 @@ class B extends A {
     }
   }
 
-  def void test_private_constructor_creation()  {
+  void test_private_constructor_creation()  {
     create_instance_of(source21)
   }
 
-  def void test_public_constructor_creation()  {
+  void test_public_constructor_creation()  {
     shouldFail AssertionError, {
       create_instance_of(source21, [ 'test1', null ])
     }
   }
 
-  def void test_inherited_class_invariant()  {
+  void test_inherited_class_invariant()  {
     add_class_to_classpath(source51)
     def b = create_instance_of(source52, [])
 
@@ -239,13 +239,13 @@ class B extends A {
 
   }
 
-//  def void test_with_abstract_class_invariant()  {
+//  void test_with_abstract_class_invariant()  {
 //
 //    add_class_to_classpath(source31)
 //    def b = create_instance_of(source32)
 //  }
 //
-//  def void test_recursive_class_invariant_call()  {
+//  void test_recursive_class_invariant_call()  {
 //
 //    def a = create_instance_of(source41)
 //  }

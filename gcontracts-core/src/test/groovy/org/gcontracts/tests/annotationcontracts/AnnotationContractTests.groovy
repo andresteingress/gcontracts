@@ -1,4 +1,4 @@
-package org.gcontracts.ast.visitor
+package org.gcontracts.tests.annotationcontracts
 
 import org.codehaus.groovy.ast.builder.AstStringCompiler
 import org.gcontracts.tests.basic.BaseTestClass
@@ -6,29 +6,32 @@ import org.gcontracts.tests.basic.BaseTestClass
  /**
  * @author ast
  */
-class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
+class AnnotationContractTests extends BaseTestClass {
 
     AstStringCompiler astStringCompiler = new AstStringCompiler()
 
-    def void test_single_notnull_parameter() {
+    void test_single_notnull_parameter() {
 
-        def source = '''
-    import org.gcontracts.annotations.meta.*
+        def source_anno = '''
+import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
 
     @Precondition
-    @AnnotationProcessorClosure({ it != null })
+    @AnnotationContract({ it != null })
     public @interface NotNull {}
+'''
 
+        def source = '''
     class Tester {
 
         def method(@NotNull param) {}
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_anno)
         Class clz = loader.parseClass(source)
         assertNotNull(clz)
 
@@ -37,25 +40,28 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
         try  { tester.method(null) } catch (AssertionError ae) {}
     }
 
-    def void test_multiple_notnull_parameters() {
+    void test_multiple_notnull_parameters() {
 
-        def source = '''
-    import org.gcontracts.annotations.meta.*
+        def source_anno = '''
+   import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
 
     @Precondition
-    @AnnotationProcessorClosure({ it != null })
+    @AnnotationContract({ it != null })
     public @interface NotNull {}
+'''
 
+        def source = '''
     class Tester {
 
         def method(@NotNull param1, @NotNull param2) {}
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_anno)
         Class clz = loader.parseClass(source)
         assertNotNull(clz)
 
@@ -66,25 +72,27 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
         try  { tester.method(null, null) } catch (AssertionError ae) {}
     }
 
-    def void test_constructor_params() {
+    void test_constructor_params() {
 
-        def source = '''
-    import org.gcontracts.annotations.meta.*
+        def source_anno = '''
+   import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
 
     @Precondition
-    @AnnotationProcessorClosure({ it != null })
+    @AnnotationContract({ it != null })
     public @interface NotNull {}
+'''
 
+        def source = '''
     class Tester {
-
         def Tester(@NotNull param1, @NotNull param2) {}
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_anno)
         Class clz = loader.parseClass(source)
         assertNotNull(clz)
 
@@ -93,18 +101,10 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
         fail("AssertionError must have been thrown")
     }
 
-    def void test_requires_method() {
+    void test_requires_method() {
 
         def source = '''
-    import org.gcontracts.annotations.meta.*
-    import java.lang.annotation.*
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.PARAMETER)
-
-    @Precondition
-    @AnnotationProcessorClosure({ it != null })
-    public @interface NotNull {}
+    import org.gcontracts.annotations.*
 
     class Tester {
 
@@ -127,31 +127,34 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
         fail("AssertionError must have been thrown")
     }
 
-    def void test_default_requires_method() {
+    void test_default_requires_method() {
 
-        def source = '''
-    import org.gcontracts.annotations.meta.*
+        def source_anno = '''
+   import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
 
     @Precondition
-    @AnnotationProcessorClosure({ it != null })
+    @AnnotationContract({ it != null })
     public @interface NotNull {}
+'''
 
+        def source = '''
     class Tester {
 
         def method(param1, param2) {}
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_anno)
         Class clz = loader.parseClass(source)
         assertNotNull(clz)
 
     }
 
-    def void test_requires_method_with_not_null_parameter() {
+    void test_requires_method_with_not_null_parameter() {
 
         def source_custom_anno = '''
     import org.gcontracts.annotations.*
@@ -162,7 +165,7 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
     @Target(ElementType.PARAMETER)
 
     @Precondition
-    @AnnotationProcessorClosure({ it != null })
+    @AnnotationContract({ it != null })
     public @interface NotNull {}
 
 '''
@@ -194,42 +197,37 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
 
     }
 
-    def void test_default_ensures_method() {
+    void test_default_ensures_method() {
 
-        def source = '''
-    import org.gcontracts.annotations.meta.*
+        def source_anno = '''
+   import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
 
     @Precondition
-    @AnnotationProcessorClosure({ it != null })
+    @AnnotationContract({ it != null })
     public @interface NotNull {}
+'''
 
+        def source = '''
     class Tester {
 
         def method(param1, param2) {}
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_anno)
         Class clz = loader.parseClass(source)
         assertNotNull(clz)
 
     }
 
-    def void test_ensures_method() {
+    void test_ensures_method() {
 
         def source = '''
-    import org.gcontracts.annotations.meta.*
-    import java.lang.annotation.*
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.PARAMETER)
-
-    @Precondition
-    @AnnotationProcessorClosure({ it != null })
-    public @interface NotNull {}
+    import org.gcontracts.annotations.*
 
     class Tester {
 
@@ -256,18 +254,10 @@ class AnnotationProcessingASTTransformationsVisitorTests extends BaseTestClass {
         fail("AssertionError must have been thrown")
     }
 
-    def void test_class_invariant() {
+    void test_class_invariant() {
 
         def source = '''
-    import org.gcontracts.annotations.meta.*
-    import java.lang.annotation.*
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.PARAMETER)
-
-    @Precondition
-    @AnnotationProcessorClosure({ it != null })
-    public @interface NotNull {}
+    import org.gcontracts.annotations.*
 
     @Invariant({ prop != null })
     class Tester {

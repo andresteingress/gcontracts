@@ -35,17 +35,17 @@ import org.gcontracts.util.Validate;
 import java.util.List;
 
 /**
- * Implementation of a generic processor with handles {@link org.gcontracts.annotations.meta.AnnotationProcessorClosure}
+ * Implementation of a generic processor with handles {@link org.gcontracts.annotations.meta.AnnotationContract}
  * annotations and injects the given closure into the specified assertion.
  *
  * @author ast
  */
-public class AnnotationClosureProcessor extends AnnotationProcessor {
+public class AnnotationContractProcessor extends AnnotationProcessor {
 
     private final AnnotationNode annotationNode;
     private final List<ClassExpression> closureClasses;
 
-    public AnnotationClosureProcessor(AnnotationNode annotationNode, List<ClassExpression> closureClasses)  {
+    public AnnotationContractProcessor(AnnotationNode annotationNode, List<ClassExpression> closureClasses)  {
         Validate.notNull(annotationNode);
         Validate.notNull(closureClasses);
 

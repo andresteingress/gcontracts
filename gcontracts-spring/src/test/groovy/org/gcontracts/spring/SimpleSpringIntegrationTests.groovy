@@ -68,25 +68,25 @@ class A {
 }
 '''
 
-  def void test_defer_invariant_check_to_afterPropertiesSet()  {
+  void test_defer_invariant_check_to_afterPropertiesSet()  {
     create_instance_of(source1, [null])
   }
 
-  def void test_invariant_check_in_afterPropertiesSet()  {
+  void test_invariant_check_in_afterPropertiesSet()  {
     def a = create_instance_of(source1, [null])
     shouldFail AssertionError, {
       a.$gcontracts_postConstruct()
     }
   }
 
-  def void test_Sinvariant_check_will_be_ignored_for_bean_with_InitializingBean()  {
+  void test_Sinvariant_check_will_be_ignored_for_bean_with_InitializingBean()  {
     def a = create_instance_of(source2, [null])
     shouldFail MissingMethodException, {
       a.$gcontracts_postConstruct()
     }
   }
 
-  def void test_Sinvariant_check_will_be_ignored_for_bean_with_PostConstruct()  {
+  void test_Sinvariant_check_will_be_ignored_for_bean_with_PostConstruct()  {
     def a = create_instance_of(source3, [null])
     shouldFail MissingMethodException, {
       a.$gcontracts_postConstruct()

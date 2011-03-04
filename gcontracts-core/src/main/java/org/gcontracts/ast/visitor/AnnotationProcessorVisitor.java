@@ -26,10 +26,10 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.gcontracts.annotations.meta.AnnotationProcessorClosure;
+import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
-import org.gcontracts.common.impl.AnnotationClosureProcessor;
+import org.gcontracts.common.impl.AnnotationContractProcessor;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
@@ -219,7 +219,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
     }
 
     private AnnotationProcessor createAnnotationProcessorFromClosure(AnnotationNode annotationNode) {
-        List<AnnotationNode> annotationNodes = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(AnnotationProcessorClosure.class));
+        List<AnnotationNode> annotationNodes = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(AnnotationContract.class));
         if (annotationNodes == null || annotationNodes.isEmpty()) return null;
 
         List<ClassExpression> classExpressionList = new ArrayList<ClassExpression>();
@@ -230,6 +230,6 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
             classExpressionList.add(closureClass);
         }
 
-        return new AnnotationClosureProcessor(annotationNode, classExpressionList);
+        return new AnnotationContractProcessor(annotationNode, classExpressionList);
     }
 }

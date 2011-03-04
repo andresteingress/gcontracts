@@ -74,7 +74,7 @@ class Descendant extends Parent {
 }
 '''
 
-  def void test_redefined_precondition() throws Exception {
+  void test_redefined_precondition() throws Exception {
     // create_instance_of(source_parent)
       add_class_to_classpath(source_parent)
     def child = create_instance_of(source_descendant)
@@ -82,7 +82,7 @@ class Descendant extends Parent {
     child.some_operation1(1, 1)
   }
 
-  def void test_redefined_precondition2() throws Exception {
+  void test_redefined_precondition2() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -91,7 +91,7 @@ class Descendant extends Parent {
     }
   }
 
-  def void test_method_call_of_super_class_in_precondition() throws Exception {
+  void test_method_call_of_super_class_in_precondition() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -100,7 +100,7 @@ class Descendant extends Parent {
     child.some_operation2()
   }
 
-  def void test_refined_precondition_with_other_param_names() throws Exception {
+  void test_refined_precondition_with_other_param_names() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -109,7 +109,7 @@ class Descendant extends Parent {
     }
   }
 
-  def void test_refined_precondition_with_other_param_names1() throws Exception {
+  void test_refined_precondition_with_other_param_names1() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
@@ -118,7 +118,7 @@ class Descendant extends Parent {
     }
   }
 
-  def void test_refined_precondition_with_other_param_names2() throws Exception {
+  void test_refined_precondition_with_other_param_names2() throws Exception {
     create_instance_of(source_parent)
     def child = create_instance_of(source_descendant)
 
