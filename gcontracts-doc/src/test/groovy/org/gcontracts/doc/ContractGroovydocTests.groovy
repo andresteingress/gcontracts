@@ -12,17 +12,19 @@ class ContractGroovydocTests {
 
         def ant = new AntBuilder()
         ant.taskdef(name: "groovydoc", classname: "org.gcontracts.doc.ContractGroovyDoc")
+
         ant.groovydoc(
-        destdir      : "gcontracts-doc/out/test",
-        sourcepath   : "gcontracts-doc/src/test/groovy",
-        packagenames : "**.*",
-        use          : "true",
-        windowtitle  : "Title",
-        doctitle     : "Doctitle",
-        header       : "Header",
-        footer       : "Docfooter",
-        overview     : "src/main/overview.html",
-        private      : "false",
+            destdir      : "gcontracts-doc/out/test",
+            sourcepath   : "gcontracts-doc/src/test/groovy",
+            classTemplates : "gcontracts-doc/src/main/java/**/*.html",
+            packagenames : "**.*",
+            use          : "true",
+            windowtitle  : "Title",
+            doctitle     : "Doctitle",
+            header       : "Header",
+            footer       : "Docfooter",
+            overview     : "src/main/overview.html",
+            private      : "false",
 	{
 	   link(packages:"java.,org.xml.,javax.,org.xml.",href:"http://download.oracle.com/javase/6/docs/api")
 	   link(packages:"groovy.,org.codehaus.groovy.",  href:"http://groovy.codehaus.org/api")

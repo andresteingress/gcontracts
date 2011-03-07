@@ -22,12 +22,11 @@
  */
 package org.gcontracts.generation;
 
+import groovy.lang.ProxyMetaClass;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.IfStatement;
-import org.codehaus.groovy.ast.stmt.TryCatchStatement;
+import org.codehaus.groovy.ast.stmt.*;
+import org.codehaus.groovy.classgen.*;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -36,6 +35,8 @@ import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -73,22 +74,35 @@ public abstract class BaseGenerator {
         return classNode.getDeclaredMethod(getInvariantMethodName(classNode), Parameter.EMPTY_ARRAY);
     }
 
-    protected BlockStatement wrapAssertionBooleanExpression(BooleanExpression classInvariantExpression) {
+    protected BlockStatement wrapAssertionBooleanExpression(ClassNode type, MethodNode methodNode, BooleanExpression classInvariantExpression) {
         final BlockStatement assertBlockStatement = new BlockStatement();
         final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
+
+        final String $_gc_caci = "$_gc_caci";
+        final String $_gc_proxy = "$_gc_proxy";
+
+        final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
+        final VariableExpression caciVariableExpression = new VariableExpression($_gc_caci, ClassHelper.makeWithoutCaching(CyclicAssertionCallInterceptor.class));
+        final VariableExpression proxyVariableExpression = new VariableExpression($_gc_proxy, ClassHelper.DYNAMIC_TYPE);
+
+        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
+        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression(caciVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), new ConstructorCallExpression(ClassHelper.makeWithoutCaching(CyclicAssertionCallInterceptor.class), ArgumentListExpression.EMPTY_ARGUMENTS))));
+        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression(proxyVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(CyclicMethodCallAwareMetaClass.class)), "getInstance", new ClassExpression(type)))));
+        assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(proxyVariableExpression, "setInterceptor", caciVariableExpression)));
 
         assertBlockStatement.addStatement(new ExpressionStatement(
                new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "init", ArgumentListExpression.EMPTY_ARGUMENTS))
         );
 
-        final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
-        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result,
+        assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(proxyVariableExpression, "init", ArgumentListExpression.EMPTY_ARGUMENTS)));
+        assertBlockStatement.addStatement(new ExpressionStatement(new BinaryExpression($_gc_result,
                 Token.newSymbol(Types.ASSIGN, -1, -1),
                 classInvariantExpression
         )));
 
         BlockStatement finallyBlockStatement = new BlockStatement();
         finallyBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "deinit", ArgumentListExpression.EMPTY_ARGUMENTS)));
+        finallyBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(proxyVariableExpression, "deinit", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
         assertBlockStatement.addStatement(
                 new IfStatement(

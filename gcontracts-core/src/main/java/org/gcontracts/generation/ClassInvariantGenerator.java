@@ -61,11 +61,12 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
         BooleanExpression classInvariantExpression = addCallsToSuperAnnotationClosure(type, ClassInvariant.class, classInvariant);
 
-        final BlockStatement blockStatement = wrapAssertionBooleanExpression(classInvariantExpression);
-        blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
+        final BlockStatement blockStatement = new BlockStatement();
 
         // add a local protected method with the invariant closure - this is needed for invariant checks in inheritance lines
-        type.addMethod(getInvariantMethodName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.Boolean_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, blockStatement);
+        MethodNode methodNode = type.addMethod(getInvariantMethodName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.Boolean_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, blockStatement);
+        blockStatement.addStatements(wrapAssertionBooleanExpression(type, methodNode, classInvariantExpression).getStatements());
+        blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
     }
 
     private BooleanExpression addCallsToSuperAnnotationClosure(final ClassNode type, final Class<? extends Annotation> annotationType, BooleanExpression booleanExpression)  {

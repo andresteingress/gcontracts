@@ -24,16 +24,12 @@ package org.gcontracts.doc;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.DirSet;
-import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.PatternSet;
+import org.apache.tools.ant.types.*;
+import org.apache.tools.ant.types.selectors.FileSelector;
 import org.codehaus.groovy.ant.Groovydoc;
 import org.codehaus.groovy.ant.LoggingHelper;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
-import org.codehaus.groovy.tools.groovydoc.ClasspathResourceManager;
-import org.codehaus.groovy.tools.groovydoc.FileOutputTool;
-import org.codehaus.groovy.tools.groovydoc.GroovyDocTool;
-import org.codehaus.groovy.tools.groovydoc.LinkArgument;
+import org.codehaus.groovy.tools.groovydoc.*;
 import org.codehaus.groovy.tools.groovydoc.gstringTemplates.GroovyDocTemplateInfo;
 
 import java.io.File;
@@ -52,6 +48,11 @@ public class ContractGroovyDoc extends Groovydoc {
     private File destDir;
     private List<String> packageNames;
     private List<String> excludePackageNames;
+
+    private List<String> docTemplates = Arrays.asList(GroovyDocTemplateInfo.DEFAULT_DOC_TEMPLATES);
+    private List<String> packageTemplates = Arrays.asList(GroovyDocTemplateInfo.DEFAULT_PACKAGE_TEMPLATES);
+    private List<String> classTemplates = Arrays.asList(GroovyDocTemplateInfo.DEFAULT_CLASS_TEMPLATES);
+
     private String windowTitle = "Groovy Documentation";
     private String docTitle = "Groovy Documentation";
     private String footer = "Groovy Documentation";
@@ -87,6 +88,45 @@ public class ContractGroovyDoc extends Groovydoc {
         author = true;
         processScripts = true;
         includeMainForScripts = true;
+    }
+
+    public void setDocTemplates(String docTemplates) {
+        if (docTemplates != null && docTemplates.length() > 0)  {
+            StringTokenizer tokenizer = new StringTokenizer(docTemplates, ";\\n\\r\\t");
+            if (tokenizer.countTokens() == 0) return;
+
+            this.docTemplates = new ArrayList<String>(tokenizer.countTokens());
+            while (tokenizer.hasMoreTokens())  {
+                String token = tokenizer.nextToken();
+                this.docTemplates.add(token);
+            }
+        }
+    }
+
+    public void setPackageTemplates(String packageTemplates) {
+        if (packageTemplates != null && packageTemplates.length() > 0)  {
+            StringTokenizer tokenizer = new StringTokenizer(packageTemplates, ";\\n\\r\\t");
+            if (tokenizer.countTokens() == 0) return;
+
+            this.packageTemplates = new ArrayList<String>(tokenizer.countTokens());
+            while (tokenizer.hasMoreTokens())  {
+                String token = tokenizer.nextToken();
+                this.packageTemplates.add(token);
+            }
+        }
+    }
+
+    public void setClassTemplates(String classTemplates) {
+        if (classTemplates != null && classTemplates.length() > 0)  {
+            StringTokenizer tokenizer = new StringTokenizer(classTemplates, ";\\n\\r\\t");
+            if (tokenizer.countTokens() == 0) return;
+
+            this.classTemplates = new ArrayList<String>(tokenizer.countTokens());
+            while (tokenizer.hasMoreTokens())  {
+                String token = tokenizer.nextToken();
+                this.classTemplates.add(token);
+            }
+        }
     }
 
     /**
@@ -410,12 +450,15 @@ public class ContractGroovyDoc extends Groovydoc {
         }
         parsePackages(packagesToDoc, sourceDirs);
 
+        if (classTemplates.size() == 0)
+            throw new BuildException("Method getClassTemplates() needs to return at least a single classTemplate String!");
+
         GroovyDocTool htmlTool = new GroovyDocTool(
-                new ClasspathResourceManager(), // we're gonna get the default templates out of the dist jar file
+                createResourceManager(),
                 sourcePath.list(),
-                GroovyDocTemplateInfo.DEFAULT_DOC_TEMPLATES,
-                GroovyDocTemplateInfo.DEFAULT_PACKAGE_TEMPLATES,
-                new String[] { "org/gcontracts/doc/templates/classDocName.html" },
+                getDocTemplates(),
+                getPackageTemplates(),
+                getClassTemplates(),
                 links,
                 properties
         );
@@ -463,5 +506,42 @@ public class ContractGroovyDoc extends Groovydoc {
         LinkArgument result = new LinkArgument();
         links.add(result);
         return result;
+    }
+
+    /**
+     * Create a {@link ResourceManager} instance which is used to resolve GroovyDoc templates.
+     *
+     * @return an instance of {@link ResourceManager} used to resolve GroovyDoc templates
+     */
+    protected ResourceManager createResourceManager()  {
+        return new ClasspathResourceManager();
+    }
+
+    /**
+     * A list of top-level document templates, see {@link GroovyDocTemplateInfo#DEFAULT_DOC_TEMPLATES} as an example.
+     *
+     * @return a String array of top-level document templates
+     */
+    public String[] getDocTemplates() {
+        return docTemplates.toArray(new String[docTemplates.size()]);
+    }
+
+    /**
+     * A list of package-level document templates, see {@link GroovyDocTemplateInfo#DEFAULT_PACKAGE_TEMPLATES} as an example.
+     *
+     * @return a String array of package-level document templates
+     */
+    public String[] getPackageTemplates() {
+        return packageTemplates.toArray(new String[packageTemplates.size()]);
+    }
+
+    /**
+     * A list of class-level document templates, see {@link GroovyDocTemplateInfo#DEFAULT_DOC_TEMPLATES} as an example.
+     *
+     * @return a String array of class-level document templates
+     */
+    public String[] getClassTemplates()  {
+        return classTemplates.toArray(new String[classTemplates.size()]);
+        // return null;
     }
 }

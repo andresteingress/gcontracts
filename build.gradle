@@ -28,7 +28,7 @@ allprojects {
 subprojects {
   apply plugin: "groovy"
 
-  compileGroovy.options.fork = false
+  compileGroovy.options.fork = true
   compileTestGroovy.options.fork = true
 
   dependencies {
