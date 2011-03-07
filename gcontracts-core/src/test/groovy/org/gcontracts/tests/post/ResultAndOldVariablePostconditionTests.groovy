@@ -3,14 +3,13 @@ package org.gcontracts.tests.post
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
-
 /**
  * @author ast
  */
 class ResultAndOldVariablePostconditionTests extends BaseTestClass {
 
   def source = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

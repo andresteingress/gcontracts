@@ -2,15 +2,13 @@ package org.gcontracts.tests.post
 
 import org.gcontracts.tests.basic.BaseTestClass
 
-
-import static org.junit.Assert.*;
-
 /**
  * @author ast
  */
 class ImplicitVariableNamesPostconditionTests extends BaseTestClass {
 
   def source = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

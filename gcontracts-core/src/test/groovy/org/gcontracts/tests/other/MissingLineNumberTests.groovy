@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 class MissingLineNumberTests extends BaseTestClass {
 
   def source = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

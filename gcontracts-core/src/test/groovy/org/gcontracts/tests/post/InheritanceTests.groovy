@@ -3,14 +3,13 @@ package org.gcontracts.tests.post
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
-
 /**
  * @author ast
  */
 class InheritanceTests extends BaseTestClass {
   
   def source_parent = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -67,6 +66,7 @@ class Parent {
 '''
   
   def source_descendant = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -122,6 +122,7 @@ class Descendant extends Parent {
 '''
 
   def source2 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -141,6 +142,7 @@ class Rocket  {
 '''
 
   def source3 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

@@ -3,8 +3,6 @@ package org.gcontracts.tests.pre
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
-
 /**
  * @author ast
  */
@@ -12,6 +10,7 @@ import static org.junit.Assert.*;
 class SimplePreconditionTests extends BaseTestClass {
 
   def source = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

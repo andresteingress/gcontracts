@@ -1,10 +1,8 @@
 package org.gcontracts.tests.other
 
+import org.gcontracts.PreconditionViolation
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
-
-import static org.junit.Assert.*
-import org.gcontracts.PreconditionViolation;
 
 /**
  * @author ast
@@ -12,6 +10,7 @@ import org.gcontracts.PreconditionViolation;
 class AbstractClassTests extends BaseTestClass {
 
   def source1 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -33,6 +32,7 @@ abstract class A {
 '''
 
   def source2 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

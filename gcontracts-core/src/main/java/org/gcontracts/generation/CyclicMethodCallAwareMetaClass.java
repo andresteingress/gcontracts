@@ -1,17 +1,24 @@
-/*
- * Copyright 2003-2007 the original author or authors.
+/**
+ * Copyright (c) 2011, Andre Steingress
+ * All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * 1.) Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * 2.) Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3.) Neither the name of Andre Steingress nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written permission.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.gcontracts.generation;
 
@@ -22,68 +29,66 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Custom {@link MetaClass} implementation which intercepts all (static) method calls and tracks the
+ * call stack. If a cyclic method call is detected (A calls B calls A), an exception is thrown.<p/>
  *
+ * This class is primarily used to avoid cyclic method calls in assertions.
+ *
+ * @author ast
  */
 public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements AdaptingMetaClass {
 
-    protected MetaClass adaptee = null;
     protected MetaClass origMetaClass = null;
-    protected Interceptor interceptor = null;
 
-    private static Map<String, CyclicMethodCallAwareMetaClass> metaClasses = new HashMap<String, CyclicMethodCallAwareMetaClass>();
+    private static ThreadLocal<Interceptor> interceptor = new ThreadLocal<Interceptor>() {
+        @Override
+        protected Interceptor initialValue() {
+            return new CyclicAssertionCallInterceptor();
+        }
+    };
 
-    /**
-     * convenience factory method for the most usual case.
-     */
-    public synchronized static CyclicMethodCallAwareMetaClass getInstance(Class theClass) throws IntrospectionException {
+    private static ThreadLocal<Map<String, CyclicMethodCallAwareMetaClass>> metaClasses = new ThreadLocal<Map<String, CyclicMethodCallAwareMetaClass>>()  {
+        @Override
+        protected Map<String, CyclicMethodCallAwareMetaClass> initialValue() {
+            return new HashMap<String, CyclicMethodCallAwareMetaClass>();
+        }
+    };
 
-        if (metaClasses.containsKey(theClass.getName())) return metaClasses.get(theClass.getName());
+    public static CyclicMethodCallAwareMetaClass getProxy(GroovyObject theObject) throws IntrospectionException {
 
-        MetaClassRegistry metaRegistry = GroovySystem.getMetaClassRegistry();
-        MetaClass meta = metaRegistry.getMetaClass(theClass);
+        synchronized (metaClasses.get())  {
+            final MetaClassRegistry metaClassRegistry = GroovySystem.getMetaClassRegistry();
+            final Map<String, CyclicMethodCallAwareMetaClass> metaClassMap = metaClasses.get();
 
-        metaClasses.put(theClass.getName(), new CyclicMethodCallAwareMetaClass(metaRegistry, theClass, meta));
+            final MetaClass metaClass = theObject.getMetaClass();
+            final Class theClass = metaClass.getTheClass();
 
-        return metaClasses.get(theClass.getName());
+            if (metaClassMap.containsKey(theClass.getName())) return metaClassMap.get(theClass.getName());
+
+            metaClassMap.put(theClass.getName(), new CyclicMethodCallAwareMetaClass(metaClassRegistry, theClass, theObject));
+
+            return metaClassMap.get(theClass.getName());
+        }
     }
 
-    /**
-     * @param adaptee the MetaClass to decorate with interceptability
-     */
-    public CyclicMethodCallAwareMetaClass(MetaClassRegistry registry, Class theClass, MetaClass adaptee) throws IntrospectionException {
+    public CyclicMethodCallAwareMetaClass(MetaClassRegistry registry, Class theClass, GroovyObject theObject) throws IntrospectionException {
         super(registry, theClass);
-        this.adaptee = adaptee;
-        if (null == adaptee) throw new IllegalArgumentException("adaptee must not be null");
         super.initialize();
-    }
 
-    public synchronized void initialize() {
-        this.adaptee.initialize();
-    }
-
-    private void init() {
-        // grab existing meta (usually adaptee but we may have nested use calls)
         origMetaClass = registry.getMetaClass(theClass);
         registry.setMetaClass(theClass, this);
+        theObject.setMetaClass(this);
     }
 
-    public void deinit()  {
-        if (origMetaClass != null) registry.setMetaClass(theClass, origMetaClass);
-        origMetaClass = null;
-    }
-
-    /**
-     * @return the interceptor in use or null if no interceptor is used
-     */
-    public Interceptor getInterceptor() {
-        return interceptor;
-    }
-
-    /**
-     * @param interceptor may be null to reset any interception
-     */
-    public void setInterceptor(Interceptor interceptor) {
-        this.interceptor = interceptor;
+    public void release()  {
+        synchronized (metaClasses.get())  {
+            final Map<String, CyclicMethodCallAwareMetaClass> metaClassMap = metaClasses.get();
+            if (origMetaClass != null) {
+                registry.setMetaClass(theClass, origMetaClass);
+                metaClassMap.remove(theClass.getName());
+            }
+            // origMetaClass = null;
+        }
     }
 
     /**
@@ -93,9 +98,10 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
      * See Interceptor for details.
      */
     public Object invokeMethod(final Object object, final String methodName, final Object[] arguments) {
-        return doCall(object, methodName, arguments, interceptor, new Callable() {
+        return doCall(object, methodName, arguments, interceptor.get(), new Callable() {
+            @Override
             public Object call() {
-                return adaptee.invokeMethod(object, methodName, arguments);
+                return origMetaClass.invokeMethod(object, methodName, arguments);
             }
         });
     }
@@ -107,9 +113,10 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
      * See Interceptor for details.
      */
     public Object invokeStaticMethod(final Object object, final String methodName, final Object[] arguments) {
-        return doCall(object, methodName, arguments, interceptor, new Callable() {
+        return doCall(object, methodName, arguments, interceptor.get(), new Callable() {
+            @Override
             public Object call() {
-                return adaptee.invokeStaticMethod(object, methodName, arguments);
+                return origMetaClass.invokeStaticMethod(object, methodName, arguments);
             }
         });
     }
@@ -121,11 +128,7 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
      * See Interceptor for details.
      */
     public Object invokeConstructor(final Object[] arguments) {
-        return doCall(theClass, "ctor", arguments, interceptor, new Callable() {
-            public Object call() {
-                return adaptee.invokeConstructor(arguments);
-            }
-        });
+        return super.invokeConstructor(arguments);
     }
 
     /**
@@ -137,18 +140,6 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
      * @return the value of the property
      */
     public Object getProperty(Class aClass, Object object, String property, boolean b, boolean b1) {
-        if (null == interceptor) {
-            return super.getProperty(aClass, object, property, b, b1);
-        }
-        if (interceptor instanceof PropertyAccessInterceptor) {
-            PropertyAccessInterceptor pae = (PropertyAccessInterceptor) interceptor;
-
-            Object result = pae.beforeGet(object, property);
-            if (interceptor.doInvoke()) {
-                result = super.getProperty(aClass, object, property, b, b1);
-            }
-            return result;
-        }
         return super.getProperty(aClass, object, property, b, b1);
     }
 
@@ -161,28 +152,16 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
      * @param newValue The new value of the property
      */
     public void setProperty(Class aClass, Object object, String property, Object newValue, boolean b, boolean b1) {
-        if (null == interceptor) {
-            super.setProperty(aClass, object, property, newValue, b, b1);
-        }
-        if (interceptor instanceof PropertyAccessInterceptor) {
-            PropertyAccessInterceptor pae = (PropertyAccessInterceptor) interceptor;
-
-            pae.beforeSet(object, property, newValue);
-            if (interceptor.doInvoke()) {
-                super.setProperty(aClass, object, property, newValue, b, b1);
-            }
-        } else {
-            super.setProperty(aClass, object, property, newValue, b, b1);
-        }
+        super.setProperty(aClass, object, property, newValue, b, b1);
     }
 
+    @Override
     public MetaClass getAdaptee() {
-        return this.adaptee;
+        return origMetaClass;
     }
 
-    public void setAdaptee(MetaClass metaClass) {
-        this.adaptee = metaClass;
-    }
+    @Override
+    public void setAdaptee(MetaClass metaClass) {}
 
     // since Java has no Closures...
     private interface Callable {
@@ -195,9 +174,12 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
         }
         Object result = interceptor.beforeInvoke(object, methodName, arguments);
         if (interceptor.doInvoke()) {
-            result = howToInvoke.call();
+            try {
+                result = howToInvoke.call();
+            } finally {
+                result = interceptor.afterInvoke(object, methodName, arguments, result);
+            }
         }
-        result = interceptor.afterInvoke(object, methodName, arguments, result);
         return result;
     }
 }

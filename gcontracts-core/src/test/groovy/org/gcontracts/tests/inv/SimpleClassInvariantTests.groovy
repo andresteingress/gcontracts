@@ -3,14 +3,13 @@ package org.gcontracts.tests.inv
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
-
 /**
  * @author ast
  */
 class SimpleClassInvariantTests extends BaseTestClass {
 
   def source1 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -27,6 +26,7 @@ class A {
 '''
 
   def source2 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -43,6 +43,7 @@ class A {
 '''
 
   def source3 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

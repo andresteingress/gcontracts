@@ -22,18 +22,18 @@
  */
 package org.gcontracts.ast;
 
-import org.codehaus.groovy.ast.ASTNode;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.ModuleNode;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.gcontracts.annotations.AssertionsEnabled;
 import org.gcontracts.ast.visitor.*;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -82,7 +82,8 @@ public class GContractsASTTransformation extends BaseASTTransformation {
             // there is nothing to do for interfaces
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
-            final ProcessingContextInformation pci = new ProcessingContextInformation(classNode, unit, source);
+            final ProcessingContextInformation pci = createProcessingContextInformation(classNode, unit, source);
+            if (pci == null) continue;
 
             configuratorSetupVisitor.visitClass(classNode);
 
@@ -94,6 +95,17 @@ public class GContractsASTTransformation extends BaseASTTransformation {
             new LifecycleAfterTransformationVisitor(unit, source, pci).visitClass(classNode);
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
         }
+    }
+
+    private ProcessingContextInformation createProcessingContextInformation(ClassNode classNode, SourceUnit unit, ReaderSource source)  {
+        final ClassNode assertionsEnabledClassNode = ClassHelper.makeWithoutCaching(AssertionsEnabled.class);
+
+        final List<AnnotationNode> annotationsPackage = classNode.getPackage() != null ? classNode.getPackage().getAnnotations(assertionsEnabledClassNode) : Collections.<AnnotationNode>emptyList();
+        final List<AnnotationNode> annotationsClassNode = classNode.getAnnotations(assertionsEnabledClassNode);
+
+        if (annotationsPackage.isEmpty() && annotationsClassNode.isEmpty())  return null;
+
+        return new ProcessingContextInformation(classNode, unit, source);
     }
 }
 

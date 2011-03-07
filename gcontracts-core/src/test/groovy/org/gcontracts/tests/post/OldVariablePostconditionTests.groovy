@@ -3,8 +3,6 @@ package org.gcontracts.tests.post
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
-
 /**
  * <tt>old</tt> variables tests for postconditions.
  *
@@ -16,11 +14,10 @@ import static org.junit.Assert.*;
 class OldVariablePostconditionTests extends BaseTestClass {
 
   def templateSourceCode = '''
+@AssertionsEnabled
 package tests
 
-import org.gcontracts.annotations.Invariant
-import org.gcontracts.annotations.Requires
-import org.gcontracts.annotations.Ensures
+import org.gcontracts.annotations.*
 
 class OldVariable {
 

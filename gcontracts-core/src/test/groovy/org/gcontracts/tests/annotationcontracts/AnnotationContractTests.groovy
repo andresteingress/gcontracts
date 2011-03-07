@@ -1,10 +1,11 @@
 package org.gcontracts.tests.annotationcontracts
 
 import org.codehaus.groovy.ast.builder.AstStringCompiler
-import static junit.framework.Assert.*;
 import org.junit.Test
+import static junit.framework.Assert.assertNotNull
+import static junit.framework.Assert.fail
 
-/**
+ /**
  * @author ast
  */
 class AnnotationContractTests {
@@ -15,7 +16,10 @@ class AnnotationContractTests {
     void single_notnull_parameter() {
 
         def source_anno = '''
-import org.gcontracts.annotations.meta.*
+    package tests
+
+    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -27,6 +31,11 @@ import org.gcontracts.annotations.meta.*
 '''
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
+    import org.gcontracts.annotations.*
+
     class Tester {
 
         def method(@NotNull param) {}
@@ -46,7 +55,9 @@ import org.gcontracts.annotations.meta.*
     void multiple_notnull_parameters() {
 
         def source_anno = '''
-   import org.gcontracts.annotations.meta.*
+    package tests
+
+    import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -58,9 +69,13 @@ import org.gcontracts.annotations.meta.*
 '''
 
         def source = '''
-    class Tester {
+    @AssertionsEnabled
+    package tests
 
-        def method(@NotNull param1, @NotNull param2) {}
+    import org.gcontracts.annotations.*
+
+    class Tester {
+        def method(@NotNull param1, @NotNull param2) { println "BEEN CALLED" }
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
@@ -78,7 +93,9 @@ import org.gcontracts.annotations.meta.*
     void test_constructor_params() {
 
         def source_anno = '''
-   import org.gcontracts.annotations.meta.*
+    package tests
+
+    import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -90,6 +107,9 @@ import org.gcontracts.annotations.meta.*
 '''
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
     class Tester {
         def Tester(@NotNull param1, @NotNull param2) {}
     }'''
@@ -108,6 +128,9 @@ import org.gcontracts.annotations.meta.*
     void requires_method() {
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
     import org.gcontracts.annotations.*
 
     class Tester {
@@ -135,7 +158,9 @@ import org.gcontracts.annotations.meta.*
     void default_requires_method() {
 
         def source_anno = '''
-   import org.gcontracts.annotations.meta.*
+    package tests
+
+    import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -147,6 +172,11 @@ import org.gcontracts.annotations.meta.*
 '''
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
+    import org.gcontracts.annotations.*
+
     class Tester {
 
         def method(param1, param2) {}
@@ -163,6 +193,8 @@ import org.gcontracts.annotations.meta.*
     void requires_method_with_not_null_parameter() {
 
         def source_custom_anno = '''
+    package tests
+
     import org.gcontracts.annotations.*
     import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
@@ -177,6 +209,9 @@ import org.gcontracts.annotations.meta.*
 '''
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
     import org.gcontracts.annotations.*
 
     class Tester {
@@ -207,7 +242,9 @@ import org.gcontracts.annotations.meta.*
     void default_ensures_method() {
 
         def source_anno = '''
-   import org.gcontracts.annotations.meta.*
+    package tests
+
+    import org.gcontracts.annotations.meta.*
     import java.lang.annotation.*
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -219,6 +256,11 @@ import org.gcontracts.annotations.meta.*
 '''
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
+    import org.gcontracts.annotations.*
+
     class Tester {
 
         def method(param1, param2) {}
@@ -235,6 +277,9 @@ import org.gcontracts.annotations.meta.*
     void ensures_method() {
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
     import org.gcontracts.annotations.*
 
     class Tester {
@@ -266,6 +311,9 @@ import org.gcontracts.annotations.meta.*
     void class_invariant() {
 
         def source = '''
+    @AssertionsEnabled
+    package tests
+
     import org.gcontracts.annotations.*
 
     @Invariant({ prop != null })

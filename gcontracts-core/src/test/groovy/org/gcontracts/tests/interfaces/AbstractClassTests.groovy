@@ -1,10 +1,8 @@
 package org.gcontracts.tests.interfaces
 
+import org.gcontracts.PreconditionViolation
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
-
-import static org.junit.Assert.*
-import org.gcontracts.PreconditionViolation;
 
 /**
  * @author ast
@@ -12,6 +10,7 @@ import org.gcontracts.PreconditionViolation;
 class AbstractClassTests extends BaseTestClass {
 
   def source_stackable = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -27,6 +26,7 @@ abstract class Stackable {
 '''
 
   def source_stack = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

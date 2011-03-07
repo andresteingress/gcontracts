@@ -44,14 +44,12 @@ public class CyclicAssertionCallInterceptor implements Interceptor {
     public Object beforeInvoke(Object object, String methodName, Object[] arguments) {
         if (callStack.contains(methodName)) throw new CyclicAssertionCallException("Method '" + methodName + "' has already been called from the current assertion - assertion call cycle detected!");
         callStack.add(methodName);
-        System.out.println("ADDED " + methodName);
         return object;
     }
 
     @Override
     public Object afterInvoke(Object object, String methodName, Object[] arguments, Object result) {
         callStack.remove(methodName);
-        System.out.println("REMOVED " + methodName);
         return result;
     }
 

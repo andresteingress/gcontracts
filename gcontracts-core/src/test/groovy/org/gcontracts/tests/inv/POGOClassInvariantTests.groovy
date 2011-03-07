@@ -3,8 +3,6 @@ package org.gcontracts.tests.inv
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
-
 /**
  * <tt>old</tt> variables tests for postconditions.
  *
@@ -16,11 +14,10 @@ import static org.junit.Assert.*;
 class POGOClassInvariantTests extends BaseTestClass {
 
   def dynamic_constructor_class_code = '''
+@AssertionsEnabled
 package tests
 
-import org.gcontracts.annotations.Invariant
-import org.gcontracts.annotations.Requires
-import org.gcontracts.annotations.Ensures
+import org.gcontracts.annotations.*
 
 @Invariant({ property != null })
 class DynamicConstructor {
@@ -30,11 +27,10 @@ class DynamicConstructor {
 '''
 
   def dynamic_setter_class_code = '''
+@AssertionsEnabled
 package tests
 
-import org.gcontracts.annotations.Invariant
-import org.gcontracts.annotations.Requires
-import org.gcontracts.annotations.Ensures
+import org.gcontracts.annotations.*
 
 @Invariant({ string1 != null && string2 != null && string3 != null })
 class DynamicSetter {

@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 class SimplePostconditionTests extends BaseTestClass {
 
   def source_postconditions = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*

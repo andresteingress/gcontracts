@@ -3,14 +3,13 @@ package org.gcontracts.tests.doc
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
-
 /**
  * @author ast
  */
 class StackExampleTests extends BaseTestClass {
 
   def source_stack = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -71,6 +70,7 @@ class Stack  {
 '''
 
   def source_stack_descendant = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
