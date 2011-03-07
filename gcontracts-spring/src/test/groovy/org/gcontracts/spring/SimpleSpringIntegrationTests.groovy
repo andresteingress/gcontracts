@@ -6,6 +6,7 @@ package org.gcontracts.spring
 class SimpleSpringIntegrationTests extends BaseTestClass {
 
   def source1 = '''
+@AssertionsEnabled
 package tests
 
 import org.gcontracts.annotations.*
@@ -24,6 +25,7 @@ class A {
 '''
 
   def source2 = '''
+@AssertionsEnabled
 package tests
 
 import org.springframework.stereotype.*
@@ -46,6 +48,7 @@ class A implements org.springframework.beans.factory.InitializingBean {
 '''
 
   def source3 = '''
+@AssertionsEnabled
 package tests
 
 import org.springframework.stereotype.*
@@ -74,7 +77,7 @@ class A {
 
   void test_invariant_check_in_afterPropertiesSet()  {
     def a = create_instance_of(source1, [null])
-    shouldFail AssertionError, {
+    shouldFail org.gcontracts.ClassInvariantViolation, {
       a.$gcontracts_postConstruct()
     }
   }
