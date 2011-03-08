@@ -40,7 +40,7 @@ import org.codehaus.groovy.ast.MethodNode;
  *
  * <h3>Generation of closure classes</h3>
  *
- * <p>In order to support Groovy 1.7.x GContracts emulates Groovy 1.8 handling of annotation closures. This is done
+ * <p>In order to support Groovy 1.7.x GContracts backported Groovy 1.8 handling of annotation closures. This is done
  * by extracting {@link org.codehaus.groovy.ast.expr.ClosureExpression} from annotations and creating {@link groovy.lang.Closure}
  * implementation classes.</p>
  *
