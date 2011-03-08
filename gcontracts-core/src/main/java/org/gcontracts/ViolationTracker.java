@@ -33,7 +33,7 @@ import java.util.TreeMap;
  * being able to rethrow assertion errors.
  * </p>
  *
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 public class ViolationTracker {
 

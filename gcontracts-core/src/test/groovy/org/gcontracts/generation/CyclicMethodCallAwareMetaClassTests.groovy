@@ -4,7 +4,7 @@ import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
  /**
- * @author andre.steingress@gmail.com
+ * @author ast
  */
 class CyclicMethodCallAwareMetaClassTests extends BaseTestClass {
 
