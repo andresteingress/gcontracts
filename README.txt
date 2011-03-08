@@ -28,5 +28,5 @@ If you experience any issues, feel free to post a ticket at http://gcontracts.li
 
 
 
-For further information on gcontracts visit http://wiki.github.com/andresteingress/gcontracts/ or http://andresteingress.wordpress.com
+For further information on gcontracts visit http://wiki.github.com/andresteingress/gcontracts/ or http://blog.andresteingress.com
 
