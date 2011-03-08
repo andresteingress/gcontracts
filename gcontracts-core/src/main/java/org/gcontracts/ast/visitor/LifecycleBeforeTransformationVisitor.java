@@ -34,6 +34,11 @@ import org.gcontracts.util.Validate;
 import java.util.ArrayList;
 
 /**
+ * <p>AST transformation visitor which is triggered before applying {@link org.gcontracts.common.spi.AnnotationProcessor}
+ * related transformations.</p>
+ *
+ * @see AnnotationProcessorVisitor
+ *
  * @author ast
  */
 public class LifecycleBeforeTransformationVisitor extends BaseVisitor {

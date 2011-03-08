@@ -41,7 +41,7 @@ import java.util.List;
 
 /**
  * <p>
- * Implements contract support for setter methods in Groovy properties and public default constructors.
+ * Implements contract support for setter methods and default constructors of POGOs.
  * </p>
  *
  * @see BaseVisitor

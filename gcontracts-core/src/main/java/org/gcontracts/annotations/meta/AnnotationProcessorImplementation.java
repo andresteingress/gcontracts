@@ -29,8 +29,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A meta-annotation which is used to specify an implementation class of
- * {@link org.gcontracts.common.spi.AnnotationProcessor}.
+ * <p>Indicates what {@link AnnotationProcessor} implementation should be used to process
+ * the correlating annotation.</p>
  *
  * @see org.gcontracts.common.spi.AnnotationProcessor
  *

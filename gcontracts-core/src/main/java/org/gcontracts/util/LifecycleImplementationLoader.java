@@ -30,7 +30,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * Finds and loads implementation classes of interface {@link org.gcontracts.common.spi.Lifecycle}.
+ * <p>Finds and loads implementation classes of interface {@link org.gcontracts.common.spi.Lifecycle}.</p>
  *
  * @author ast
  **/

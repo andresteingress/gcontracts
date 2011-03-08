@@ -30,6 +30,8 @@ import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.util.Validate;
 
 /**
+ * <p>Base class for all assertion types.</p>
+ *
  * @author ast
  *
  * @param <T>

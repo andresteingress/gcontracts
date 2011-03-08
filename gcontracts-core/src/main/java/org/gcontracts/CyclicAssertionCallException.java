@@ -23,7 +23,9 @@
 package org.gcontracts;
 
 /**
- * Thrown whenever pre- or post-conditions are called in a cyclic way.
+ * <p>Thrown whenever pre- or post-conditions are called in a cyclic way.</p>
+ *
+ * @see AssertionViolation
  *
  * @author ast
  */

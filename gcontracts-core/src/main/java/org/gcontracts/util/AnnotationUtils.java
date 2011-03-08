@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Helper methods for reading/getting {@link org.codehaus.groovy.ast.AnnotationNode} instances.
+ * <p>Helper methods for reading/getting {@link org.codehaus.groovy.ast.AnnotationNode} instances.</p>
  *
  * @author ast
  */

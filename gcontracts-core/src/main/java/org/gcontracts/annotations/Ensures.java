@@ -45,7 +45,7 @@ import java.lang.annotation.Target;
  * Example:
  *
  * <pre>
- *   @Ensures({ result -> result != argument1 })
+ *   &#064;Ensures({ result -> result != argument1 })
  *   def T someOperation(def argument1, def argument2)  {
  *     ...
  *   }

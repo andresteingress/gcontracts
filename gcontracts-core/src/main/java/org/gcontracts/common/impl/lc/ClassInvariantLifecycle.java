@@ -30,6 +30,8 @@ import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.ClassInvariantGenerator;
 
 /**
+ * Internal {@link org.gcontracts.common.spi.Lifecycle} implementation for class-invariants.
+ *
  * @author ast
  */
 public class ClassInvariantLifecycle extends BaseLifecycle {

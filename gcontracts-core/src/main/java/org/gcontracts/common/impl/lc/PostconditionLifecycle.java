@@ -34,6 +34,8 @@ import org.gcontracts.generation.PostconditionGenerator;
 import org.gcontracts.util.AnnotationUtils;
 
 /**
+ * Internal {@link org.gcontracts.common.spi.Lifecycle} implementation for post-conditions.
+ *
  * @author ast
  */
 public class PostconditionLifecycle extends BaseLifecycle {

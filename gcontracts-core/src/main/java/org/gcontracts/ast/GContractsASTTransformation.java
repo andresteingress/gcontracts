@@ -43,19 +43,18 @@ import java.util.List;
  * assertions executing the closure-code.
  * </p>
  * <p>
- * Whenever a constraint is broken an {@link AssertionError} will be thrown.
+ * Whenever an assertion is broken an {@link org.gcontracts.AssertionViolation} descendant class will be thrown.
  * </p>
  *
- * @see AssertionError
+ * @see org.gcontracts.PreconditionViolation
+ * @see org.gcontracts.PostconditionViolation
+ * @see org.gcontracts.ClassInvariantViolation
  *
  * @author ast
  */
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class GContractsASTTransformation extends BaseASTTransformation {
 
-    /**
-     * Pregeneration of annotation closures to closure classes (needs to be done manually before Groovy 1.8).
-     */
     private void generateAnnotationClosureClasses(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
         final AnnotationClosureVisitor annotationClosureVisitor = new AnnotationClosureVisitor(unit, source);
 

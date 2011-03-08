@@ -29,5 +29,11 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 
+/**
+ * Indicates that annotations being marked as {@code @ClassInvariant} are to be treated
+ * as class invariant modifying annotations.
+ *
+ * @author ast
+ */
 @ContractElement
 public @interface ClassInvariant {}

@@ -38,6 +38,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * <p>Holds all context-specific information which is needed during the transformation
+ * phase of a single {@link Contract} and its related {@link ClassNode}.</p>
+ *
  * @author ast
  */
 public class ProcessingContextInformation {

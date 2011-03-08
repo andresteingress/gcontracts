@@ -29,5 +29,12 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 
+
+/**
+ * Indicates that annotations being marked as {@code @Postcondition} are to be treated
+ * as post-condition modifying annotations.
+ *
+ * @author ast
+ */
 @ContractElement
 public @interface Postcondition {}

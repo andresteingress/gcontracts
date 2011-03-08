@@ -31,6 +31,8 @@ import org.gcontracts.domain.Contract;
 import org.gcontracts.domain.Precondition;
 
 /**
+ * Internal {@link AnnotationProcessor} implementation for pre-conditions.
+ *
  * @author ast
  */
 public class RequiresAnnotationProcessor extends AnnotationProcessor {

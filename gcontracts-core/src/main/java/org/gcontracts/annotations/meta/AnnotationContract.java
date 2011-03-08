@@ -27,10 +27,32 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A meta-annotation which is used to specify an implementation class of
- * {@link org.gcontracts.common.spi.AnnotationProcessor}.
+ * <p>Specifies an annotation closure which will be part of a method's pre- or
+ * postcondition.</p>
+ *
+ * For example:
+ * <pre>
+ *   &#064;Retention(RetentionPolicy.RUNTIME)
+ *   &#064;Target(ElementType.PARAMETER)
+ *
+ *   &#064;Precondition
+ *   &#064;AnnotationContract({ it != null })
+ *   public @interface NotNull {}
+ * </pre>
+ *
+ * <p>In the example above, {@code @NotNull} can be applied on parameters and will be
+ * automatically injected into the precondition of the current method:</p>
+ *
+ * <pre>
+ * def some_method(@NotNull def myParam)
+ * </pre>
+ *
+ * <p>It is possible to specify multiple meta-annotations, currently only {@link Postcondition}
+ * and {@link Precondition} are supported. </p>
  *
  * @see org.gcontracts.common.spi.AnnotationProcessor
+ * @see Precondition
+ * @see Postcondition
  *
  * @author ast
  */

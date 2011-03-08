@@ -91,12 +91,6 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
         }
     }
 
-    /**
-     * Call invokeMethod on adaptee with logic like in MetaClass unless we have an Interceptor.
-     * With Interceptor the call is nested in its beforeInvoke and afterInvoke methods.
-     * The method call is suppressed if Interceptor.doInvoke() returns false.
-     * See Interceptor for details.
-     */
     public Object invokeMethod(final Object object, final String methodName, final Object[] arguments) {
         return doCall(object, methodName, arguments, interceptor.get(), new Callable() {
             @Override
@@ -106,12 +100,6 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
         });
     }
 
-    /**
-     * Call invokeStaticMethod on adaptee with logic like in MetaClass unless we have an Interceptor.
-     * With Interceptor the call is nested in its beforeInvoke and afterInvoke methods.
-     * The method call is suppressed if Interceptor.doInvoke() returns false.
-     * See Interceptor for details.
-     */
     public Object invokeStaticMethod(final Object object, final String methodName, final Object[] arguments) {
         return doCall(object, methodName, arguments, interceptor.get(), new Callable() {
             @Override
@@ -121,36 +109,14 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
         });
     }
 
-    /**
-     * Call invokeConstructor on adaptee with logic like in MetaClass unless we have an Interceptor.
-     * With Interceptor the call is nested in its beforeInvoke and afterInvoke methods.
-     * The method call is suppressed if Interceptor.doInvoke() returns false.
-     * See Interceptor for details.
-     */
     public Object invokeConstructor(final Object[] arguments) {
         return super.invokeConstructor(arguments);
     }
 
-    /**
-     * Interceptors the call to getProperty if a PropertyAccessInterceptor is
-     * available
-     *
-     * @param object   the object to invoke the getter on
-     * @param property the property name
-     * @return the value of the property
-     */
     public Object getProperty(Class aClass, Object object, String property, boolean b, boolean b1) {
         return super.getProperty(aClass, object, property, b, b1);
     }
 
-    /**
-     * Interceptors the call to a property setter if a PropertyAccessInterceptor
-     * is available
-     *
-     * @param object   The object to invoke the setter on
-     * @param property The property name to set
-     * @param newValue The new value of the property
-     */
     public void setProperty(Class aClass, Object object, String property, Object newValue, boolean b, boolean b1) {
         super.setProperty(aClass, object, property, newValue, b, b1);
     }

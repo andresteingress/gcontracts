@@ -26,6 +26,8 @@ import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 
 /**
+ * <p>A class-invariant assertion.</p>
+ *
  * @author ast
  */
 public class ClassInvariant extends Assertion<ClassInvariant> {

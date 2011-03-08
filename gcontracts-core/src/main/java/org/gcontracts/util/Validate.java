@@ -23,7 +23,7 @@
 package org.gcontracts.util;
 
 /**
- * Internal utility class for in-code assertion checks.
+ * <p>Internal utility class for in-code assertion checks.</p>
  *
  * @author ast
  */

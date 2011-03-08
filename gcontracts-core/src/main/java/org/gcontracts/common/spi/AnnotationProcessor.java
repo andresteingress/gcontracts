@@ -29,6 +29,11 @@ import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.gcontracts.domain.Contract;
 
 /**
+ * Implements the AST transformation processing logic of a custom annotations annotated with
+ * {@link org.gcontracts.annotations.meta.AnnotationProcessorImplementation}.
+ *
+ * @see org.gcontracts.annotations.meta.AnnotationProcessorImplementation
+ *
  * @author ast
  */
 public abstract class AnnotationProcessor {

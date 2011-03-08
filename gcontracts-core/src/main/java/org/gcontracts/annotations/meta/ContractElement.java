@@ -27,12 +27,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * This annotation can be used as meta element for contract elements, that is class-invariants,
- * pre- and post-conditions.<p/>
- *
- * <b>This meta-annotation is intented for internal use by GContracts.</b>
- *
- * @see org.gcontracts.annotations.common.NotNull
+ * Indicates that annotations being marked as {@code @ContractElement} are to be used
+ * by some contract element being either a class-invariant, pre- or post-condition.
  *
  * @author ast
  */

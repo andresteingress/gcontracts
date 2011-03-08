@@ -32,7 +32,6 @@ import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.meta.Postcondition;
-import org.gcontracts.annotations.meta.Precondition;
 import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
 
@@ -59,7 +58,7 @@ public class PostconditionGenerator extends BaseGenerator {
      * @param classNode the {@link org.codehaus.groovy.ast.ClassNode} to add the synthetic method to
      */
     public void addOldVariablesMethod(final ClassNode classNode)  {
-        VariableGenerationUtility.addOldVariableMethodNode(classNode);
+        OldVariableGenerationUtility.addOldVariableMethodNode(classNode);
     }
 
     /**
@@ -132,7 +131,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
                 new BinaryExpression(oldVariableExpression,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
-                        new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
+                        new MethodCallExpression(VariableExpression.THIS_EXPRESSION, OldVariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
 
                 final BlockStatement oldVariableIfBlock = new BlockStatement();
                 oldVariableIfBlock.addStatement(oldVariabeStatement);
@@ -152,7 +151,7 @@ public class PostconditionGenerator extends BaseGenerator {
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
                 new BinaryExpression(oldVariableExpression,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
-                        new MethodCallExpression(VariableExpression.THIS_EXPRESSION, VariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
+                        new MethodCallExpression(VariableExpression.THIS_EXPRESSION, OldVariableGenerationUtility.OLD_VARIABLES_METHOD, ArgumentListExpression.EMPTY_ARGUMENTS)));
 
                 final BlockStatement oldVariableIfBlock = new BlockStatement();
                 oldVariableIfBlock.addStatement(oldVariabeStatement);

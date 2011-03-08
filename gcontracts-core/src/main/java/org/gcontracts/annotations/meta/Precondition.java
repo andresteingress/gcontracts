@@ -30,5 +30,12 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 
+
+/**
+ * Indicates that annotations being marked as {@code @Precondition} are to be treated
+ * as pre-condition modifying annotations.
+ *
+ * @author ast
+ */
 @ContractElement
 public @interface Precondition {}

@@ -30,6 +30,8 @@ import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.PreconditionGenerator;
 
 /**
+* Internal {@link org.gcontracts.common.spi.Lifecycle} implementation for pre-conditions.
+ *
  * @author ast
  */
 public class PreconditionLifecycle extends BaseLifecycle {

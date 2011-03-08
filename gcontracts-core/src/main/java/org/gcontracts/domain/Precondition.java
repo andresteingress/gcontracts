@@ -25,6 +25,8 @@ package org.gcontracts.domain;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 
 /**
+ * <p>A pre-condition assertion.</p>
+ *
  * @author ast
  */
 public class Precondition extends Assertion<Precondition> {

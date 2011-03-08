@@ -34,6 +34,8 @@ import org.gcontracts.domain.Postcondition;
 import java.util.List;
 
 /**
+ * Internal {@link AnnotationProcessor} implementation for post-conditions.
+ *
  * @author ast
  */
 public class EnsuresAnnotationProcessor extends AnnotationProcessor {

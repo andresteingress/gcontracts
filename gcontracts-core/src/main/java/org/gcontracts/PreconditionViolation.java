@@ -23,7 +23,9 @@
 package org.gcontracts;
 
 /**
- * Thrown whenever a precondition violation occurs.
+ * <p>Thrown whenever a precondition violation occurs.</p>
+ *
+ * @see AssertionViolation
  *
  * @author ast
  */

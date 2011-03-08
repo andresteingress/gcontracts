@@ -23,7 +23,9 @@
 package org.gcontracts;
 
 /**
- * Thrown whenever a class invariant violation occurs.
+ * <p>Thrown whenever a class invariant violation occurs.</p>
+ *
+ * @see AssertionViolation
  *
  * @author ast
  */

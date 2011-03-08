@@ -26,7 +26,7 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.gcontracts.util.Validate;
 
 /**
- * Represents a contract between a supplier and a customer of a class.
+ * <p>Represents a contract between a supplier and a customer of a class.</p>
  *
  * @author ast
  */

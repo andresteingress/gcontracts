@@ -35,8 +35,10 @@ import org.gcontracts.util.Validate;
 import java.util.List;
 
 /**
- * Implementation of a generic processor with handles {@link org.gcontracts.annotations.meta.AnnotationContract}
- * annotations and injects the given closure into the specified assertion.
+ * <p>Implementation of a generic processor with handles {@link org.gcontracts.annotations.meta.AnnotationContract}
+ * annotations and injects the given closure into the specified assertion.</p>
+ *
+ * @see org.gcontracts.annotations.meta.AnnotationContract
  *
  * @author ast
  */

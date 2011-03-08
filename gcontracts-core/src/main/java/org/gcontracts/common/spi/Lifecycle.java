@@ -26,6 +26,9 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 
 /**
+ * <p>Specifies life-cycle hook-ins for applying AST transformation logic before and
+ * after the annotation processors have been run.</p>
+ *
  * @author ast
  */
 public interface Lifecycle {

@@ -30,6 +30,8 @@ import org.gcontracts.domain.ClassInvariant;
 import org.gcontracts.domain.Contract;
 
 /**
+ * Internal {@link AnnotationProcessor} implementation for class-invariants.
+ *
  * @author ast
  */
 public class ClassInvariantAnnotationProcessor extends AnnotationProcessor {

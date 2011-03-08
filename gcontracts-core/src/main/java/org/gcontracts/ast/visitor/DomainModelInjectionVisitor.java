@@ -39,7 +39,7 @@ import org.gcontracts.util.Validate;
 import java.util.Map;
 
 /**
- * Visits the given {@link ClassNode} and injects the current {@link org.gcontracts.domain.Contract} to the current AST
+ * Visits the given {@link ClassNode} and injects the current {@link org.gcontracts.domain.Contract} into the given AST
  * nodes.
  *
  * @see org.gcontracts.domain.Contract

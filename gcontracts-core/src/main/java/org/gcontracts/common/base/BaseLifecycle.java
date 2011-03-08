@@ -28,6 +28,12 @@ import org.gcontracts.common.spi.Lifecycle;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 
 /**
+ * Base implementation class for interface {@link Lifecycle}. This class is supposed
+ * tp be extended by {@link Lifecycle} implementation classes and provides empty
+ * method bodies for all interface methods.
+ *
+ * @see Lifecycle
+ *
  * @author ast
  */
 public abstract class BaseLifecycle implements Lifecycle {

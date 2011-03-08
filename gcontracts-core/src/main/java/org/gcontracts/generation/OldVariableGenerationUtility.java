@@ -32,9 +32,12 @@ import org.codehaus.groovy.syntax.Types;
 import org.objectweb.asm.Opcodes;
 
 /**
+ * <p>Central place where code generation for the <tt>old</tt> closure variable
+ * takes place.</p>
+ *
  * @author ast
  */
-public class VariableGenerationUtility {
+public class OldVariableGenerationUtility {
 
     public static final String OLD_VARIABLES_METHOD = "$_gc_computeOldVariables";
 

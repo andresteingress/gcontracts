@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * Example:
  *
  * <pre>
- *   @Requires({ argument1 != argument2 && argument2 > = 0 })
+ *   &#064;Requires({ argument1 != argument2 && argument2 > = 0 })
  *   void someOperation(def argument1, def argument2)  {
  *     ...
  *   }

@@ -6,11 +6,10 @@ import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.builder.AstStringCompiler
 import org.codehaus.groovy.control.CompilePhase
-import org.gcontracts.annotations.meta.ContractElement
+import org.gcontracts.annotations.meta.Precondition
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals
 
 /**
  * @author ast
@@ -37,7 +36,7 @@ class AnnotationUtilsTests extends BaseTestClass {
         ClassNode classNode = astNodes[1]
         MethodNode methodNode = classNode.getMethod("method", [new Parameter(ClassHelper.makeWithoutCaching("java.lang.Object"), "param")] as Parameter[] )
 
-        def annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName())
+        def annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, Precondition.class.getName())
         assertEquals(1, annotationNodes.size())
     }
 }

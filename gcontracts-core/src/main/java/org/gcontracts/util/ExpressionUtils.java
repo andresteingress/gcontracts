@@ -31,7 +31,7 @@ import org.codehaus.groovy.ast.stmt.Statement;
 import java.util.List;
 
 /**
- * Internal utility class for extracting a boolean expression from the given closure expression.
+ * <p>Internal utility class for extracting a boolean expression from the given closure expression.</p>
  *
  * @see ClosureExpression
  * @see BooleanExpression

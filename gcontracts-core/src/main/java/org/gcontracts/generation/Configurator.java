@@ -28,6 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * <p>Handles {@code -ea} and {@code -da} runtime input arguments for enabling and
+ * disabling contract elements.</p>
+ *
  * @author ast
  */
 public final class Configurator {
