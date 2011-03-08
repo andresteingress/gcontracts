@@ -22,7 +22,9 @@
 ====
 To download the current version of gcontracts visit: http://github.com/andresteingress/gcontracts/downloads
 
-To fork gcontracts and develop from within your own repository, take a look at http://help.github.com/.
+If you want to fork, or send pull requests, check out http://help.github.com/.
+
+If you experience any issues, feel free to post a ticket at http://gcontracts.lighthouseapp.com/projects/71511-gcontracts-core/overview
 
 
 
