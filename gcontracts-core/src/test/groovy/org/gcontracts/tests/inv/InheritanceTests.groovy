@@ -9,7 +9,7 @@ import org.junit.Test
 class InheritanceTests extends BaseTestClass {
 
   def source1 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -23,7 +23,7 @@ class A {
 '''
 
   def source2 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 
@@ -44,7 +44,7 @@ class B extends A {
 '''
 
   def source3 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 
@@ -60,7 +60,7 @@ class C extends B {
 '''
 
   def source11 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 
@@ -76,7 +76,7 @@ class A {
 '''
 
   def source12 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 
@@ -89,7 +89,7 @@ class B extends A {
 '''
 
   def source21 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -110,7 +110,7 @@ class PrivateConstructor {
 '''
 
   def source31 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -124,7 +124,7 @@ abstract class A {
 '''
 
   def source32 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -136,7 +136,7 @@ class B extends A {
 '''
 
   def source41 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -148,7 +148,7 @@ class A {
 '''
 
   def source51 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -165,7 +165,7 @@ class A {
 '''
 
   def source52 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*

@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals
 class AnnotationUtilsTests extends BaseTestClass {
 
     def source = '''
-    @AssertionsEnabled
+    @EnableAssertions
     package tests
 
     import org.gcontracts.annotations.*

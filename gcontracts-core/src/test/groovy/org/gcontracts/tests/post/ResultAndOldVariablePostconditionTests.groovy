@@ -9,7 +9,7 @@ import org.junit.Test
 class ResultAndOldVariablePostconditionTests extends BaseTestClass {
 
   def source = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*

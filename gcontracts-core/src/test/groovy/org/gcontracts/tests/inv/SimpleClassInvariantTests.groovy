@@ -9,7 +9,7 @@ import org.junit.Test
 class SimpleClassInvariantTests extends BaseTestClass {
 
   def source1 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -26,7 +26,7 @@ class A {
 '''
 
   def source2 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -43,7 +43,7 @@ class A {
 '''
 
   def source3 = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*

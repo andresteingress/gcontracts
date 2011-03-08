@@ -11,7 +11,7 @@ class CyclicAssertionCallTests extends BaseTestClass {
     @Test void detectCyclicAssertionCalls()  {
 
         def source = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -36,7 +36,7 @@ class A {
     @Test void detect_diamon_assertion_calls()  {
 
         def source = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*

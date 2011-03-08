@@ -14,7 +14,7 @@ import org.junit.Test
 class OldVariablePostconditionTests extends BaseTestClass {
 
   def templateSourceCode = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*

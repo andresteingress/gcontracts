@@ -27,7 +27,7 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
-import org.gcontracts.annotations.AssertionsEnabled;
+import org.gcontracts.annotations.EnableAssertions;
 import org.gcontracts.ast.visitor.*;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
@@ -97,7 +97,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
     }
 
     private ProcessingContextInformation createProcessingContextInformation(ClassNode classNode, SourceUnit unit, ReaderSource source)  {
-        final ClassNode assertionsEnabledClassNode = ClassHelper.makeWithoutCaching(AssertionsEnabled.class);
+        final ClassNode assertionsEnabledClassNode = ClassHelper.makeWithoutCaching(EnableAssertions.class);
 
         final List<AnnotationNode> annotationsPackage = classNode.getPackage() != null ? classNode.getPackage().getAnnotations(assertionsEnabledClassNode) : Collections.<AnnotationNode>emptyList();
         final List<AnnotationNode> annotationsClassNode = classNode.getAnnotations(assertionsEnabledClassNode);

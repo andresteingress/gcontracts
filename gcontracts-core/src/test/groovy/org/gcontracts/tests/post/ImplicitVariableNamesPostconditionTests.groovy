@@ -8,7 +8,7 @@ import org.gcontracts.tests.basic.BaseTestClass
 class ImplicitVariableNamesPostconditionTests extends BaseTestClass {
 
   def source = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*

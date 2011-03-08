@@ -9,7 +9,7 @@ import org.junit.Test
 class AssertionsEnabledTests extends BaseTestClass {
 
   def source = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -24,7 +24,7 @@ class A {
     def source2 = '''
 import org.gcontracts.annotations.*
 
-@AssertionsEnabled
+@EnableAssertions
 @Invariant({ property != null })
 class A {
 

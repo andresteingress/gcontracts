@@ -12,7 +12,7 @@ class ResultVariablePostconditionTests extends BaseTestClass {
 
 
     def sourceCode = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*

@@ -9,7 +9,7 @@ import org.junit.Test
 class InheritanceTests extends BaseTestClass {
 
   def source_parent = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
@@ -45,7 +45,7 @@ class Parent {
 '''
 
   def source_descendant = '''
-@AssertionsEnabled
+@EnableAssertions
 package tests
 
 import org.gcontracts.annotations.*
