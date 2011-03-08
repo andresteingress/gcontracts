@@ -3,7 +3,8 @@ package org.gcontracts.example
 import org.gcontracts.annotations.*
 
 /**
- * This class should serve as an example for GContracts' customer groovydoc task.
+ * <p>This class should serve as an example for the {@link org.gcontracts.doc.ContractGroovyDoc} ant
+ * task.</p>
  *
  * @author ast
  */

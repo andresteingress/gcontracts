@@ -49,9 +49,9 @@ public class ContractGroovyDoc extends Groovydoc {
     private List<String> packageNames;
     private List<String> excludePackageNames;
 
-    private List<String> docTemplates = Arrays.asList(GroovyDocTemplateInfo.DEFAULT_DOC_TEMPLATES);
-    private List<String> packageTemplates = Arrays.asList(GroovyDocTemplateInfo.DEFAULT_PACKAGE_TEMPLATES);
-    private List<String> classTemplates = Arrays.asList(GroovyDocTemplateInfo.DEFAULT_CLASS_TEMPLATES);
+    private List<String> docTemplates = new ArrayList<String>(Arrays.asList(GroovyDocTemplateInfo.DEFAULT_DOC_TEMPLATES));
+    private List<String> packageTemplates = new ArrayList<String>(Arrays.asList(GroovyDocTemplateInfo.DEFAULT_PACKAGE_TEMPLATES));
+    private List<String> classTemplates = new ArrayList<String>(Arrays.asList(GroovyDocTemplateInfo.DEFAULT_CLASS_TEMPLATES));
 
     private String windowTitle = "Groovy Documentation";
     private String docTitle = "Groovy Documentation";
@@ -91,40 +91,27 @@ public class ContractGroovyDoc extends Groovydoc {
     }
 
     public void setDocTemplates(String docTemplates) {
-        if (docTemplates != null && docTemplates.length() > 0)  {
-            StringTokenizer tokenizer = new StringTokenizer(docTemplates, ";\\n\\r\\t");
-            if (tokenizer.countTokens() == 0) return;
-
-            this.docTemplates = new ArrayList<String>(tokenizer.countTokens());
-            while (tokenizer.hasMoreTokens())  {
-                String token = tokenizer.nextToken();
-                this.docTemplates.add(token);
-            }
-        }
+        scanTemplateFileset(this.docTemplates, docTemplates);
     }
 
     public void setPackageTemplates(String packageTemplates) {
-        if (packageTemplates != null && packageTemplates.length() > 0)  {
-            StringTokenizer tokenizer = new StringTokenizer(packageTemplates, ";\\n\\r\\t");
-            if (tokenizer.countTokens() == 0) return;
-
-            this.packageTemplates = new ArrayList<String>(tokenizer.countTokens());
-            while (tokenizer.hasMoreTokens())  {
-                String token = tokenizer.nextToken();
-                this.packageTemplates.add(token);
-            }
-        }
+        scanTemplateFileset(this.packageTemplates, packageTemplates);
     }
 
     public void setClassTemplates(String classTemplates) {
-        if (classTemplates != null && classTemplates.length() > 0)  {
-            StringTokenizer tokenizer = new StringTokenizer(classTemplates, ";\\n\\r\\t");
-            if (tokenizer.countTokens() == 0) return;
+        scanTemplateFileset(this.classTemplates, classTemplates);
+    }
 
-            this.classTemplates = new ArrayList<String>(tokenizer.countTokens());
-            while (tokenizer.hasMoreTokens())  {
-                String token = tokenizer.nextToken();
-                this.classTemplates.add(token);
+    private void scanTemplateFileset(List<String> templates, String fileset)  {
+        if (templates == null) throw new IllegalArgumentException("Parameter 'templates' must not be null!");
+        if (fileset != null && fileset.length() > 0)  {
+            String[] tokens = fileset.split(";");
+            if (tokens.length == 0) return;
+
+            templates.clear();
+
+            for (String token : tokens)  {
+                templates.add(token);
             }
         }
     }
@@ -542,6 +529,5 @@ public class ContractGroovyDoc extends Groovydoc {
      */
     public String[] getClassTemplates()  {
         return classTemplates.toArray(new String[classTemplates.size()]);
-        // return null;
     }
 }
