@@ -84,7 +84,7 @@ public abstract class BaseGenerator {
         final VariableExpression proxyVariableExpression = new VariableExpression($_gc_proxy, ClassHelper.DYNAMIC_TYPE);
 
         assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
-        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression(proxyVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(CyclicMethodCallAwareMetaClass.class)), "getProxy", new ArgumentListExpression(VariableExpression.THIS_EXPRESSION)))));
+        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression(proxyVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(CircularMethodCallAwareMetaClass.class)), "getProxy", new ArgumentListExpression(VariableExpression.THIS_EXPRESSION)))));
 
         assertBlockStatement.addStatement(new ExpressionStatement(
                new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "init", ArgumentListExpression.EMPTY_ARGUMENTS))

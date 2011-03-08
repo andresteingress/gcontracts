@@ -36,42 +36,42 @@ import java.util.Map;
  *
  * @author ast
  */
-public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements AdaptingMetaClass {
+public class CircularMethodCallAwareMetaClass extends MetaClassImpl implements AdaptingMetaClass {
 
     protected MetaClass origMetaClass = null;
 
     private static ThreadLocal<Interceptor> interceptor = new ThreadLocal<Interceptor>() {
         @Override
         protected Interceptor initialValue() {
-            return new CyclicAssertionCallInterceptor();
+            return new CircularAssertionCallInterceptor();
         }
     };
 
-    private static ThreadLocal<Map<String, CyclicMethodCallAwareMetaClass>> metaClasses = new ThreadLocal<Map<String, CyclicMethodCallAwareMetaClass>>()  {
+    private static ThreadLocal<Map<String, CircularMethodCallAwareMetaClass>> metaClasses = new ThreadLocal<Map<String, CircularMethodCallAwareMetaClass>>()  {
         @Override
-        protected Map<String, CyclicMethodCallAwareMetaClass> initialValue() {
-            return new HashMap<String, CyclicMethodCallAwareMetaClass>();
+        protected Map<String, CircularMethodCallAwareMetaClass> initialValue() {
+            return new HashMap<String, CircularMethodCallAwareMetaClass>();
         }
     };
 
-    public static CyclicMethodCallAwareMetaClass getProxy(GroovyObject theObject) throws IntrospectionException {
+    public static CircularMethodCallAwareMetaClass getProxy(GroovyObject theObject) throws IntrospectionException {
 
         synchronized (metaClasses.get())  {
             final MetaClassRegistry metaClassRegistry = GroovySystem.getMetaClassRegistry();
-            final Map<String, CyclicMethodCallAwareMetaClass> metaClassMap = metaClasses.get();
+            final Map<String, CircularMethodCallAwareMetaClass> metaClassMap = metaClasses.get();
 
             final MetaClass metaClass = theObject.getMetaClass();
             final Class theClass = metaClass.getTheClass();
 
             if (metaClassMap.containsKey(theClass.getName())) return metaClassMap.get(theClass.getName());
 
-            metaClassMap.put(theClass.getName(), new CyclicMethodCallAwareMetaClass(metaClassRegistry, theClass, theObject));
+            metaClassMap.put(theClass.getName(), new CircularMethodCallAwareMetaClass(metaClassRegistry, theClass, theObject));
 
             return metaClassMap.get(theClass.getName());
         }
     }
 
-    public CyclicMethodCallAwareMetaClass(MetaClassRegistry registry, Class theClass, GroovyObject theObject) throws IntrospectionException {
+    public CircularMethodCallAwareMetaClass(MetaClassRegistry registry, Class theClass, GroovyObject theObject) throws IntrospectionException {
         super(registry, theClass);
         super.initialize();
 
@@ -82,7 +82,7 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
 
     public void release()  {
         synchronized (metaClasses.get())  {
-            final Map<String, CyclicMethodCallAwareMetaClass> metaClassMap = metaClasses.get();
+            final Map<String, CircularMethodCallAwareMetaClass> metaClassMap = metaClasses.get();
             if (origMetaClass != null) {
                 registry.setMetaClass(theClass, origMetaClass);
                 metaClassMap.remove(theClass.getName());
@@ -93,7 +93,6 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
 
     public Object invokeMethod(final Object object, final String methodName, final Object[] arguments) {
         return doCall(object, methodName, arguments, interceptor.get(), new Callable() {
-            @Override
             public Object call() {
                 return origMetaClass.invokeMethod(object, methodName, arguments);
             }
@@ -102,7 +101,6 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
 
     public Object invokeStaticMethod(final Object object, final String methodName, final Object[] arguments) {
         return doCall(object, methodName, arguments, interceptor.get(), new Callable() {
-            @Override
             public Object call() {
                 return origMetaClass.invokeStaticMethod(object, methodName, arguments);
             }
@@ -121,12 +119,10 @@ public class CyclicMethodCallAwareMetaClass extends MetaClassImpl implements Ada
         super.setProperty(aClass, object, property, newValue, b, b1);
     }
 
-    @Override
     public MetaClass getAdaptee() {
         return origMetaClass;
     }
 
-    @Override
     public void setAdaptee(MetaClass metaClass) {}
 
     // since Java has no Closures...

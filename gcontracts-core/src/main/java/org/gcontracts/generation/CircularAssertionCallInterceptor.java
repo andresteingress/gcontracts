@@ -20,29 +20,38 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.gcontracts;
+package org.gcontracts.generation;
+
+import groovy.lang.Interceptor;
+import org.gcontracts.CircularAssertionCallException;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * <p>Thrown whenever pre- or post-conditions are called in a cyclic way.</p>
+ * {@link Interceptor} implementation which checks for cyclic method calls - as these need to be avoided
+ * in contract definitions.
  *
- * @see AssertionViolation
+ * @see Interceptor
  *
  * @author ast
  */
-public class CyclicAssertionCallException extends RuntimeException {
+public class CircularAssertionCallInterceptor implements Interceptor {
 
-    public CyclicAssertionCallException() {
+    private List<String> callStack = new LinkedList<String>();
+
+    public Object beforeInvoke(Object object, String methodName, Object[] arguments) {
+        if (callStack.contains(methodName)) throw new CircularAssertionCallException("Method '" + methodName + "' has already been called from the current assertion - assertion call cycle detected!");
+        callStack.add(methodName);
+        return object;
     }
 
-    public CyclicAssertionCallException(String s) {
-        super(s);
+    public Object afterInvoke(Object object, String methodName, Object[] arguments, Object result) {
+        callStack.remove(methodName);
+        return result;
     }
 
-    public CyclicAssertionCallException(String s, Throwable throwable) {
-        super(s, throwable);
-    }
-
-    public CyclicAssertionCallException(Throwable throwable) {
-        super(throwable);
+    public boolean doInvoke() {
+        return true;
     }
 }

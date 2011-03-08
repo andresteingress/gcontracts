@@ -6,7 +6,7 @@ import org.junit.Test
  /**
  * @author ast
  */
-class CyclicMethodCallAwareMetaClassTests extends BaseTestClass {
+class CircularMethodCallAwareMetaClassTests extends BaseTestClass {
 
     class Dummy {
         boolean called = false
@@ -22,21 +22,21 @@ class CyclicMethodCallAwareMetaClassTests extends BaseTestClass {
     }
 
     @Test void get_shared_instance_in_current_thread()  {
-        def proxy = CyclicMethodCallAwareMetaClass.getProxy(new Dummy())
-        assert proxy == CyclicMethodCallAwareMetaClass.getProxy(new Dummy())
+        def proxy = CircularMethodCallAwareMetaClass.getProxy(new Dummy())
+        assert proxy == CircularMethodCallAwareMetaClass.getProxy(new Dummy())
     }
 
     @Test void get_new_shared_instance_on_release()  {
-        def proxy = CyclicMethodCallAwareMetaClass.getProxy(new Dummy())
+        def proxy = CircularMethodCallAwareMetaClass.getProxy(new Dummy())
         proxy.release()
-        assert proxy != CyclicMethodCallAwareMetaClass.getProxy(new Dummy())
+        assert proxy != CircularMethodCallAwareMetaClass.getProxy(new Dummy())
     }
 
     @Test void detect_cyclic_method_call_in_Dummy_class()  {
-        CyclicMethodCallAwareMetaClass.getProxy(new Dummy())
+        CircularMethodCallAwareMetaClass.getProxy(new Dummy())
 
         def dummy = new Dummy()
-        shouldFail org.gcontracts.CyclicAssertionCallException, {
+        shouldFail org.gcontracts.CircularAssertionCallException, {
             dummy.some_method()
         }
     }

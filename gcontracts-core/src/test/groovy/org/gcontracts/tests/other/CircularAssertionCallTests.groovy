@@ -6,9 +6,9 @@ import org.junit.Test
  /**
  * @author ast
  */
-class CyclicAssertionCallTests extends BaseTestClass {
+class CircularAssertionCallTests extends BaseTestClass {
 
-    @Test void detectCyclicAssertionCalls()  {
+    @Test void detectCircularAssertionCalls()  {
 
         def source = '''
 @EnableAssertions
@@ -28,7 +28,7 @@ class A {
 
         def a = create_instance_of(source)
 
-        shouldFail org.gcontracts.CyclicAssertionCallException, {
+        shouldFail org.gcontracts.CircularAssertionCallException, {
             a.isConditionB()
         }
     }
@@ -59,7 +59,7 @@ class A {
 
         def a = create_instance_of(source)
 
-        shouldFail org.gcontracts.CyclicAssertionCallException, {
+        shouldFail org.gcontracts.CircularAssertionCallException, {
             a.isConditionB()
         }
     }
