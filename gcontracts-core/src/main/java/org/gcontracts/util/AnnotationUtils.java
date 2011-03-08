@@ -75,14 +75,24 @@ public class AnnotationUtils {
         }
     }
 
-    public static List<AnnotationNode> getAnnotationNodeInHierarchyWithMetaAnnotation(ClassNode type, MethodNode originMethodNode, ClassNode anno)  {
+    /**
+     * <p>Checks whether there exists a {@link MethodNode} up the inheritance tree where exists an annotation which is annotated
+     * with <tt>metaAnnotationClassNode</tt>.</p>
+     *
+     * @param type the origin {@link ClassNode}
+     * @param originMethodNode the origin {@link MethodNode}
+     * @param metaAnnotationClassNode the {@link ClassNode} of the meta-annotation
+     *
+     * @return a list of {@link AnnotationNode} all annotated with <tt>metaAnnotationClassNode</tt>
+     */
+    public static List<AnnotationNode> getAnnotationNodeInHierarchyWithMetaAnnotation(ClassNode type, MethodNode originMethodNode, ClassNode metaAnnotationClassNode)  {
         List<AnnotationNode> result = new ArrayList<AnnotationNode>();
 
         while (type != null)  {
             MethodNode methodNode = type.getMethod(originMethodNode.getName(), originMethodNode.getParameters());
             if (methodNode != null) {
                 for (AnnotationNode annotation : methodNode.getAnnotations())  {
-                    if (annotation.getClassNode().getAnnotations(anno).size() > 0)  {
+                    if (annotation.getClassNode().getAnnotations(metaAnnotationClassNode).size() > 0)  {
                         result.add(annotation);
                     }
                 }

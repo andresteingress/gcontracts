@@ -23,6 +23,8 @@
 package org.gcontracts;
 
 /**
+ * <p>Abstract base class for all assertion violations.</p>
+ *
  * @author ast
  */
 public abstract class AssertionViolation extends AssertionError {

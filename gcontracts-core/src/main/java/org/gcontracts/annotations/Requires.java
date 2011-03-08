@@ -34,11 +34,15 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * Represents a <b>method's precondition</b>.
+ * Represents a <b>method precondition</b>.
  * </p>
- *
  * <p>
- * A method's precondition is executed <i>before</i> a method call. A
+ * A precondition is a condition that must be met by clients of this class. Whenever the
+ * precondition can be satisfied, it is guaranteed that the supplier will fullfil the method's
+ * postcondition.
+ * </p>
+ * <p>
+ * A method's precondition is executed <i>as the first statement</i> within a method call. A
  * successor's precondition weakens the precondition of its parent class, e.g. if A.someMethod
  * declares a precondition and B.someMethod overrides the method the preconditions are combined with a boolean OR.
  * </p>

@@ -37,10 +37,10 @@ import java.lang.annotation.Target;
  * </p>
  *
  * <p>
- * The class-invariant defines assertions that must holds during the entire life-time of this class's instances.
+ * The class-invariant defines assertions holding during the entire objects life-time.
  * </p>
  * <p>
- * Checking the class-invariant is injected at several pointcuts:
+ * Class-invariants are verified at runtime at the following pointcuts:
  * <ul>
  *  <li>after a constructor call</li>
  *  <li>before a method call</li>
