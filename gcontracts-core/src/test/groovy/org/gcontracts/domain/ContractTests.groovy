@@ -3,7 +3,7 @@ package org.gcontracts.domain
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
-import org.codehaus.groovy.ast.builder.AstStringCompiler
+import org.codehaus.groovy.ast.builder.*
 import org.codehaus.groovy.ast.expr.BooleanExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.control.CompilePhase
@@ -26,8 +26,7 @@ class ContractTests {
         }
 '''
 
-        AstStringCompiler astStringCompiler = new AstStringCompiler()
-        def astNodes = astStringCompiler.compile(source, CompilePhase.SEMANTIC_ANALYSIS, false)
+        def astNodes = new AstBuilder().buildFromString(CompilePhase.SEMANTIC_ANALYSIS, false, source)
         classNode = astNodes[1]
         assertNotNull(classNode)
 

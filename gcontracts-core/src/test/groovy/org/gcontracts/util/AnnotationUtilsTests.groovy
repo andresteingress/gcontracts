@@ -4,7 +4,7 @@ import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
-import org.codehaus.groovy.ast.builder.AstStringCompiler
+import org.codehaus.groovy.ast.builder.AstBuilder
 import org.codehaus.groovy.control.CompilePhase
 import org.gcontracts.annotations.meta.Precondition
 import org.gcontracts.tests.basic.BaseTestClass
@@ -30,8 +30,8 @@ class AnnotationUtilsTests extends BaseTestClass {
     }'''
 
     @Test void find_annotations_with_meta_annos() {
-        AstStringCompiler astStringCompiler = new AstStringCompiler()
-        def astNodes = astStringCompiler.compile(source, CompilePhase.SEMANTIC_ANALYSIS, false)
+        AstBuilder astBuilder  = new AstBuilder()
+        def astNodes = astBuilder.buildFromString(CompilePhase.SEMANTIC_ANALYSIS, false, source)
 
         ClassNode classNode = astNodes[1]
         MethodNode methodNode = classNode.getMethod("method", [new Parameter(ClassHelper.makeWithoutCaching("java.lang.Object"), "param")] as Parameter[] )
