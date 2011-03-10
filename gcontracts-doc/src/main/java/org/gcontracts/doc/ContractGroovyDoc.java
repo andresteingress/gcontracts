@@ -24,8 +24,9 @@ package org.gcontracts.doc;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.*;
-import org.apache.tools.ant.types.selectors.FileSelector;
+import org.apache.tools.ant.types.DirSet;
+import org.apache.tools.ant.types.Path;
+import org.apache.tools.ant.types.PatternSet;
 import org.codehaus.groovy.ant.Groovydoc;
 import org.codehaus.groovy.ant.LoggingHelper;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
@@ -51,7 +52,7 @@ public class ContractGroovyDoc extends Groovydoc {
 
     private List<String> docTemplates = new ArrayList<String>(Arrays.asList(GroovyDocTemplateInfo.DEFAULT_DOC_TEMPLATES));
     private List<String> packageTemplates = new ArrayList<String>(Arrays.asList(GroovyDocTemplateInfo.DEFAULT_PACKAGE_TEMPLATES));
-    private List<String> classTemplates = new ArrayList<String>(Arrays.asList(GroovyDocTemplateInfo.DEFAULT_CLASS_TEMPLATES));
+    private List<String> classTemplates = new ArrayList<String>(Arrays.asList("org/gcontracts/doc/templates/classDocName.html"));
 
     private String windowTitle = "Groovy Documentation";
     private String docTitle = "Groovy Documentation";
