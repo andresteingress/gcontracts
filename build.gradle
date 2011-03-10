@@ -14,7 +14,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = "org.gcontracts"
-    version = "1.2"
+    version = "1.2.0"
 
     asm = "asm:asm:3.2"
     junit = "junit:junit:4.8.2"

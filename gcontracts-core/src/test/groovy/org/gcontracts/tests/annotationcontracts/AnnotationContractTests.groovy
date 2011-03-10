@@ -1,6 +1,5 @@
 package org.gcontracts.tests.annotationcontracts
 
-import org.codehaus.groovy.ast.builder.AstStringCompiler
 import org.junit.Test
 import static junit.framework.Assert.assertNotNull
 import static junit.framework.Assert.fail
@@ -9,8 +8,6 @@ import static junit.framework.Assert.fail
  * @author ast
  */
 class AnnotationContractTests {
-
-    AstStringCompiler astStringCompiler = new AstStringCompiler()
 
     @Test
     void single_notnull_parameter() {
