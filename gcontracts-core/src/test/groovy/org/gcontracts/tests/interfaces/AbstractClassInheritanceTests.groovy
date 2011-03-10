@@ -10,7 +10,7 @@ import org.junit.Test
 class AbstractClassInheritanceTests extends BaseTestClass {
 
   def source_stackable = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -26,7 +26,7 @@ abstract class Stackable {
 '''
 
   def source_stack = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

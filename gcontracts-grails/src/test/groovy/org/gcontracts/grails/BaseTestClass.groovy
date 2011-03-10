@@ -1,4 +1,4 @@
-package org.gcontracts.spring
+package org.gcontracts.grails
 
 import groovy.text.GStringTemplateEngine
 

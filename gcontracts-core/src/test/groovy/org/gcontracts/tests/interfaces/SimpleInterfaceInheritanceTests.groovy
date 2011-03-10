@@ -9,7 +9,7 @@ import org.junit.Test
 class SimpleInterfaceInheritanceTests extends BaseTestClass {
 
   def source_stackable = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -23,7 +23,7 @@ abstract class Stackable {
 '''
 
   def source_stack = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -52,7 +52,7 @@ class Stack extends Stackable {
 '''
 
     def source_implicit_interface = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -74,7 +74,7 @@ class C extends B {
 '''
 
     def source_implicit_interface2 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

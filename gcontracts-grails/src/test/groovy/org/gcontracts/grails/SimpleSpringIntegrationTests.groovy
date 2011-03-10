@@ -1,4 +1,4 @@
-package org.gcontracts.spring
+package org.gcontracts.grails
 
  /**
  * @author ast
@@ -6,7 +6,7 @@ package org.gcontracts.spring
 class SimpleSpringIntegrationTests extends BaseTestClass {
 
   def source1 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -25,7 +25,7 @@ class A {
 '''
 
   def source2 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.springframework.stereotype.*
@@ -48,7 +48,7 @@ class A implements org.springframework.beans.factory.InitializingBean {
 '''
 
   def source3 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.springframework.stereotype.*

@@ -9,7 +9,7 @@ import org.junit.Test
 class StackExampleTests extends BaseTestClass {
 
   def source_stack = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -70,7 +70,7 @@ class Stack  {
 '''
 
   def source_stack_descendant = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

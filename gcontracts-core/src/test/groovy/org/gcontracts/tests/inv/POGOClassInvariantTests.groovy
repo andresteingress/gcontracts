@@ -14,7 +14,7 @@ import org.junit.Test
 class POGOClassInvariantTests extends BaseTestClass {
 
   def dynamic_constructor_class_code = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -27,7 +27,7 @@ class DynamicConstructor {
 '''
 
   def dynamic_setter_class_code = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

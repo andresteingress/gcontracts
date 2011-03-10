@@ -27,7 +27,7 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
-import org.gcontracts.annotations.EnableAssertions;
+import org.gcontracts.annotations.Contracted;
 import org.gcontracts.ast.visitor.*;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
@@ -78,7 +78,6 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         final ConfiguratorSetupVisitor configuratorSetupVisitor = new ConfiguratorSetupVisitor(unit, source);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
-            // there is nothing to do for interfaces
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
             final ProcessingContextInformation pci = createProcessingContextInformation(classNode, unit, source);
@@ -97,7 +96,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
     }
 
     private ProcessingContextInformation createProcessingContextInformation(ClassNode classNode, SourceUnit unit, ReaderSource source)  {
-        final ClassNode assertionsEnabledClassNode = ClassHelper.makeWithoutCaching(EnableAssertions.class);
+        final ClassNode assertionsEnabledClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
 
         final List<AnnotationNode> annotationsPackage = classNode.getPackage() != null ? classNode.getPackage().getAnnotations(assertionsEnabledClassNode) : Collections.<AnnotationNode>emptyList();
         final List<AnnotationNode> annotationsClassNode = classNode.getAnnotations(assertionsEnabledClassNode);

@@ -10,7 +10,7 @@ import org.junit.Test
 class AbstractClassTests extends BaseTestClass {
 
   def source1 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -32,7 +32,7 @@ abstract class A {
 '''
 
   def source2 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

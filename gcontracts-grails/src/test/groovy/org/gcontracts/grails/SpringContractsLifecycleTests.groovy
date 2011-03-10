@@ -1,4 +1,4 @@
-package org.gcontracts.spring
+package org.gcontracts.grails
 
 import java.lang.reflect.Method
 import junit.framework.TestCase
@@ -15,6 +15,7 @@ class SpringContractsLifecycleTests extends TestCase {
         import org.springframework.stereotype.*
         import org.gcontracts.annotations.*
 
+        @Contracted
         @Service
         @Invariant({ someName != null })
         class MyService {

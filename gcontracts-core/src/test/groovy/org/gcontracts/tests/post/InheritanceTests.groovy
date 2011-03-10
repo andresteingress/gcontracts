@@ -9,7 +9,7 @@ import org.junit.Test
 class InheritanceTests extends BaseTestClass {
   
   def source_parent = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -66,7 +66,7 @@ class Parent {
 '''
   
   def source_descendant = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -122,7 +122,7 @@ class Descendant extends Parent {
 '''
 
   def source2 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -142,7 +142,7 @@ class Rocket  {
 '''
 
   def source3 = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

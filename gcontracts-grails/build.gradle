@@ -1,6 +1,6 @@
 dependsOn(':gcontracts-core')
 
-project(":gcontracts-spring") {
+project(":gcontracts-grails") {
   def springVersion = "3.0.5.RELEASE"
 
   dependencies {
@@ -13,5 +13,5 @@ project(":gcontracts-spring") {
 
 test {
   // exclude basic test case classes
-  excludes = ['org/gcontracts/spring/BaseTestClass*']
+  excludes = ['org/gcontracts/grails/BaseTestClass*']
 }

@@ -31,7 +31,7 @@ class AnnotationContractTests {
 '''
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
@@ -69,7 +69,7 @@ class AnnotationContractTests {
 '''
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
@@ -107,7 +107,7 @@ class AnnotationContractTests {
 '''
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     class Tester {
@@ -128,7 +128,7 @@ class AnnotationContractTests {
     void requires_method() {
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
@@ -172,7 +172,7 @@ class AnnotationContractTests {
 '''
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
@@ -209,7 +209,7 @@ class AnnotationContractTests {
 '''
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
@@ -256,7 +256,7 @@ class AnnotationContractTests {
 '''
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
@@ -277,7 +277,7 @@ class AnnotationContractTests {
     void ensures_method() {
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
@@ -311,7 +311,7 @@ class AnnotationContractTests {
     void class_invariant() {
 
         def source = '''
-    @EnableAssertions
+    @Contracted
     package tests
 
     import org.gcontracts.annotations.*

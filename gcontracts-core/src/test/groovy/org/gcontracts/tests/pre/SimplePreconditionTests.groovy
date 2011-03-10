@@ -10,7 +10,7 @@ import org.junit.Test
 class SimplePreconditionTests extends BaseTestClass {
 
   def source = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

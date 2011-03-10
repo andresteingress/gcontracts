@@ -13,7 +13,7 @@ class DocumentationExampleTests extends BaseTestClass {
 
 
   def example_person = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -33,7 +33,7 @@ class Person {
 '''
 
   def example_eiffel_stack = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

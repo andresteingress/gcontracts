@@ -11,7 +11,7 @@ class CircularAssertionCallTests extends BaseTestClass {
     @Test void detectCircularAssertionCalls()  {
 
         def source = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -36,7 +36,7 @@ class A {
     @Test void detect_diamon_assertion_calls()  {
 
         def source = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

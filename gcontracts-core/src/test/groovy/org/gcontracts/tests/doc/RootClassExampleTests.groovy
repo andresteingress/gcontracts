@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 class RootClassExampleTests extends BaseTestClass {
   
   def source = ''' 
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

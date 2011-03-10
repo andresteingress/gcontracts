@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 class StackExampleTests extends BaseTestClass {
 
   def source_stackable = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -27,7 +27,7 @@ interface Stackable {
 '''
 
   def source_stack = '''
-@EnableAssertions
+@Contracted
 package tests
 
 import org.gcontracts.annotations.*

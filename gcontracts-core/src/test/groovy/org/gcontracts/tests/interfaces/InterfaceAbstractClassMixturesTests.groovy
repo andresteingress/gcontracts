@@ -13,7 +13,7 @@ class InterfaceAbstractClassMixturesTests extends BaseTestClass {
     @Test void class_with_abstract_class_and_interface() {
 
         def s1 = '''
-        @EnableAssertions
+        @Contracted
         package tests
 
         import org.gcontracts.annotations.*
@@ -29,7 +29,7 @@ class InterfaceAbstractClassMixturesTests extends BaseTestClass {
         '''
 
         def s2 = '''
-        @EnableAssertions
+        @Contracted
         package tests
 
         import org.gcontracts.annotations.*
@@ -50,7 +50,7 @@ class InterfaceAbstractClassMixturesTests extends BaseTestClass {
     @Test void interface_and_abstract_class_both_contain_abstract_methods() {
 
         def s1 = '''
-        @EnableAssertions
+        @Contracted
         package tests
 
         import org.gcontracts.annotations.*
@@ -67,7 +67,7 @@ class InterfaceAbstractClassMixturesTests extends BaseTestClass {
         '''
 
         def s2 = '''
-        @EnableAssertions
+        @Contracted
         package tests
 
         import org.gcontracts.annotations.*

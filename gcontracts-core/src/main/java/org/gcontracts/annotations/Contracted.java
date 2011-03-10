@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  *
  * For example:
  * <pre>
- * &#064;EnableAssertions
+ * &#064;Contracted
  * package my.package
  *
  * import org.gcontracts.annotations.*
@@ -43,4 +43,4 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.PACKAGE, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EnableAssertions {}
+public @interface Contracted {}
