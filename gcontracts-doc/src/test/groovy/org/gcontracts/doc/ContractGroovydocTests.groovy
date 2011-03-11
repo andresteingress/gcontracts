@@ -16,9 +16,6 @@ class ContractGroovydocTests {
         ant.groovydoc(
             destdir      : "gcontracts-doc/out/test",
             sourcepath   : "gcontracts-doc/src/test/groovy",
-            classTemplates : ant.fileset(dir:"gcontracts-doc/src/main/java/") {
-                include(name:"**/*.html")
-            },
             packagenames : "**.*",
             use          : "true",
             windowtitle  : "Title",
