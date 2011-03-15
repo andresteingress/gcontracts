@@ -3,8 +3,9 @@ package org.gcontracts.tests.annotationcontracts
 import org.junit.Test
 import static junit.framework.Assert.assertNotNull
 import static junit.framework.Assert.fail
+import org.gcontracts.PreconditionViolation
 
- /**
+/**
  * @author ast
  */
 class AnnotationContractTests {
@@ -12,7 +13,7 @@ class AnnotationContractTests {
     @Test
     void single_notnull_parameter() {
 
-        def source_anno = '''
+        def source_anno_parameter = '''
     package tests
 
     import org.gcontracts.annotations.*
@@ -26,8 +27,7 @@ class AnnotationContractTests {
     @AnnotationContract({ it != null })
     public @interface NotNull {}
 '''
-
-        def source = '''
+        def source_parameter = '''
     @Contracted
     package tests
 
@@ -39,8 +39,8 @@ class AnnotationContractTests {
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
-        loader.parseClass(source_anno)
-        Class clz = loader.parseClass(source)
+        loader.parseClass(source_anno_parameter)
+        Class clz = loader.parseClass(source_parameter)
         assertNotNull(clz)
 
         def tester = clz.newInstance()
@@ -336,5 +336,53 @@ class AnnotationContractTests {
             return }
 
         fail("AssertionError must have been thrown")
+    }
+
+    @Test
+    void annotation_contract_for_method_precondition() {
+
+
+        def source_anno_method = '''
+    package tests
+
+    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+
+    @Precondition
+    @AnnotationContract({ param1 != null })
+    public @interface NotNull {}
+'''
+
+        def source_method = '''
+    @Contracted
+    package tests
+
+    import org.gcontracts.annotations.*
+
+    class Tester {
+
+        @NotNull
+        def method(def param1) {}
+    }'''
+
+        GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        Class clz = loader.parseClass(source_anno_method)
+        assertNotNull(clz)
+
+        clz = loader.parseClass(source_method)
+
+        try  {
+            def tester = clz.newInstance()
+            tester.method(null)
+
+        } catch (PreconditionViolation pv) {
+            return
+        }
+
+        fail("PreconditionViolation must have been thrown")
     }
 }
