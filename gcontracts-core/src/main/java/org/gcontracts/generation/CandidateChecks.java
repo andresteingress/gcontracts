@@ -44,7 +44,8 @@ public class CandidateChecks {
      * @return whether the given <tt>type</tt> is a candidate for applying contract assertions
      */
     public static boolean isContractsCandidate(final ClassNode type)  {
-        return !type.isSynthetic() && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
+        return
+                !type.isSynthetic() && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody() && !isRuntimeClass(type);
     }
 
     /**
@@ -55,7 +56,7 @@ public class CandidateChecks {
      * @return whether the given <tt>type</tt> is a candidate for applying interface contract assertions
      */
     public static boolean isInterfaceContractsCandidate(final ClassNode type)  {
-        return type.isInterface() && !type.isSynthetic() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody();
+        return type.isInterface() && !type.isSynthetic() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody() && !isRuntimeClass(type);
     }
 
     /**
@@ -98,5 +99,15 @@ public class CandidateChecks {
         if (method.getDeclaringClass() != null && !method.getDeclaringClass().getName().equals(type.getName())) return false;
 
         return true;
+    }
+
+    /**
+     * Checks whether the given {@link ClassNode} is part of the Groovy/Java runtime.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @return <tt>true</tt> whether the current {@link org.codehaus.groovy.ast.ClassNode} is a Groovy/Java system class
+     */
+    public static boolean isRuntimeClass(final ClassNode type)  {
+        return type.getName().startsWith("groovy.") || type.getName().startsWith("java.");
     }
 }
