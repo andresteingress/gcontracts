@@ -4,6 +4,7 @@ import org.junit.Test
 import static junit.framework.Assert.assertNotNull
 import static junit.framework.Assert.fail
 import org.gcontracts.PreconditionViolation
+import org.gcontracts.PostconditionViolation
 
 /**
  * @author ast
@@ -36,6 +37,41 @@ class AnnotationContractTests {
     class Tester {
 
         def method(@NotNull param) {}
+    }'''
+
+        GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_anno_parameter)
+        Class clz = loader.parseClass(source_parameter)
+        assertNotNull(clz)
+
+        def tester = clz.newInstance()
+
+        tester.method(null)
+    }
+
+    @Test(expected = PostconditionViolation.class)
+    void single_notnull_parameter_postcondition() {
+
+        def source_anno_parameter = '''
+    package tests
+
+    import org.gcontracts.annotations.*
+    import org.gcontracts.annotations.meta.*
+    import java.lang.annotation.*
+
+    @Postcondition
+    @AnnotationContract({ it != null })
+    public @interface NotNull {}
+'''
+        def source_parameter = '''
+    @Contracted
+    package tests
+
+    import org.gcontracts.annotations.*
+
+    class Tester {
+
+        def method(@NotNull param) { println "test" }
     }'''
 
         GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
