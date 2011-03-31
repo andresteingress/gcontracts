@@ -23,15 +23,23 @@
 package org.gcontracts.ast;
 
 import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.expr.ClassExpression;
+import org.codehaus.groovy.ast.expr.PropertyExpression;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.annotations.Contracted;
+import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.ast.visitor.*;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
+import org.gcontracts.util.AnnotationUtils;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +85,12 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         final ConfiguratorSetupVisitor configuratorSetupVisitor = new ConfiguratorSetupVisitor(unit, source);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
+            if (CandidateChecks.isAnnotationContractCandidate(classNode))  {
+                if (AnnotationUtils.hasAnnotationOfType(classNode, AnnotationContract.class.getName()))  {
+                    markAnnotationContract(classNode);
+                }
+            }
+
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
             final ContractElementVisitor contractElementVisitor = new ContractElementVisitor(unit, source);
@@ -102,6 +116,19 @@ public class GContractsASTTransformation extends BaseASTTransformation {
     private void markClassNodeAsContracted(final ClassNode classNode) {
         final ClassNode contractedAnnotationClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
         classNode.addAnnotation(new AnnotationNode(contractedAnnotationClassNode));
+    }
+
+    private void markAnnotationContract(final ClassNode classNode) {
+        final ClassNode retentionClassNode = ClassHelper.makeWithoutCaching(Retention.class);
+        final AnnotationNode retentionAnnotationNode = new AnnotationNode(retentionClassNode);
+        retentionAnnotationNode.addMember("value", new PropertyExpression(new ClassExpression(ClassHelper.makeWithoutCaching(RetentionPolicy.class)), "RUNTIME"));
+
+        final ClassNode targetClassNode = ClassHelper.makeWithoutCaching(Target.class);
+        final AnnotationNode targetAnnotationNode = new AnnotationNode(targetClassNode);
+        targetAnnotationNode.addMember("value", new PropertyExpression(new ClassExpression(ClassHelper.makeWithoutCaching(ElementType.class)), "PARAMETER"));
+
+        classNode.addAnnotation(retentionAnnotationNode);
+        classNode.addAnnotation(targetAnnotationNode);
     }
 }
 

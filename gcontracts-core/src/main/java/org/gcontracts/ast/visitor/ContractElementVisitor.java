@@ -2,6 +2,7 @@ package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.Contracted;
@@ -62,6 +63,15 @@ public class ContractElementVisitor extends BaseVisitor {
         if (!CandidateChecks.couldBeContractElementMethodNode(classNode, methodNode)) return;
 
         foundContractElement |= AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName()).size() > 0;
+        if (foundContractElement) return;
+
+        // check parameters for annotation contracts (interfaces not supported by now)
+        if (CandidateChecks.isContractsCandidate(classNode))  {
+            for (Parameter param : methodNode.getParameters())  {
+                foundContractElement |= AnnotationUtils.hasMetaAnnotations(param, ContractElement.class.getName()).size() > 0;
+                if (foundContractElement) return;
+            }
+        }
     }
 
     public boolean isFoundContractElement() {

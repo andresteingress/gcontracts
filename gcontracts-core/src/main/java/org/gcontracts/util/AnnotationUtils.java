@@ -23,6 +23,7 @@
 package org.gcontracts.util;
 
 import org.codehaus.groovy.ast.*;
+import org.gcontracts.generation.CandidateChecks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +120,7 @@ public class AnnotationUtils {
         ArrayList<AnnotationNode> result = new ArrayList<AnnotationNode>();
 
         for (AnnotationNode annotationNode : annotatedNode.getAnnotations())  {
-            if (annotationNode.getClassNode().getName().startsWith("java.lang")) continue;
+            if (CandidateChecks.isRuntimeClass(annotationNode.getClassNode())) continue;
 
             // is the annotation marked with the given meta annotation?
             List<AnnotationNode> metaAnnotations = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(metaAnnotationClassName));
