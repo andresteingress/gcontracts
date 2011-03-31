@@ -78,9 +78,35 @@ public class CandidateChecks {
      * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for pre- or postconditions 
      */
     public static boolean isPreOrPostconditionCandidate(final ClassNode type, final MethodNode method)  {
-        if (method.isSynthetic() || method.isStatic() || method.isAbstract() || !method.isPublic()) return false;
+        if (!isPreconditionCandidate(type, method) && !isPostconditionCandidate(type, method)) return false;
+
+        return true;
+    }
+
+    /**
+     * Decides whether the given <tt>method</tt> is a candidate for a pre-condition.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to check for pre-condition compliance
+     * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for pre-conditions
+     */
+    public static boolean isPreconditionCandidate(final ClassNode type, final MethodNode method)  {
+        if (method.isSynthetic() || method.isAbstract() || method.isStatic() || !method.isPublic()) return false;
         if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
         if (method.getDeclaringClass() != type) return false;
+
+        return true;
+    }
+
+    /**
+     * Decides whether the given <tt>method</tt> is a candidate for a post-condition.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to check for post-condition compliance
+     * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for post-conditions
+     */
+    public static boolean isPostconditionCandidate(final ClassNode type, final MethodNode method)  {
+        if (!isPreconditionCandidate(type, method)) return false;
 
         return true;
     }
@@ -94,7 +120,7 @@ public class CandidateChecks {
      * @return whether the given method node could be a candidate or not
      */
     public static boolean couldBeContractElementMethodNode(final ClassNode type, final MethodNode method)  {
-        if (method.isSynthetic() || method.isStatic() || !method.isPublic()) return false;
+        if (method.isSynthetic() || !method.isPublic()) return false;
         if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
         if (method.getDeclaringClass() != null && !method.getDeclaringClass().getName().equals(type.getName())) return false;
 

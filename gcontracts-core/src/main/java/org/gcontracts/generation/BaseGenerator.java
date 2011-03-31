@@ -77,7 +77,6 @@ public abstract class BaseGenerator {
         final BlockStatement assertBlockStatement = new BlockStatement();
         final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
 
-        final String $_gc_caci = "$_gc_caci";
         final String $_gc_proxy = "$_gc_proxy";
 
         final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
