@@ -84,10 +84,18 @@ public class CandidateChecks {
         return true;
     }
 
+    /**
+     * Checks whether the given {@link MethodNode} could be a candidate for an arbitrary {@link org.gcontracts.annotations.meta.ContractElement}
+     * annotation.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to check for {@link org.gcontracts.annotations.meta.ContractElement} compliance
+     * @return whether the given method node could be a candidate or not
+     */
     public static boolean couldBeContractElementMethodNode(final ClassNode type, final MethodNode method)  {
         if (method.isSynthetic() || method.isStatic() || !method.isPublic()) return false;
         if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
-        if (method.getDeclaringClass() != type) return false;
+        if (method.getDeclaringClass() != null && !method.getDeclaringClass().getName().equals(type.getName())) return false;
 
         return true;
     }

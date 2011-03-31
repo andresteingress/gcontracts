@@ -33,7 +33,6 @@ import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -80,10 +79,15 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         for (final ClassNode classNode : moduleNode.getClasses())  {
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
-            final ProcessingContextInformation pci = createProcessingContextInformation(classNode, unit, source);
-            if (pci == null) continue;
+            final ContractElementVisitor contractElementVisitor = new ContractElementVisitor(unit, source);
+            contractElementVisitor.visitClass(classNode);
+            if (!contractElementVisitor.isFoundContractElement()) continue;
+
+            final ProcessingContextInformation pci = new ProcessingContextInformation(classNode, unit, source);
 
             configuratorSetupVisitor.visitClass(classNode);
+
+            markClassNodeAsContracted(classNode);
 
             new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
 
@@ -95,15 +99,9 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         }
     }
 
-    private ProcessingContextInformation createProcessingContextInformation(ClassNode classNode, SourceUnit unit, ReaderSource source)  {
-        final ClassNode assertionsEnabledClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
-
-        final List<AnnotationNode> annotationsPackage = classNode.getPackage() != null ? classNode.getPackage().getAnnotations(assertionsEnabledClassNode) : Collections.<AnnotationNode>emptyList();
-        final List<AnnotationNode> annotationsClassNode = classNode.getAnnotations(assertionsEnabledClassNode);
-
-        if (annotationsPackage.isEmpty() && annotationsClassNode.isEmpty())  return null;
-
-        return new ProcessingContextInformation(classNode, unit, source);
+    private void markClassNodeAsContracted(final ClassNode classNode) {
+        final ClassNode contractedAnnotationClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
+        classNode.addAnnotation(new AnnotationNode(contractedAnnotationClassNode));
     }
 }
 
