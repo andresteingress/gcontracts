@@ -57,8 +57,6 @@ public class AnnotationContractProcessor extends AnnotationProcessor {
 
     @Override
     public void process(ProcessingContextInformation processingContextInformation, Contract contract, ClassNode classNode, MethodNode methodNode, Parameter parameter) {
-        if (!processingContextInformation.isPreconditionsEnabled()) return;
-
         for (ClassExpression closureClass : closureClasses)  {
             ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
                     VariableExpression.THIS_EXPRESSION,
