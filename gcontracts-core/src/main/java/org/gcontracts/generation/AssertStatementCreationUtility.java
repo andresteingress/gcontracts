@@ -50,6 +50,7 @@ public final class AssertStatementCreationUtility {
     public static AssertStatement getAssertionStatement(final BooleanExpression booleanExpression)  {
 
         final AssertStatement assertStatement = new AssertStatement(booleanExpression);
+        assertStatement.setStatementLabel((String) booleanExpression.getNodeMetaData("statementLabel"));
         assertStatement.setSourcePosition(booleanExpression);
 
         return assertStatement;

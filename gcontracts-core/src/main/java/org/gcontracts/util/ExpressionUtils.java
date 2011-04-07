@@ -24,6 +24,7 @@ package org.gcontracts.util;
 
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
@@ -54,10 +55,16 @@ public class ExpressionUtils {
 
         for (Statement stmt : statementList)  {
             if (stmt instanceof ExpressionStatement && ((ExpressionStatement) stmt).getExpression() instanceof BooleanExpression)  {
-                return (BooleanExpression) ((ExpressionStatement) stmt).getExpression();
+                final BooleanExpression expression = (BooleanExpression) ((ExpressionStatement) stmt).getExpression();
+                expression.setNodeMetaData("statementLabel", stmt.getStatementLabel());
+                return expression;
+
             } else if (stmt instanceof ExpressionStatement)  {
-                BooleanExpression result = new BooleanExpression(((ExpressionStatement) stmt).getExpression());
-                result.setSourcePosition(stmt);
+                Expression expression = ((ExpressionStatement) stmt).getExpression();
+                BooleanExpression result = new BooleanExpression(expression);
+                result.setSourcePosition(expression);
+                result.setNodeMetaData("statementLabel", stmt.getStatementLabel());
+
                 return result;
             }
         }
