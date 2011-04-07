@@ -39,7 +39,7 @@ import org.codehaus.groovy.syntax.Types;
  */
 public class TryCatchBlockGenerator {
 
-   public static BlockStatement generateTryCatchBlock(final ClassNode assertionErrorClass, final String message, final AssertStatement assertStatement)  {
+   public static BlockStatement generateTryCatchBlock(final ClassNode assertionErrorClass, final String message, final Statement assertStatement)  {
 
        final String $_gc_closure_result = "$_gc_closure_result";
 

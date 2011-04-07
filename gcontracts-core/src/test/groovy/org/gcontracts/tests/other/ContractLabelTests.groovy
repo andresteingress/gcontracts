@@ -62,12 +62,18 @@ import org.gcontracts.annotations.*
 class A {
 @Ensures({
     result_is_a_result: result == param
+    result_is_no_result: result != param
 })
 def some_operation(def param) {
  null
 }
 }
 '''
+
+    shouldFail PostconditionViolation, {
+       def a = create_instance_of(source1)
+       a.some_operation null
+    }
 
     shouldFail PostconditionViolation, {
        def a = create_instance_of(source1)

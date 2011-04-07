@@ -27,6 +27,7 @@ import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.stmt.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +40,26 @@ import java.util.List;
  * @author ast
  */
 public final class AssertStatementCreationUtility {
+
+    /**
+     * Reusable method for creating assert statements for the given <tt>booleanExpression</tt>.
+     *
+     * @param booleanExpressions the assertion's {@link org.codehaus.groovy.ast.expr.BooleanExpression} instances
+     *
+     * @return a newly created {@link org.codehaus.groovy.ast.stmt.AssertStatement}
+     */
+    public static BlockStatement getAssertionStatemens(final List<BooleanExpression> booleanExpressions)  {
+
+        List<AssertStatement> assertStatements = new ArrayList<AssertStatement>();
+        for (BooleanExpression booleanExpression : booleanExpressions)  {
+            assertStatements.add(getAssertionStatement(booleanExpression));
+        }
+
+        final BlockStatement blockStatement = new BlockStatement();
+        blockStatement.getStatements().addAll(assertStatements);
+
+        return blockStatement;
+    }
 
     /**
      * Reusable method for creating assert statements for the given <tt>booleanExpression</tt>.

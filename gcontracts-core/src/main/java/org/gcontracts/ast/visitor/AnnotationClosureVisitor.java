@@ -26,7 +26,6 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClassExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
-import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
@@ -86,17 +85,15 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
                 List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
-                final BooleanExpression booleanExpression = ExpressionUtils.getBooleanExpression(closureExpression);
-                if (booleanExpression == null) continue;
-
-                final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement(booleanExpression);
+                final List<BooleanExpression> booleanExpressions = ExpressionUtils.getBooleanExpression(closureExpression);
+                if (booleanExpressions == null || booleanExpressions.isEmpty()) continue;
 
                 BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
 
                 BlockStatement newClosureBlockStatement = TryCatchBlockGenerator.generateTryCatchBlock(
                         ClassHelper.makeWithoutCaching(ClassInvariantViolation.class),
                         "<" + annotationNode.getClassNode().getName() + "> " + classNode.getName() + " \n\n",
-                        assertStatement
+                        AssertStatementCreationUtility.getAssertionStatemens(booleanExpressions)
                 );
 
                 newClosureBlockStatement.setSourcePosition(closureBlockStatement);
@@ -157,17 +154,15 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
         parameters.addAll(new ArrayList<Parameter>(Arrays.asList(methodNode.getParameters())));
 
-        final BooleanExpression booleanExpression = ExpressionUtils.getBooleanExpression(closureExpression);
-        if (booleanExpression == null) return;
-
-        final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement(booleanExpression);
+        final List<BooleanExpression> booleanExpressions = ExpressionUtils.getBooleanExpression(closureExpression);
+        if (booleanExpressions == null || booleanExpressions.isEmpty()) return;
 
         BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
 
         BlockStatement newClosureBlockStatement = TryCatchBlockGenerator.generateTryCatchBlock(
                 isPostcondition ? ClassHelper.makeWithoutCaching(PostconditionViolation.class) : ClassHelper.makeWithoutCaching(PreconditionViolation.class),
                 "<" + annotationNode.getClassNode().getName() + "> " + classNode.getName() + "." + methodNode.getTypeDescriptor() + " \n\n",
-                assertStatement
+                AssertStatementCreationUtility.getAssertionStatemens(booleanExpressions)
         );
 
         newClosureBlockStatement.setSourcePosition(closureBlockStatement);
@@ -202,17 +197,15 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
         List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
-        final BooleanExpression booleanExpression = ExpressionUtils.getBooleanExpression(closureExpression);
-        if (booleanExpression == null) return;
-
-        final AssertStatement assertStatement = AssertStatementCreationUtility.getAssertionStatement(booleanExpression);
+        final List<BooleanExpression> booleanExpressions = ExpressionUtils.getBooleanExpression(closureExpression);
+        if (booleanExpressions == null || booleanExpressions.isEmpty()) return;
 
         BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
 
         BlockStatement newClosureBlockStatement = TryCatchBlockGenerator.generateTryCatchBlock(
                 isPostcondition ? ClassHelper.makeWithoutCaching(PostconditionViolation.class) : ClassHelper.makeWithoutCaching(PreconditionViolation.class),
                 "<" + annotation.getName() + "> Annotation Closure Contract has been violated \n\n",
-                assertStatement
+                AssertStatementCreationUtility.getAssertionStatemens(booleanExpressions)
         );
 
         newClosureBlockStatement.setSourcePosition(closureBlockStatement);

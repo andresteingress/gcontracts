@@ -29,6 +29,7 @@ import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,28 +48,30 @@ public class ExpressionUtils {
      * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      * @return the first {@link org.codehaus.groovy.ast.expr.Expression} found in the given {@link org.codehaus.groovy.ast.expr.ClosureExpression}
      */
-    public static BooleanExpression getBooleanExpression(ClosureExpression closureExpression)  {
+    public static List<BooleanExpression> getBooleanExpression(ClosureExpression closureExpression)  {
         if (closureExpression == null) return null;
 
         final BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
         final List<Statement> statementList = closureBlockStatement.getStatements();
 
-        for (Statement stmt : statementList)  {
-            if (stmt instanceof ExpressionStatement && ((ExpressionStatement) stmt).getExpression() instanceof BooleanExpression)  {
-                final BooleanExpression expression = (BooleanExpression) ((ExpressionStatement) stmt).getExpression();
-                expression.setNodeMetaData("statementLabel", stmt.getStatementLabel());
-                return expression;
+        List<BooleanExpression> booleanExpressions = new ArrayList<BooleanExpression>();
 
+        for (Statement stmt : statementList)  {
+            BooleanExpression tmp = null;
+
+            if (stmt instanceof ExpressionStatement && ((ExpressionStatement) stmt).getExpression() instanceof BooleanExpression)  {
+                tmp = (BooleanExpression) ((ExpressionStatement) stmt).getExpression();
+                tmp.setNodeMetaData("statementLabel", stmt.getStatementLabel());
             } else if (stmt instanceof ExpressionStatement)  {
                 Expression expression = ((ExpressionStatement) stmt).getExpression();
-                BooleanExpression result = new BooleanExpression(expression);
-                result.setSourcePosition(expression);
-                result.setNodeMetaData("statementLabel", stmt.getStatementLabel());
-
-                return result;
+                tmp = new BooleanExpression(expression);
+                tmp.setSourcePosition(expression);
+                tmp.setNodeMetaData("statementLabel", stmt.getStatementLabel());
             }
+
+            booleanExpressions.add(tmp);
         }
 
-        return null;
+        return booleanExpressions;
     }
 }
