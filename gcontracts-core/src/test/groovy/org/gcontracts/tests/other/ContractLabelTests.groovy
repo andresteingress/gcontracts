@@ -80,4 +80,34 @@ def some_operation(def param) {
        a.some_operation "test"
     }
   }
+
+  @Test void malformatted_postcondition()  {
+    def source1 = '''
+package tests
+
+import org.gcontracts.annotations.*
+
+class A {
+@Ensures({
+    result_is_a_result:
+        result == param
+    result_is_no_result:
+        result != param
+})
+def some_operation(def param) {
+ null
+}
+}
+'''
+
+    shouldFail PostconditionViolation, {
+       def a = create_instance_of(source1)
+       a.some_operation null
+    }
+
+    shouldFail PostconditionViolation, {
+       def a = create_instance_of(source1)
+       a.some_operation "test"
+    }
+  }
 }
