@@ -132,7 +132,7 @@ public class CandidateChecks {
      */
     public static boolean couldBeContractElementMethodNode(final ClassNode type, final MethodNode method)  {
         if (method.isSynthetic() || !method.isPublic()) return false;
-        if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
+        if (method.hasAnnotationDefault()) return false;
         if (method.getDeclaringClass() != null && !method.getDeclaringClass().getName().equals(type.getName())) return false;
 
         return true;

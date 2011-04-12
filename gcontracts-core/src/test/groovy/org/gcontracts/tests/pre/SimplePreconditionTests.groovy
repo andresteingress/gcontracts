@@ -71,4 +71,24 @@ class A {
     def a = create_instance_of(source)
     a.change_property_value_not('test')
   }
+
+  @Test void precondition_in_constructor_declaration()  {
+
+    def source = """
+import org.gcontracts.annotations.*
+
+class Account
+{
+    protected BigDecimal balance
+
+    @Requires({ amount >= 0.0 })
+    def Account( BigDecimal amount = 0.0 )
+    {
+        balance = amount
+    }
+}
+    """
+
+    create_instance_of(source, [10.0])
+  }
 }
