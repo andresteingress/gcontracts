@@ -3,14 +3,11 @@ package org.gcontracts.tests.inv
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-/**
- * <tt>old</tt> variables tests for postconditions.
- *
- * @see org.gcontracts.annotations.Ensures
+ /**
+ * POGO class invariant tests.
  *
  * @author ast
  */
-
 class POGOClassInvariantTests extends BaseTestClass {
 
   def dynamic_constructor_class_code = '''
