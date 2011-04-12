@@ -103,7 +103,7 @@ public class CandidateChecks {
      */
     public static boolean isPreconditionCandidate(final ClassNode type, final MethodNode method)  {
         if (method.isSynthetic() || method.isAbstract() || method.isStatic() || !method.isPublic()) return false;
-        if (method.hasDefaultValue() || method.hasAnnotationDefault()) return false;
+        if (method.hasAnnotationDefault()) return false;
         if (method.getDeclaringClass() != type) return false;
 
         return true;

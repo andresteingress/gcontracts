@@ -1,9 +1,10 @@
 package org.gcontracts.tests.pre
 
+import org.gcontracts.PreconditionViolation
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-/**
+ /**
  * @author ast
  */
 
@@ -88,7 +89,8 @@ class Account
     }
 }
     """
-
-    create_instance_of(source, [10.0])
+    shouldFail PreconditionViolation, {
+        create_instance_of(source, [-10.0])
+    }
   }
 }
