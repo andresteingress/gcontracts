@@ -130,4 +130,33 @@ class Account {
     }
   }
 
+  @Test void duplicate_return_statements()  {
+
+    def source = """
+        import org.gcontracts.annotations.*
+
+@Invariant({ elements != null })
+class Stack {
+
+   def elements = []
+
+   def push(def item) {
+      elements << item
+   }
+
+   def pop()  {
+      elements.pop()
+   }
+}
+    """
+
+    def stack = create_instance_of(source)
+
+    stack.push(1)
+    stack.push(2)
+
+    assert stack.pop() == 2
+    assert stack.pop() == 1
+  }
+
 }
