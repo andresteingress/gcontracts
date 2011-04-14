@@ -22,10 +22,12 @@
  */
 package org.gcontracts.generation;
 
-import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.ClassCodeVisitorSupport;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.VariableExpression;
 import org.codehaus.groovy.ast.stmt.*;
+import org.codehaus.groovy.control.SourceUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,28 +80,36 @@ public final class AssertStatementCreationUtility {
     }
 
     /**
-     * Gets a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} from the given {@link org.codehaus.groovy.ast.stmt.Statement}.
+     * Gets a list of {@link org.codehaus.groovy.ast.stmt.ReturnStatement} instances from the given {@link MethodNode}.
      *
-     * @param declaringClass the current {@link org.codehaus.groovy.ast.ClassNode} which declares the given method
      * @param method the {@link org.codehaus.groovy.ast.MethodNode} that holds the given <tt>lastStatement</tt>
-     * @param lastStatement the last {@link org.codehaus.groovy.ast.stmt.Statement} of some method code block
      * @return a {@link org.codehaus.groovy.ast.stmt.ReturnStatement} or <tt>null</tt>
      */
-    public static ReturnStatement getReturnStatement(ClassNode declaringClass, MethodNode method, Statement lastStatement)  {
+    public static List<ReturnStatement> getReturnStatements(MethodNode method)  {
 
-        if (lastStatement instanceof ReturnStatement)  {
-            return (ReturnStatement) lastStatement;
-        } else if (lastStatement instanceof BlockStatement) {
-            BlockStatement blockStatement = (BlockStatement) lastStatement;
-            List<Statement> statements = blockStatement.getStatements();
+        final ReturnStatementVisitor returnStatementVisitor = new ReturnStatementVisitor();
+        returnStatementVisitor.visitMethod(method);
 
-            return statements.size() > 0 ? getReturnStatement(declaringClass, method, statements.get(statements.size() - 1)) : null;
-        } else {
-            if (!(lastStatement instanceof ExpressionStatement)) return null;
-            // the last statement in a Groovy method could also be an expression which result is treated as return value
-            ExpressionStatement expressionStatement = (ExpressionStatement) lastStatement;
-            return new ReturnStatement(expressionStatement);
+        final List<ReturnStatement> returnStatements = returnStatementVisitor.getReturnStatements();
+        final BlockStatement blockStatement = (BlockStatement) method.getCode();
+
+        if (returnStatements.isEmpty())  {
+            final int statementCount = blockStatement.getStatements().size();
+            if (statementCount > 0)  {
+                final Statement lastStatement = blockStatement.getStatements().get(statementCount - 1);
+                if (lastStatement instanceof ExpressionStatement)  {
+                    final ReturnStatement returnStatement = new ReturnStatement((ExpressionStatement) lastStatement);
+                    returnStatement.setSourcePosition(lastStatement);
+
+                    blockStatement.getStatements().remove(lastStatement);
+                    blockStatement.addStatement(returnStatement);
+
+                    returnStatements.add(returnStatement);
+                }
+            }
         }
+
+        return returnStatements;
     }
 
     /**
@@ -117,6 +127,123 @@ public final class AssertStatementCreationUtility {
                 removeReturnStatement((BlockStatement) stmt, returnStatement);
                 return;
             }
+        }
+    }
+
+    public static void injectResultVariableReturnStatementAndAssertionCallStatement(BlockStatement statement, ReturnStatement returnStatement, BlockStatement assertionCallStatement)  {
+        final AddResultReturnStatementVisitor addResultReturnStatementVisitor = new AddResultReturnStatementVisitor(returnStatement, assertionCallStatement);
+        addResultReturnStatementVisitor.visitBlockStatement(statement);
+    }
+
+    public static void addAssertionCallStatementToReturnStatement(BlockStatement statement, ReturnStatement returnStatement, Statement assertionCallStatement)  {
+        final AddAssertionCallStatementToReturnStatementVisitor addAssertionCallStatementToReturnStatementVisitor = new AddAssertionCallStatementToReturnStatementVisitor(returnStatement, assertionCallStatement);
+        addAssertionCallStatementToReturnStatementVisitor.visitBlockStatement(statement);
+    }
+
+    /**
+     * Collects all {@link ReturnStatement} instances from a given code block.
+     */
+    public static class ReturnStatementVisitor extends ClassCodeVisitorSupport {
+
+        private List<ReturnStatement> returnStatements = new ArrayList<ReturnStatement>();
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            return null;
+        }
+
+        @Override
+        public void visitReturnStatement(ReturnStatement statement) {
+            returnStatements.add(statement);
+        }
+
+        public List<ReturnStatement> getReturnStatements() {
+            return returnStatements;
+        }
+    }
+
+    /**
+     * Replaces a given {@link ReturnStatement} with the appropriate assertion call statement and returns a result variable expression.
+     */
+    public static class AddResultReturnStatementVisitor extends ClassCodeVisitorSupport {
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            return null;
+        }
+
+        private BlockStatement blockStatement;
+        private BlockStatement blockStatementCopy;
+
+        private final ReturnStatement returnStatement;
+        private final BlockStatement assertionCallStatement;
+
+        public AddResultReturnStatementVisitor(ReturnStatement returnStatement, BlockStatement assertionCallStatement)  {
+            this.returnStatement = returnStatement;
+            this.assertionCallStatement = assertionCallStatement;
+        }
+
+        @Override
+        public void visitBlockStatement(BlockStatement block) {
+            blockStatement = block;
+
+            blockStatementCopy = new BlockStatement(new ArrayList<Statement>(blockStatement.getStatements()), blockStatement.getVariableScope());
+            blockStatementCopy.copyNodeMetaData(blockStatement);
+            blockStatementCopy.setSourcePosition(blockStatement);
+
+            for (Statement statement : blockStatementCopy.getStatements())  {
+                if (statement == returnStatement) {
+                    blockStatement.getStatements().remove(statement);
+                    blockStatement.addStatements(assertionCallStatement.getStatements());
+                    blockStatement.addStatement(new ReturnStatement(new VariableExpression("result")));
+                    return; // we found the return statement under target, let's cancel tree traversal
+                }
+            }
+
+            super.visitBlockStatement(blockStatement);
+        }
+    }
+
+    /**
+     * Replaces a given {@link ReturnStatement} with the appropriate assertion call statement and returns a result variable expression.
+     */
+    public static class AddAssertionCallStatementToReturnStatementVisitor extends ClassCodeVisitorSupport {
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            return null;
+        }
+
+        private BlockStatement blockStatement;
+        private BlockStatement blockStatementCopy;
+
+        private final ReturnStatement returnStatement;
+        private final Statement assertionCallStatement;
+
+        public AddAssertionCallStatementToReturnStatementVisitor(ReturnStatement returnStatement, Statement assertionCallStatement)  {
+            this.returnStatement = returnStatement;
+            this.assertionCallStatement = assertionCallStatement;
+        }
+
+        @Override
+        public void visitBlockStatement(BlockStatement block) {
+            blockStatement = block;
+
+            blockStatementCopy = new BlockStatement(new ArrayList<Statement>(blockStatement.getStatements()), blockStatement.getVariableScope());
+            blockStatementCopy.copyNodeMetaData(blockStatement);
+            blockStatementCopy.setSourcePosition(blockStatement);
+
+            for (Statement statement : blockStatementCopy.getStatements())  {
+                if (statement == returnStatement) {
+                    blockStatement.getStatements().remove(statement);
+
+                    blockStatement.addStatement(assertionCallStatement);
+                    blockStatement.addStatement(returnStatement);
+                    return; // we found the return statement under target, let's cancel tree traversal
+                }
+            }
+
+            super.visitBlockStatement(blockStatement);
         }
     }
 }

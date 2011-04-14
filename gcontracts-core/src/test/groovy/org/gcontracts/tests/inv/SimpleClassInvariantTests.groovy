@@ -2,6 +2,7 @@ package org.gcontracts.tests.inv
 
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
+import org.gcontracts.ClassInvariantViolation
 
 /**
  * @author ast
@@ -79,6 +80,54 @@ class A {
 
   @Test void class_with_constant()  {
     create_instance_of(source3, ['test'])
+  }
+
+
+  @Test void multiple_return_statements()  {
+
+    def source = """
+        import org.gcontracts.annotations.*
+
+@Invariant({ property != 0 })
+class Account {
+
+   def property = 1
+
+   def some_method()  {
+     if (true)  {
+         property = 0
+         return;
+     }
+
+     return;
+   }
+}
+    """
+
+      def source2 = """
+        import org.gcontracts.annotations.*
+
+@Invariant({ property != 0 })
+class Account {
+
+   def property = 1
+
+   def some_method()  {
+     if (false)  {
+         property = 1
+         return;
+     }
+
+     property = 0
+     return;
+   }
+}
+    """
+
+    def a = create_instance_of(source2)
+    shouldFail ClassInvariantViolation, {
+      a.some_method()
+    }
   }
 
 }

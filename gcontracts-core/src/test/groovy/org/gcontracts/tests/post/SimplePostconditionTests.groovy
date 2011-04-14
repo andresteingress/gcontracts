@@ -3,7 +3,8 @@ package org.gcontracts.tests.post
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.*
+import org.gcontracts.PostconditionViolation;
 
 /**
  * @author ast
@@ -60,5 +61,30 @@ class A {
 
     def a = create_instance_of(source_postconditions)
     a.change_property_value_not('test')
+  }
+
+
+  @Test void multiple_return_statements()  {
+
+    def source = """
+        import org.gcontracts.annotations.*
+
+class Account {
+
+   @Ensures({ result == 2 })
+   def some_method()  {
+     if (true)  {
+         return 1
+     }
+
+     return 2
+   }
+}
+    """
+
+    def a = create_instance_of(source)
+    shouldFail PostconditionViolation, {
+      a.some_method()
+    }
   }
 }
