@@ -11,7 +11,8 @@ class CircularMethodCallAwareMetaClassTests extends BaseTestClass {
     class Dummy {
         boolean called = false
         def some_method() {
-            if (called) return
+            assert !called // this method must not be called twice
+
             called = true
             another_method()
         }
@@ -36,8 +37,6 @@ class CircularMethodCallAwareMetaClassTests extends BaseTestClass {
         CircularMethodCallAwareMetaClass.getProxy(new Dummy())
 
         def dummy = new Dummy()
-        shouldFail org.gcontracts.CircularAssertionCallException, {
-            dummy.some_method()
-        }
+        dummy.some_method()
     }
 }

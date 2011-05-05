@@ -22,8 +22,9 @@
  */
 package org.gcontracts.generation;
 
+import groovy.lang.GroovyObject;
 import groovy.lang.Interceptor;
-import org.gcontracts.CircularAssertionCallException;
+import groovy.lang.MetaMethod;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,20 +39,31 @@ import java.util.List;
  */
 public class CircularAssertionCallInterceptor implements Interceptor {
 
-    private List<String> callStack = new LinkedList<String>();
+    private List<MetaMethod> callStack = new LinkedList<MetaMethod>();
+    private boolean methodInvoke = true;
 
     public Object beforeInvoke(Object object, String methodName, Object[] arguments) {
-        if (callStack.contains(methodName)) throw new CircularAssertionCallException("Method '" + methodName + "' has already been called from the current assertion - assertion call cycle detected!");
-        callStack.add(methodName);
+        MetaMethod metaMethod = ((GroovyObject) object).getMetaClass().getMetaMethod(methodName, arguments);
+
+        if (callStack.contains(metaMethod))  {
+            methodInvoke = false;
+            return true;
+        }
+
+        callStack.add(metaMethod);
+
         return object;
     }
 
     public Object afterInvoke(Object object, String methodName, Object[] arguments, Object result) {
-        callStack.remove(methodName);
+        MetaMethod metaMethod = ((GroovyObject) object).getMetaClass().getMetaMethod(methodName, arguments);
+        callStack.remove(metaMethod);
+        methodInvoke = true;
+
         return result;
     }
 
     public boolean doInvoke() {
-        return true;
+        return methodInvoke;
     }
 }

@@ -1,5 +1,6 @@
 package org.gcontracts.tests.other
 
+import org.gcontracts.PreconditionViolation
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
@@ -19,16 +20,16 @@ import org.gcontracts.annotations.*
 class A {
 
   @Requires({ isConditionB() })
-  def isConditionA() {}
+  def isConditionA() { return false }
 
   @Requires({ isConditionA() })
-  def isConditionB() {}
+  def isConditionB() { return true }
 }
 '''
 
         def a = create_instance_of(source)
 
-        shouldFail org.gcontracts.CircularAssertionCallException, {
+        shouldFail PreconditionViolation, {
             a.isConditionB()
         }
     }
@@ -58,8 +59,7 @@ class A {
 '''
 
         def a = create_instance_of(source)
-
-        shouldFail org.gcontracts.CircularAssertionCallException, {
+        shouldFail PreconditionViolation, {
             a.isConditionB()
         }
     }

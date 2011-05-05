@@ -135,13 +135,15 @@ public class CircularMethodCallAwareMetaClass extends MetaClassImpl implements A
             return howToInvoke.call();
         }
         Object result = interceptor.beforeInvoke(object, methodName, arguments);
-        if (interceptor.doInvoke()) {
-            try {
+        try {
+            if (interceptor.doInvoke()) {
                 result = howToInvoke.call();
-            } finally {
-                result = interceptor.afterInvoke(object, methodName, arguments, result);
             }
+
+        } finally {
+            result = interceptor.afterInvoke(object, methodName, arguments, result);
         }
+
         return result;
     }
 }
