@@ -181,6 +181,40 @@ class B extends A {
 }
 '''
 
+  def source61 = '''
+@Contracted
+package tests
+
+import org.gcontracts.annotations.*
+
+@Invariant({ property1 != null })
+class A {
+
+  private def property1 = "test"
+
+  def A() {}
+
+  def set_values(def prop) { property1 = prop }
+}
+'''
+
+  def source62 = '''
+@Contracted
+package tests
+
+import org.gcontracts.annotations.*
+
+@Invariant({ property2 != null })
+class B extends A {
+
+  def property2 = "test"
+
+  def B() {}
+
+  def set_values(def prop) { property2 = prop }
+}
+'''
+
 
   @Test void two_way_inheritance_path()  {
     create_instance_of(source1, ['test'])
@@ -250,6 +284,15 @@ class B extends A {
   @Test void inherited_class_invariant()  {
     add_class_to_classpath(source51)
     def b = create_instance_of(source52, [])
+
+    shouldFail AssertionError, {
+      b.set_values(null)
+    }
+  }
+
+  @Test void inherited_class_invariant_with_private_instance_variable()  {
+    add_class_to_classpath(source61)
+    def b = create_instance_of(source62, [])
 
     shouldFail AssertionError, {
       b.set_values(null)
