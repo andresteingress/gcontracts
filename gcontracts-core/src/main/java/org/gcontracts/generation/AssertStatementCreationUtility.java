@@ -23,11 +23,15 @@
 package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassCodeVisitorSupport;
+import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.DeclarationExpression;
 import org.codehaus.groovy.ast.expr.VariableExpression;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.SourceUnit;
+import org.codehaus.groovy.syntax.Token;
+import org.codehaus.groovy.syntax.Types;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -237,8 +241,17 @@ public final class AssertStatementCreationUtility {
                 if (statement == returnStatement) {
                     blockStatement.getStatements().remove(statement);
 
+                    final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.DYNAMIC_TYPE);
+                    blockStatement.addStatement(new ExpressionStatement(
+                            new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), returnStatement.getExpression())
+                    ));
+
                     blockStatement.addStatement(assertionCallStatement);
-                    blockStatement.addStatement(returnStatement);
+
+                    ReturnStatement gcResultReturn = new ReturnStatement($_gc_result);
+                    gcResultReturn.setSourcePosition(returnStatement);
+
+                    blockStatement.addStatement(gcResultReturn);
                     return; // we found the return statement under target, let's cancel tree traversal
                 }
             }
