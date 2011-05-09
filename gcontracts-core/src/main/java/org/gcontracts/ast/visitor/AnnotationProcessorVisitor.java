@@ -69,7 +69,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         methodNodes.addAll(type.getDeclaredConstructors());
 
         for (MethodNode methodNode : methodNodes)  {
-            if (!CandidateChecks.isPreOrPostconditionCandidate(type, methodNode)) continue;
+            if (!CandidateChecks.isClassInvariantCandidate(type, methodNode) && !CandidateChecks.isPreOrPostconditionCandidate(type, methodNode)) continue;
 
             handleMethodNode(methodNode, AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName()));
 

@@ -95,6 +95,20 @@ public class CandidateChecks {
     }
 
     /**
+     * Decides whether the given <tt>method</tt> is a candidate for class invariants.
+     *
+     * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
+     * @param method the {@link org.codehaus.groovy.ast.MethodNode} to check for class invariant compliance
+     * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for class invariants
+     */
+    public static boolean isClassInvariantCandidate(final ClassNode type, final MethodNode method)  {
+        if (method.isSynthetic() || method.isAbstract() || method.isStatic() || !method.isPublic()) return false;
+        if (method.getDeclaringClass() != type) return false;
+
+        return true;
+    }
+
+    /**
      * Decides whether the given <tt>method</tt> is a candidate for a pre-condition.
      *
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
@@ -102,8 +116,7 @@ public class CandidateChecks {
      * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for pre-conditions
      */
     public static boolean isPreconditionCandidate(final ClassNode type, final MethodNode method)  {
-        if (method.isSynthetic() || method.isAbstract() || method.isStatic() || !method.isPublic()) return false;
-        if (method.hasAnnotationDefault()) return false;
+        if (method.isSynthetic() || method.isAbstract() || method.isStatic()) return false;
         if (method.getDeclaringClass() != type) return false;
 
         return true;
@@ -132,7 +145,6 @@ public class CandidateChecks {
      */
     public static boolean couldBeContractElementMethodNode(final ClassNode type, final MethodNode method)  {
         if (method.isSynthetic() || !method.isPublic()) return false;
-        if (method.hasAnnotationDefault()) return false;
         if (method.getDeclaringClass() != null && !method.getDeclaringClass().getName().equals(type.getName())) return false;
 
         return true;

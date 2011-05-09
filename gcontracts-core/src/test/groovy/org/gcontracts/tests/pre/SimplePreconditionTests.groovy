@@ -93,4 +93,43 @@ class Account
         create_instance_of(source, [-10.0])
     }
   }
+
+  @Test void precondition_in_private_constructor_declaration()  {
+
+    def source = """
+import org.gcontracts.annotations.*
+
+class Account
+{
+    protected BigDecimal balance
+
+    @Requires({ amount >= 0.0 })
+    private def Account( BigDecimal amount = 0.0 )
+    {
+        balance = amount
+    }
+}
+    """
+    shouldFail PreconditionViolation, {
+        create_instance_of(source, [-10.0])
+    }
+  }
+
+  @Test void precondition_in_private_method()  {
+
+    def source = """
+import org.gcontracts.annotations.*
+
+class Account
+{
+
+    @Requires({ amount != null })
+    private def withdraw(def amount) { println amount }
+}
+    """
+    shouldFail PreconditionViolation, {
+        def account = create_instance_of(source)
+        account.withdraw(null)
+    }
+  }
 }

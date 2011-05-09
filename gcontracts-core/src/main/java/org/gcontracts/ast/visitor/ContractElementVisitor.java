@@ -60,7 +60,7 @@ public class ContractElementVisitor extends BaseVisitor {
 
     @Override
     protected void visitConstructorOrMethod(MethodNode methodNode, boolean isConstructor) {
-        if (!CandidateChecks.couldBeContractElementMethodNode(classNode, methodNode)) return;
+        if (!CandidateChecks.couldBeContractElementMethodNode(classNode, methodNode) && !(CandidateChecks.isPreconditionCandidate(classNode, methodNode))) return;
 
         foundContractElement |= AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName()).size() > 0;
         if (foundContractElement) return;

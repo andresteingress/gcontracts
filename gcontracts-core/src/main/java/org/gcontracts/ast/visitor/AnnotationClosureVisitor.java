@@ -130,7 +130,7 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
     @Override
     public void visitConstructorOrMethod(MethodNode methodNode, boolean isConstructor) {
-        if (!CandidateChecks.couldBeContractElementMethodNode(classNode, methodNode)) return;
+        if (!CandidateChecks.couldBeContractElementMethodNode(classNode, methodNode) && !(CandidateChecks.isPreconditionCandidate(classNode, methodNode))) return;
 
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName());
         for (AnnotationNode annotationNode : annotationNodes)  {
