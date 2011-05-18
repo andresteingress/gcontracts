@@ -165,35 +165,35 @@ SUMMARY:&nbsp;<%
     if (classDoc.isAnnotationType()) {
         def hasReq = classDoc.fields().any{ isRequired(it, "true") }
         def hasOpt = classDoc.fields().any{ isRequired(it, "false") }
-        %><% if (hasReq) { %><A HREF="#required_element_summary"><% } %>REQUIRED<% if (hasReq) { %></A><% }
-        %> | <% if (hasOpt) { %><A HREF="#optional_element_summary"><% } %>OPTIONAL<% if (hasOpt) { %></A><% } %><%
+        %><% if (hasReq) { %><A HREF="classDocName.html#required_element_summary"><% } %>REQUIRED<% if (hasReq) { %></A><% }
+        %> | <% if (hasOpt) { %><A HREF="classDocName.html#optional_element_summary"><% } %>OPTIONAL<% if (hasOpt) { %></A><% } %><%
     } else {
-        if (visibleNested) { %><A HREF="#nested_summary"><% } %>NESTED<% if (visibleNested) { %></A><% }
+        if (visibleNested) { %><A HREF="classDocName.html#nested_summary"><% } %>NESTED<% if (visibleNested) { %></A><% }
         if (classDoc.isEnum()) {
-            %>&nbsp;|&nbsp;<% if (hasEnumConstants) { %><A HREF="#enum_constant_summary"><% } %>ENUM CONSTANTS<% if (hasEnumConstants) { %></A><% }
+            %>&nbsp;|&nbsp;<% if (hasEnumConstants) { %><A HREF="classDocName.html#enum_constant_summary"><% } %>ENUM CONSTANTS<% if (hasEnumConstants) { %></A><% }
         }
-        %>&nbsp;|&nbsp;<% if (hasFields) { %><A HREF="#field_summary"><% } %>FIELD<% if (hasFields) { %></A><% }
-        if (hasProperties) { %>&nbsp;|&nbsp;<A HREF="#property_summary">PROPERTY</A><% }
+        %>&nbsp;|&nbsp;<% if (hasFields) { %><A HREF="classDocName.html#field_summary"><% } %>FIELD<% if (hasFields) { %></A><% }
+        if (hasProperties) { %>&nbsp;|&nbsp;<A HREF="classDocName.html#property_summary">PROPERTY</A><% }
         if (classDoc.isClass()) {
-            %>&nbsp;|&nbsp;<% if (visibleConstructors) { %><A HREF="#constructor_summary"><% } %>CONSTR<% if (visibleConstructors) { %></A><% }
+            %>&nbsp;|&nbsp;<% if (visibleConstructors) { %><A HREF="classDocName.html#constructor_summary"><% } %>CONSTR<% if (visibleConstructors) { %></A><% }
         }
-        %>&nbsp;|&nbsp;<% if (visibleMethods) { %><A HREF="#method_summary"><% } %>METHOD<% if (visibleMethods) { %></A><% }
+        %>&nbsp;|&nbsp;<% if (visibleMethods) { %><A HREF="classDocName.html#method_summary"><% } %>METHOD<% if (visibleMethods) { %></A><% }
     }
     %></FONT></TD>
 <TD VALIGN="top" CLASS="NavBarCell3"><FONT SIZE="-2">
 DETAIL:&nbsp;<%
     if (classDoc.isAnnotationType()) {
-        if (hasElements) { %><A HREF="#element_detail"><% } %>ELEMENT<% if (hasElements) { %></A><% }
+        if (hasElements) { %><A HREF="classDocName.html#element_detail"><% } %>ELEMENT<% if (hasElements) { %></A><% }
     } else {
         if (classDoc.isEnum()) {
-            if (hasEnumConstants) { %><A HREF="#enum_constant_detail"><% } %>ENUM CONSTANTS<% if (hasEnumConstants) { %></A>&nbsp;|&nbsp;<% }
+            if (hasEnumConstants) { %><A HREF="classDocName.html#enum_constant_detail"><% } %>ENUM CONSTANTS<% if (hasEnumConstants) { %></A>&nbsp;|&nbsp;<% }
         }
-        if (hasFields) { %><A HREF="#field_detail"><% } %>FIELD<% if (hasFields) { %></A><% }
-        if (hasProperties) { %>&nbsp;|&nbsp;<A HREF="#prop_detail">PROPERTY</A><% }
+        if (hasFields) { %><A HREF="classDocName.html#field_detail"><% } %>FIELD<% if (hasFields) { %></A><% }
+        if (hasProperties) { %>&nbsp;|&nbsp;<A HREF="classDocName.html#prop_detail">PROPERTY</A><% }
         if (classDoc.isClass()) {
-            %>&nbsp;|&nbsp;<% if (visibleConstructors) { %><A HREF="#constructor_detail"><% } %>CONSTR<% if (visibleConstructors) { %></A><% }
+            %>&nbsp;|&nbsp;<% if (visibleConstructors) { %><A HREF="classDocName.html#constructor_detail"><% } %>CONSTR<% if (visibleConstructors) { %></A><% }
         }
-        %>&nbsp;|&nbsp;<% if (visibleMethods) { %><A HREF="#method_detail"><% } %>METHOD<% if (visibleMethods) { %></A><% }
+        %>&nbsp;|&nbsp;<% if (visibleMethods) { %><A HREF="classDocName.html#method_detail"><% } %>METHOD<% if (visibleMethods) { %></A><% }
     }
     %></FONT></TD>
 </TR>
@@ -286,7 +286,7 @@ ${classDoc.commentText()}
     <% for (ec in classDoc.enumConstants().findAll(isVisible)) { %>
         <TR BGCOLOR="white" CLASS="TableRowColor">
         <TD>
-            <CODE><B><A HREF="#${ec.name()}">${ec.name()}</A></B></CODE>
+            <CODE><B><A HREF="classDocName.html#${ec.name()}">${ec.name()}</A></B></CODE>
             <BR>
             <P>${ec.firstSentenceCommentText()}</P>
         </TD>
@@ -310,7 +310,7 @@ ${classDoc.commentText()}
         <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
         <CODE>${modifiersBrief(field) + linkable(field.type())}</CODE></FONT></TD>
         <TD>
-            <CODE><B><A HREF="#${field.name()}">${field.name()}</A></B></CODE>
+            <CODE><B><A HREF="classDocName.html#${field.name()}">${field.name()}</A></B></CODE>
             <BR>
             <P>${field.firstSentenceCommentText()}</P>
         </TD>
@@ -383,7 +383,7 @@ ${classDoc.commentText()}
         <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
         <CODE>${modifiersBrief(prop) + linkable(prop.type())}</CODE></FONT></TD>
         <TD>
-            <CODE><B><A HREF="#${prop.name()}">${prop.name()}</A></B></CODE>
+            <CODE><B><A HREF="classDocName.html#${prop.name()}">${prop.name()}</A></B></CODE>
             <BR>
             <P>${prop.firstSentenceCommentText()}</P>
         </TD>
@@ -410,7 +410,7 @@ ${classDoc.commentText()}
                 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
                 <CODE>${modifiersBrief(element) + element.type().typeName()}</CODE></FONT></TD>
                 <TD>
-                    <CODE><B><A HREF="#${element.name()}">${element.name()}</A></B></CODE>
+                    <CODE><B><A HREF="classDocName.html#${element.name()}">${element.name()}</A></B></CODE>
                     <BR>
                     <P>${element.firstSentenceCommentText()}</P>
                 </TD>
@@ -435,7 +435,7 @@ ${classDoc.commentText()}
     <% for (constructor in visibleConstructors) { %>
         <TR BGCOLOR="white" CLASS="TableRowColor">
         <TD>
-            <CODE>${modifiersBrief(constructor)}<B><a href="#${nameFromParams(constructor)}">${constructor.name()}</a></B>(${paramsOf(constructor, true)})</CODE>
+            <CODE>${modifiersBrief(constructor)}<B><a href="classDocName.html#${nameFromParams(constructor)}">${constructor.name()}</a></B>(${paramsOf(constructor, true)})</CODE>
             <BR>
             <P>${constructor.firstSentenceCommentText()}</P>
         </TD>
@@ -460,7 +460,7 @@ ${classDoc.commentText()}
             <CODE>${modifiersBrief(method)}${linkable(method.returnType())}</CODE></FONT>
         </TD>
         <TD>
-            <CODE><i>${contracts(method, '<br>')}</i><b><a href="#${nameFromParams(method)}">${method.name()}</a></b>(${paramsOf(method, true)})</CODE>
+            <CODE><i>${contracts(method, '<br>')}</i><b><a href="classDocName.html#${nameFromParams(method)}">${method.name()}</a></b>(${paramsOf(method, true)})</CODE>
             <BR>
             <P>${method.firstSentenceCommentText()}</P>
         </TD>
