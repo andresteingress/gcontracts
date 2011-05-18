@@ -215,6 +215,43 @@ class B extends A {
 }
 '''
 
+    def source71 = '''
+package tests
+
+import org.gcontracts.annotations.*
+
+@Invariant({ getBalance() >= 0.0 })
+class Account {
+
+    protected BigDecimal balance = 0.0
+
+    def Account( def amount = 0.0 )
+    {
+        balance = amount
+    }
+
+    @Requires({ amount >= 0.0 })
+    @Ensures({ balance == old.balance + amount })
+    void deposit( def amount )
+    {
+        balance += amount
+    }
+
+    @Requires({ amount >= 0.0 && getBalance() >= amount })
+    @Ensures({ balance == old.balance - amount })
+    def withdraw( def amount )
+    {
+        balance -= amount
+        return amount
+    }
+
+    def getBalance()
+    {
+        balance
+    }
+}
+'''
+
 
   @Test void two_way_inheritance_path()  {
     create_instance_of(source1, ['test'])
@@ -300,14 +337,9 @@ class B extends A {
 
   }
 
-//  @Test void with_abstract_class_invariant()  {
-//
-//    add_class_to_classpath(source31)
-//    def b = create_instance_of(source32)
-//  }
-//
-//  @Test void recursive_class_invariant_call()  {
-//
-//    def a = create_instance_of(source41)
-//  }
+  @Test void recursive_class_invariant()  {
+
+     def b = create_instance_of(source71)
+     assert b != null
+  }
 }
