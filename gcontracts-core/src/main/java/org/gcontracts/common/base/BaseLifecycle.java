@@ -22,10 +22,17 @@
  */
 package org.gcontracts.common.base;
 
+import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.expr.ArgumentListExpression;
+import org.codehaus.groovy.ast.expr.ConstructorCallExpression;
 import org.gcontracts.common.spi.Lifecycle;
 import org.gcontracts.common.spi.ProcessingContextInformation;
+import org.gcontracts.generation.BaseGenerator;
+import org.objectweb.asm.Opcodes;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Base implementation class for interface {@link Lifecycle}. This class is supposed
@@ -38,7 +45,16 @@ import org.gcontracts.common.spi.ProcessingContextInformation;
  */
 public abstract class BaseLifecycle implements Lifecycle {
 
-    public void beforeProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
+    public void beforeProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {
+        addConcurrentLockField(classNode);
+    }
+
+    private void addConcurrentLockField(final ClassNode classNode) {
+        final ClassNode reentrantLockClassNode = ClassHelper.make(ReentrantLock.class);
+
+        if (classNode.getDeclaredField(BaseGenerator.LOCK_FIELD_NAME) == null)
+            classNode.addField(BaseGenerator.LOCK_FIELD_NAME, Opcodes.ACC_PRIVATE, reentrantLockClassNode, new ConstructorCallExpression(reentrantLockClassNode, ArgumentListExpression.EMPTY_ARGUMENTS));
+    }
 
     public void afterProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
 

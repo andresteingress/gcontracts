@@ -48,6 +48,7 @@ import java.util.List;
 public abstract class BaseGenerator {
 
     public static final String INVARIANT_CLOSURE_PREFIX = "invariant";
+    public static final String LOCK_FIELD_NAME = "$_gc_lock";
 
     protected final ReaderSource source;
 
@@ -80,7 +81,11 @@ public abstract class BaseGenerator {
         final String $_gc_proxy = "$_gc_proxy";
 
         final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
+
         final VariableExpression proxyVariableExpression = new VariableExpression($_gc_proxy, ClassHelper.DYNAMIC_TYPE);
+        final FieldExpression lockFieldExpression = new FieldExpression(type.getField(LOCK_FIELD_NAME));
+
+        assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "lock", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
         assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
         assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression(proxyVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(CircularMethodCallAwareMetaClass.class)), "getProxy", new ArgumentListExpression(VariableExpression.THIS_EXPRESSION)))));
@@ -116,6 +121,8 @@ public abstract class BaseGenerator {
                         new BlockStatement()
                 )
         );
+
+        assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "unlock", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
         final BlockStatement blockStatement = new BlockStatement();
         blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
