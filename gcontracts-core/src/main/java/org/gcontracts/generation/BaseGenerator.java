@@ -24,10 +24,7 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.IfStatement;
-import org.codehaus.groovy.ast.stmt.TryCatchStatement;
+import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -36,6 +33,7 @@ import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -75,7 +73,7 @@ public abstract class BaseGenerator {
     }
 
     protected BlockStatement wrapAssertionBooleanExpression(ClassNode type, MethodNode methodNode, BooleanExpression classInvariantExpression) {
-        final BlockStatement assertBlockStatement = new BlockStatement();
+
         final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
 
         final String $_gc_proxy = "$_gc_proxy";
@@ -84,6 +82,9 @@ public abstract class BaseGenerator {
 
         final VariableExpression proxyVariableExpression = new VariableExpression($_gc_proxy, ClassHelper.DYNAMIC_TYPE);
         final FieldExpression lockFieldExpression = new FieldExpression(type.getField(LOCK_FIELD_NAME));
+
+        final BlockStatement assertBlockStatement = new BlockStatement();
+        final TryCatchStatement lockTryCatchStatement = new TryCatchStatement(assertBlockStatement, new BlockStatement(Arrays.<Statement>asList(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "unlock", ArgumentListExpression.EMPTY_ARGUMENTS))), new VariableScope()));
 
         assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "lock", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
@@ -122,10 +123,8 @@ public abstract class BaseGenerator {
                 )
         );
 
-        assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "unlock", ArgumentListExpression.EMPTY_ARGUMENTS)));
-
         final BlockStatement blockStatement = new BlockStatement();
-        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), assertBlockStatement, new BlockStatement()));
+        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), lockTryCatchStatement, new BlockStatement()));
 
         return blockStatement;
     }
