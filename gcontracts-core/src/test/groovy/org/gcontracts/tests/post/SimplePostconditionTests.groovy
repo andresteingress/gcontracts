@@ -95,7 +95,7 @@ class Account {
 
 class Account {
 
-   @Ensures({ result == 2 })
+   @Ensures({ result == 3 })
    def some_method()  {
      if (true)  {
          try {
@@ -112,8 +112,6 @@ class Account {
     """
 
     def a = create_instance_of(source)
-    shouldFail PostconditionViolation, {
-      a.some_method()
-    }
+    a.some_method()
   }
 }
