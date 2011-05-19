@@ -87,4 +87,33 @@ class Account {
       a.some_method()
     }
   }
+
+    @Test void multiple_return_statements_with_try_finally()  {
+
+    def source = """
+        import org.gcontracts.annotations.*
+
+class Account {
+
+   @Ensures({ result == 2 })
+   def some_method()  {
+     if (true)  {
+         try {
+            throw new Exception ('test')
+            return 1
+         } finally {
+            return 3
+         }
+     }
+
+     return 2
+   }
+}
+    """
+
+    def a = create_instance_of(source)
+    shouldFail PostconditionViolation, {
+      a.some_method()
+    }
+  }
 }
