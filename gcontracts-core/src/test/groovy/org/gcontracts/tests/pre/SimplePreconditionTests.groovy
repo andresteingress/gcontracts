@@ -132,4 +132,20 @@ class Account
         account.withdraw(null)
     }
   }
+
+  @Test void recursive_preconditions()  {
+
+    def source = """
+import org.gcontracts.annotations.*
+
+class Account
+{
+
+    @Requires({ amount != null })
+    private def withdraw(def amount) { if (amount < 0) return 0 else withdraw (amount - 10) }
+}
+    """
+    def account = create_instance_of(source)
+    account.withdraw(10)
+  }
 }

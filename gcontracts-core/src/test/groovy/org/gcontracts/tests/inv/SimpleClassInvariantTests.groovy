@@ -159,4 +159,37 @@ class Stack {
     assert stack.pop() == 1
   }
 
+  @Test void avoid_invariant_on_read_only_methods()  {
+
+    def source = """
+import org.gcontracts.annotations.*
+
+@Invariant({ speed() >= 0.0 })
+class Rocket {
+
+    def speed() { 1.0 }
+}
+
+    """
+
+    create_instance_of(source)
+    }
+
+
+    @Test void recursive_invariant_with_getter_method()  {
+
+    def source = """
+import org.gcontracts.annotations.*
+
+@Invariant({ speed >= 0.0 })
+class Rocket {
+
+    def getSpeed() { 1.0 }
+}
+
+    """
+
+    create_instance_of(source)
+    }
+
 }

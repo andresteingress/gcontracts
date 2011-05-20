@@ -75,38 +75,43 @@ public abstract class BaseGenerator {
     protected BlockStatement wrapAssertionBooleanExpression(ClassNode type, MethodNode methodNode, BooleanExpression classInvariantExpression) {
 
         final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
-
-        final String $_gc_proxy = "$_gc_proxy";
-
         final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
 
-        final VariableExpression proxyVariableExpression = new VariableExpression($_gc_proxy, ClassHelper.DYNAMIC_TYPE);
         final FieldExpression lockFieldExpression = new FieldExpression(type.getField(LOCK_FIELD_NAME));
 
         final BlockStatement assertBlockStatement = new BlockStatement();
-        final TryCatchStatement lockTryCatchStatement = new TryCatchStatement(assertBlockStatement, new BlockStatement(Arrays.<Statement>asList(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "unlock", ArgumentListExpression.EMPTY_ARGUMENTS))), new VariableScope()));
+        final TryCatchStatement lockTryCatchStatement = new TryCatchStatement(assertBlockStatement, new BlockStatement(Arrays.<Statement>asList(
+                new ExpressionStatement(new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "clear", ArgumentListExpression.EMPTY_ARGUMENTS)),
+                new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "unlock", ArgumentListExpression.EMPTY_ARGUMENTS))
+        ), new VariableScope()));
+        final BlockStatement ifBlockStatement = new BlockStatement();
 
         assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "lock", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
-        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
-        assertBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression(proxyVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(CircularMethodCallAwareMetaClass.class)), "getProxy", new ArgumentListExpression(VariableExpression.THIS_EXPRESSION)))));
+        assertBlockStatement.addStatement(new IfStatement(new BooleanExpression(
+                new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "track", new ArgumentListExpression(Arrays.<Expression>asList(new ConstantExpression(type.getName()), new ConstantExpression(methodNode.getTypeDescriptor()))))),
+                ifBlockStatement,
+                EmptyStatement.INSTANCE
+        ));
 
-        assertBlockStatement.addStatement(new ExpressionStatement(
+
+        ifBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
+        ifBlockStatement.addStatement(new ExpressionStatement(
                new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "init", ArgumentListExpression.EMPTY_ARGUMENTS))
         );
 
-        assertBlockStatement.addStatement(new TryCatchStatement(
+        ifBlockStatement.addStatement(new TryCatchStatement(
               new ExpressionStatement(new BinaryExpression($_gc_result,
                 Token.newSymbol(Types.ASSIGN, -1, -1),
                 classInvariantExpression
               )),
-              new ExpressionStatement(new MethodCallExpression(proxyVariableExpression, "release", ArgumentListExpression.EMPTY_ARGUMENTS))
+              EmptyStatement.INSTANCE
         ));
 
         BlockStatement finallyBlockStatement = new BlockStatement();
         finallyBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "deinit", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
-        assertBlockStatement.addStatement(
+        ifBlockStatement.addStatement(
                 new IfStatement(
                         new BooleanExpression(
                                 new BinaryExpression(

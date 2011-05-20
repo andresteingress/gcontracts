@@ -106,7 +106,6 @@ public class CandidateChecks {
     public static boolean isClassInvariantCandidate(final ClassNode type, final MethodNode method)  {
         if (method.isSynthetic() || method.isAbstract() || method.isStatic() || !method.isPublic()) return false;
         if (method.getDeclaringClass() != type) return false;
-        if (method.getName().startsWith("get") && (method.getFirstStatement() instanceof ReturnStatement || method.getFirstStatement() instanceof ExpressionStatement)) return false;
 
         return true;
     }
