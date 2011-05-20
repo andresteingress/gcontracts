@@ -184,6 +184,7 @@ import org.gcontracts.annotations.*
 @Invariant({ speed >= 0.0 })
 class Rocket {
 
+    @Requires({ true })
     def getSpeed() { 1.0 }
 }
 

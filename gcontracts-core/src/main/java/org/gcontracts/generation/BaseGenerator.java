@@ -72,7 +72,7 @@ public abstract class BaseGenerator {
         return classNode.getDeclaredMethod(getInvariantMethodName(classNode), Parameter.EMPTY_ARRAY);
     }
 
-    protected BlockStatement wrapAssertionBooleanExpression(ClassNode type, MethodNode methodNode, BooleanExpression classInvariantExpression) {
+    protected BlockStatement wrapAssertionBooleanExpression(ClassNode type, MethodNode methodNode, BooleanExpression classInvariantExpression, String assertionType) {
 
         final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
         final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
@@ -81,7 +81,7 @@ public abstract class BaseGenerator {
 
         final BlockStatement assertBlockStatement = new BlockStatement();
         final TryCatchStatement lockTryCatchStatement = new TryCatchStatement(assertBlockStatement, new BlockStatement(Arrays.<Statement>asList(
-                new ExpressionStatement(new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "clear", ArgumentListExpression.EMPTY_ARGUMENTS)),
+                new ExpressionStatement(new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "clear", new ArgumentListExpression(new ConstantExpression(type.getName()), new ConstantExpression(methodNode.getTypeDescriptor()), new ConstantExpression(assertionType)))),
                 new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "unlock", ArgumentListExpression.EMPTY_ARGUMENTS))
         ), new VariableScope()));
         final BlockStatement ifBlockStatement = new BlockStatement();
@@ -89,7 +89,7 @@ public abstract class BaseGenerator {
         assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "lock", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
         assertBlockStatement.addStatement(new IfStatement(new BooleanExpression(
-                new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "track", new ArgumentListExpression(Arrays.<Expression>asList(new ConstantExpression(type.getName()), new ConstantExpression(methodNode.getTypeDescriptor()))))),
+                new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "track", new ArgumentListExpression(Arrays.<Expression>asList(new ConstantExpression(type.getName()), new ConstantExpression(methodNode.getTypeDescriptor()), new ConstantExpression(assertionType))))),
                 ifBlockStatement,
                 EmptyStatement.INSTANCE
         ));

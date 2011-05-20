@@ -68,7 +68,7 @@ public class PostconditionGenerator extends BaseGenerator {
     public void generatePostconditionAssertionStatement(MethodNode method, BooleanExpression booleanExpression, boolean isConstructor)  {
 
         final BooleanExpression postconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Postcondition.class, booleanExpression, true);
-        final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, postconditionBooleanExpression);
+        final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, postconditionBooleanExpression, "postcondition");
 
         addPostcondition(method, blockStatement);
     }
@@ -91,7 +91,7 @@ public class PostconditionGenerator extends BaseGenerator {
         final BooleanExpression postconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Postcondition.class, new BooleanExpression(ConstantExpression.TRUE), true);
         if (postconditionBooleanExpression.getExpression() == ConstantExpression.TRUE) return;
 
-        final BlockStatement blockStatement = wrapAssertionBooleanExpression(type, method, postconditionBooleanExpression);
+        final BlockStatement blockStatement = wrapAssertionBooleanExpression(type, method, postconditionBooleanExpression, "postcondition");
         addPostcondition(method, blockStatement);
     }
 

@@ -9,12 +9,24 @@ class ContractExecutionTrackerTests {
 
     @Test void track_double_execution() {
 
-        assert ContractExecutionTracker.track('Dummy', 'method 1')
-        assert ContractExecutionTracker.track('Dummy', 'method 1') == false
+        assert ContractExecutionTracker.track('Dummy', 'method 1', 'pre')
+        assert ContractExecutionTracker.track('Dummy', 'method 1', 'pre') == false
 
-        ContractExecutionTracker.clear()
+        ContractExecutionTracker.clear('Dummy', 'method 1', 'pre')
 
-        assert ContractExecutionTracker.track('Dummy', 'method 1')
+    }
+
+    @Test void clear_only_for_first_stack_element() {
+
+        assert ContractExecutionTracker.track('Dummy', 'method 1', 'pre')
+        assert ContractExecutionTracker.track('Dummy', 'method 2', 'pre')
+        assert ContractExecutionTracker.track('Dummy', 'method 1', 'pre') == false
+
+        ContractExecutionTracker.clear('Dummy', 'method 2', 'pre')
+
+        assert ContractExecutionTracker.track('Dummy', 'method 1', 'pre') == false
+        ContractExecutionTracker.clear('Dummy', 'method 1', 'pre')
+        assert ContractExecutionTracker.track('Dummy', 'method 1', 'pre')
 
     }
 

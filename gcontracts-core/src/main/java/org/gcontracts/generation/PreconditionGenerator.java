@@ -55,7 +55,7 @@ public class PreconditionGenerator extends BaseGenerator {
      */
     public void generatePreconditionAssertionStatement(final MethodNode method, final BooleanExpression booleanExpression)  {
         final BooleanExpression preconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Precondition.class, booleanExpression, false);
-        final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, preconditionBooleanExpression);
+        final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, preconditionBooleanExpression, "precondition");
 
         addPrecondition(method, blockStatement);
     }
@@ -81,7 +81,7 @@ public class PreconditionGenerator extends BaseGenerator {
         if (preconditionBooleanExpression.getExpression() == ConstantExpression.FALSE)
             return;
 
-        final BlockStatement blockStatement = wrapAssertionBooleanExpression(type,  methodNode, preconditionBooleanExpression);
+        final BlockStatement blockStatement = wrapAssertionBooleanExpression(type,  methodNode, preconditionBooleanExpression, "precondition");
         
         addPrecondition(methodNode, blockStatement);
     }

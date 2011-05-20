@@ -23,6 +23,7 @@
 package org.gcontracts.generation;
 
 import java.util.HashSet;
+import java.util.Stack;
 
 /**
  * Keeps track of contract executions to avoid cyclic contract checks.
@@ -34,10 +35,12 @@ public class ContractExecutionTracker {
     public static class ContractExecution {
         String className;
         String methodIdentifier;
+        String assertionType;
 
-        public ContractExecution(String className, String methodIdentifier)  {
+        public ContractExecution(String className, String methodIdentifier, String assertionType)  {
             this.className = className;
             this.methodIdentifier = methodIdentifier;
+            this.assertionType = assertionType;
         }
 
         @Override
@@ -47,6 +50,8 @@ public class ContractExecutionTracker {
 
             ContractExecution that = (ContractExecution) o;
 
+            if (assertionType != null ? !assertionType.equals(that.assertionType) : that.assertionType != null)
+                return false;
             if (className != null ? !className.equals(that.className) : that.className != null) return false;
             if (methodIdentifier != null ? !methodIdentifier.equals(that.methodIdentifier) : that.methodIdentifier != null)
                 return false;
@@ -58,30 +63,33 @@ public class ContractExecutionTracker {
         public int hashCode() {
             int result = className != null ? className.hashCode() : 0;
             result = 31 * result + (methodIdentifier != null ? methodIdentifier.hashCode() : 0);
+            result = 31 * result + (assertionType != null ? assertionType.hashCode() : 0);
             return result;
         }
     }
 
-    private static ThreadLocal<HashSet<ContractExecution>> executions = new ThreadLocal<HashSet<ContractExecution>>()  {
+    private static ThreadLocal<Stack<ContractExecution>> executions = new ThreadLocal<Stack<ContractExecution>>()  {
 
         @Override
-        protected HashSet<ContractExecution> initialValue() {
-            return new HashSet<ContractExecution>();
+        protected Stack<ContractExecution> initialValue() {
+            return new Stack<ContractExecution>();
         }
     };
 
-    public static boolean track(String className, String methodIdentifier)  {
-        final ContractExecution ce = new ContractExecution(className, methodIdentifier);
+    public static boolean track(String className, String methodIdentifier, String assertionType)  {
+        final ContractExecution ce = new ContractExecution(className, methodIdentifier, assertionType);
 
         if (!executions.get().contains(ce))  {
-            executions.get().add(ce);
+            executions.get().push(ce);
             return true;
         }
 
         return false;
     }
 
-    public static void clear() {
-        executions.get().clear();
+    public static void clear(String className, String methodIdentifier, String assertionType) {
+        if (executions.get().size() > 0 && executions.get().firstElement().equals(new ContractExecution(className, methodIdentifier, assertionType)))  {
+            executions.get().clear();
+        }
     }
 }
