@@ -148,4 +148,36 @@ class Account
     def account = create_instance_of(source)
     account.withdraw(10)
   }
+
+  @Test void sueer_precondition_call_should_be_done()  {
+
+    def accountClassSource = """
+import org.gcontracts.annotations.*
+
+class Account
+{
+
+    @Requires({ amount != null })
+    def withdraw(def amount) { if (amount < 0) return 0 else withdraw (amount - 10) }
+}
+    """
+    def descendantAccountClassSource = """
+import org.gcontracts.annotations.*
+
+class BetterAccount extends Account
+{
+
+    @Requires({ true })
+    def withdraw(def amount) { super.withdraw(amount) }
+}
+    """
+
+    add_class_to_classpath accountClassSource
+
+    def account = create_instance_of(descendantAccountClassSource)
+
+    shouldFail PreconditionViolation, {
+        account.withdraw(null)
+    }
+  }
 }

@@ -14,7 +14,6 @@ import org.junit.Test
 class OldVariablePostconditionTests extends BaseTestClass {
 
   def templateSourceCode = '''
-@Contracted
 package tests
 
 import org.gcontracts.annotations.*
@@ -89,5 +88,69 @@ class OldVariable {
 
     //instance = create_instance_of(createSourceCodeForTemplate(dynamic_constructor_class_code, [type: GString.class.getName()]), "${''}")
     //instance.setVariable "${'test' + 1}"
+  }
+
+  @Test void generate_old_variables_for_super_class()  {
+
+    def baseClassSource = '''
+    package tests
+
+    import org.gcontracts.annotations.*
+
+    class Account
+{
+    protected BigDecimal balance
+
+    def Account( BigDecimal amount = 0.0 )
+    {
+        balance = amount
+    }
+
+    void deposit( BigDecimal amount )
+    {
+        balance += amount
+    }
+
+    @Requires({ amount >= 0.0 })
+    BigDecimal withdraw( BigDecimal amount )
+    {
+        if (balance < amount) return 0.0
+
+        balance -= amount
+        return amount
+    }
+
+    BigDecimal getBalance()
+    {
+        return balance
+    }
+}
+'''
+
+    def descendantClassSource = '''
+    package tests
+
+    import org.gcontracts.annotations.*
+
+    class BetterAccount extends Account {
+
+    @Ensures({ balance == old.balance - (amount * 0.5) })
+    BigDecimal withdraw( BigDecimal amount )
+    {
+        if (balance < amount) return 0.0
+
+        balance -= amount * 0.5
+        return amount
+    }
+}
+
+'''
+
+      add_class_to_classpath baseClassSource
+
+      def betterAccount = create_instance_of(descendantClassSource)
+      betterAccount.deposit (30.0)
+      betterAccount.withdraw (10.0)
+
   }
 }

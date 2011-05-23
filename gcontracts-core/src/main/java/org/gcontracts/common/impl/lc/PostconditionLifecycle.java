@@ -41,6 +41,12 @@ import org.gcontracts.util.AnnotationUtils;
 public class PostconditionLifecycle extends BaseLifecycle {
 
     @Override
+    public void beforeProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {
+        final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(processingContextInformation.readerSource());
+        postconditionGenerator.addOldVariablesMethod(classNode);
+    }
+
+    @Override
     public void afterProcessingContructorNode(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode constructorNode) {
         generatePostcondition(processingContextInformation, classNode, constructorNode);
     }
@@ -56,12 +62,7 @@ public class PostconditionLifecycle extends BaseLifecycle {
 
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(processingContextInformation.readerSource());
 
-        if (processingContextInformation.contract().postconditions().contains(methodNode)  && !(methodNode instanceof ConstructorNode))  {
-            postconditionGenerator.addOldVariablesMethod(classNode);
-
-        // the method itself is not annotated but somewhere up the inheritance line exists a postcondition
-        } else if (!(methodNode instanceof ConstructorNode) && AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(classNode, methodNode, ClassHelper.makeWithoutCaching(Postcondition.class)).size() > 0)  {
-            postconditionGenerator.addOldVariablesMethod(classNode);
+        if (!(methodNode instanceof ConstructorNode) && AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(classNode, methodNode, ClassHelper.makeWithoutCaching(Postcondition.class)).size() > 0)  {
             postconditionGenerator.generateDefaultPostconditionStatement(classNode, methodNode);
         } else {
             postconditionGenerator.generateDefaultPostconditionStatement(classNode, methodNode);
