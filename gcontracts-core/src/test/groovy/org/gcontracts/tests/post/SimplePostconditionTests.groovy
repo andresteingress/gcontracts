@@ -143,4 +143,22 @@ class Account {
       a.some_method()
     }
   }
+
+  @Test void no_postcondition_on_static_methods()  {
+
+    def source = """
+        import org.gcontracts.annotations.*
+
+class Account {
+
+   @Ensures({ amount != null })
+   static def withdraw(def amount)  {
+     return amount
+   }
+}
+    """
+
+    def clazz = add_class_to_classpath(source)
+    assert clazz.withdraw(null) == null
+  }
 }

@@ -25,8 +25,6 @@ package org.gcontracts.generation;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.PropertyNode;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.ReturnStatement;
 
 /**
  * <p>
@@ -118,7 +116,7 @@ public class CandidateChecks {
      * @return whether the given {@link org.codehaus.groovy.ast.MethodNode} is a candidate for pre-conditions
      */
     public static boolean isPreconditionCandidate(final ClassNode type, final MethodNode method)  {
-        if (method.isSynthetic() || method.isAbstract() || method.isStatic()) return false;
+        if (method.isSynthetic() || method.isAbstract()) return false;
         if (method.getDeclaringClass() != type) return false;
 
         return true;
@@ -133,6 +131,7 @@ public class CandidateChecks {
      */
     public static boolean isPostconditionCandidate(final ClassNode type, final MethodNode method)  {
         if (!isPreconditionCandidate(type, method)) return false;
+        if (method.isStatic()) return false;
 
         return true;
     }

@@ -31,6 +31,7 @@ import org.gcontracts.domain.ClassInvariant;
 import org.gcontracts.domain.Contract;
 import org.gcontracts.domain.Postcondition;
 import org.gcontracts.domain.Precondition;
+import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.ClassInvariantGenerator;
 import org.gcontracts.generation.PostconditionGenerator;
 import org.gcontracts.generation.PreconditionGenerator;
@@ -74,7 +75,7 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
     }
 
     public void injectClassInvariant(final ClassNode type, final ClassInvariant classInvariant) {
-        if (!pci.isClassInvariantsEnabled()) return;
+        if (!pci.isClassInvariantsEnabled() || !CandidateChecks.isContractsCandidate(type)) return;
 
         final ReaderSource source = pci.readerSource();
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
@@ -83,7 +84,7 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
     }
 
     public void injectPrecondition(final MethodNode method, final Precondition precondition) {
-        if (!pci.isPreconditionsEnabled() || method.isAbstract()) return;
+        if (!pci.isPreconditionsEnabled() || !CandidateChecks.isPreconditionCandidate(method.getDeclaringClass(), method)) return;
 
         final ReaderSource source = pci.readerSource();
         final PreconditionGenerator preconditionGenerator = new PreconditionGenerator(source);
@@ -92,7 +93,7 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
     }
 
     public void injectPostcondition(final MethodNode method, final Postcondition postcondition) {
-        if (!pci.isPostconditionsEnabled() || method.isAbstract()) return;
+        if (!pci.isPostconditionsEnabled() || !CandidateChecks.isPostconditionCandidate(method.getDeclaringClass(), method)) return;
 
         final ReaderSource source = pci.readerSource();
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(source);

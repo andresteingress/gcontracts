@@ -65,6 +65,8 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
         // add a local protected method with the invariant closure - this is needed for invariant checks in inheritance lines
         MethodNode methodNode = type.addMethod(getInvariantMethodName(type), Opcodes.ACC_PROTECTED | Opcodes.ACC_SYNTHETIC, ClassHelper.Boolean_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, blockStatement);
+        methodNode.setSynthetic(true);
+
         blockStatement.addStatements(wrapAssertionBooleanExpression(type, methodNode, classInvariantExpression, "invariant").getStatements());
         blockStatement.addStatement(new ReturnStatement(ConstantExpression.TRUE));
     }

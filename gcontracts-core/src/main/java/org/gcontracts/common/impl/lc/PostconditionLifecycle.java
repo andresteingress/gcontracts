@@ -58,7 +58,7 @@ public class PostconditionLifecycle extends BaseLifecycle {
 
     private void generatePostcondition(ProcessingContextInformation processingContextInformation, ClassNode classNode, MethodNode methodNode) {
         if (!processingContextInformation.isPostconditionsEnabled()) return;
-        if (!CandidateChecks.isPreOrPostconditionCandidate(classNode, methodNode)) return;
+        if (!CandidateChecks.isPostconditionCandidate(classNode, methodNode)) return;
 
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(processingContextInformation.readerSource());
 

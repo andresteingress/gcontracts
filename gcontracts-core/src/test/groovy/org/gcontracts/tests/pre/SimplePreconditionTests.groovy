@@ -180,4 +180,44 @@ class BetterAccount extends Account
         account.withdraw(null)
     }
   }
+
+  @Test void precondition_in_static_method()  {
+
+    def source = """
+import org.gcontracts.annotations.*
+
+class Account
+{
+    @Requires({ amount >= 0.0 })
+    static void withdraw( BigDecimal amount = 0.0 )
+    {
+        println amount
+    }
+}
+    """
+    shouldFail PreconditionViolation, {
+        def clazz = add_class_to_classpath(source)
+        clazz.withdraw(null)
+    }
+  }
+
+  @Test void precondition_in_factory_method()  {
+
+      def source = """
+        import org.gcontracts.annotations.*
+
+        class Factory {
+        @Requires({ g != null })
+        static void create(def g) {
+            println g
+        }
+        }
+     """
+
+      shouldFail PreconditionViolation, {
+        def clazz = add_class_to_classpath(source)
+        clazz.create(null)
+      }
+
+  }
 }

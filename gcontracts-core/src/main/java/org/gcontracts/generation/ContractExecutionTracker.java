@@ -22,7 +22,6 @@
  */
 package org.gcontracts.generation;
 
-import java.util.HashSet;
 import java.util.Stack;
 
 /**
@@ -36,11 +35,13 @@ public class ContractExecutionTracker {
         String className;
         String methodIdentifier;
         String assertionType;
+        boolean isStatic;
 
-        public ContractExecution(String className, String methodIdentifier, String assertionType)  {
+        public ContractExecution(String className, String methodIdentifier, String assertionType, boolean isStatic)  {
             this.className = className;
             this.methodIdentifier = methodIdentifier;
             this.assertionType = assertionType;
+            this.isStatic = isStatic;
         }
 
         @Override
@@ -50,6 +51,7 @@ public class ContractExecutionTracker {
 
             ContractExecution that = (ContractExecution) o;
 
+            if (isStatic != that.isStatic) return false;
             if (assertionType != null ? !assertionType.equals(that.assertionType) : that.assertionType != null)
                 return false;
             if (className != null ? !className.equals(that.className) : that.className != null) return false;
@@ -64,6 +66,7 @@ public class ContractExecutionTracker {
             int result = className != null ? className.hashCode() : 0;
             result = 31 * result + (methodIdentifier != null ? methodIdentifier.hashCode() : 0);
             result = 31 * result + (assertionType != null ? assertionType.hashCode() : 0);
+            result = 31 * result + (isStatic ? 1 : 0);
             return result;
         }
     }
@@ -76,8 +79,8 @@ public class ContractExecutionTracker {
         }
     };
 
-    public static boolean track(String className, String methodIdentifier, String assertionType)  {
-        final ContractExecution ce = new ContractExecution(className, methodIdentifier, assertionType);
+    public static boolean track(String className, String methodIdentifier, String assertionType, boolean isStatic)  {
+        final ContractExecution ce = new ContractExecution(className, methodIdentifier, assertionType, isStatic);
 
         if (!executions.get().contains(ce))  {
             executions.get().push(ce);
@@ -87,8 +90,8 @@ public class ContractExecutionTracker {
         return false;
     }
 
-    public static void clear(String className, String methodIdentifier, String assertionType) {
-        if (executions.get().size() > 0 && executions.get().firstElement().equals(new ContractExecution(className, methodIdentifier, assertionType)))  {
+    public static void clear(String className, String methodIdentifier, String assertionType, boolean isStatic) {
+        if (executions.get().size() > 0 && executions.get().firstElement().equals(new ContractExecution(className, methodIdentifier, assertionType, isStatic)))  {
             executions.get().clear();
         }
     }

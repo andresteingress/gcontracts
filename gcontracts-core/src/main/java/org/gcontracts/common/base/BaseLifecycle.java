@@ -54,6 +54,9 @@ public abstract class BaseLifecycle implements Lifecycle {
 
         if (classNode.getDeclaredField(BaseGenerator.LOCK_FIELD_NAME) == null)
             classNode.addField(BaseGenerator.LOCK_FIELD_NAME, Opcodes.ACC_PRIVATE, reentrantLockClassNode, new ConstructorCallExpression(reentrantLockClassNode, ArgumentListExpression.EMPTY_ARGUMENTS));
+
+        if (classNode.getDeclaredField(BaseGenerator.LOCK_STATIC_FIELD_NAME) == null)
+            classNode.addField(BaseGenerator.LOCK_STATIC_FIELD_NAME, Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, reentrantLockClassNode, new ConstructorCallExpression(reentrantLockClassNode, ArgumentListExpression.EMPTY_ARGUMENTS));
     }
 
     public void afterProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
