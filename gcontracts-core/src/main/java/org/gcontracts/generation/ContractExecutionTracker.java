@@ -81,9 +81,10 @@ public class ContractExecutionTracker {
 
     public static boolean track(String className, String methodIdentifier, String assertionType, boolean isStatic)  {
         final ContractExecution ce = new ContractExecution(className, methodIdentifier, assertionType, isStatic);
+        final Stack<ContractExecution> contractExecutions = executions.get();
 
-        if (!executions.get().contains(ce))  {
-            executions.get().push(ce);
+        if (!contractExecutions.contains(ce))  {
+            contractExecutions.push(ce);
             return true;
         }
 
@@ -91,8 +92,10 @@ public class ContractExecutionTracker {
     }
 
     public static void clear(String className, String methodIdentifier, String assertionType, boolean isStatic) {
-        if (executions.get().size() > 0 && executions.get().firstElement().equals(new ContractExecution(className, methodIdentifier, assertionType, isStatic)))  {
-            executions.get().clear();
+        final Stack<ContractExecution> contractExecutions = executions.get();
+
+        if (contractExecutions.size() > 0)  {
+            contractExecutions.pop();
         }
     }
 }

@@ -220,4 +220,28 @@ class Account
       }
 
   }
+
+  @Test void multiple_precondition_checks_in_single_thread()  {
+
+      def source = """
+        import org.gcontracts.annotations.*
+
+        class Factory {
+        @Requires({ g != null })
+        static void create(def g) {
+            println g
+        }
+        }
+     """
+
+      def clazz = add_class_to_classpath(source)
+
+      shouldFail PreconditionViolation, {
+        clazz.create(null)
+      }
+
+      shouldFail PreconditionViolation, {
+        clazz.create(null)
+      }
+    }
 }
