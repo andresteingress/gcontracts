@@ -183,4 +183,34 @@ class Account {
         a.toList("a", "b") == ["a", "b"]
 
     }
+
+    @Test void complex_return_statement()  {
+
+        def source = """
+        import org.gcontracts.annotations.*
+
+        class A {
+
+            @Requires({ ( messages != null ) })
+            @Ensures({  ( result   != null ) && ( result.size() == messages.size()) })
+            List<String> sortForAll ( Collection<String> messages )
+            {
+                messages.sort {
+                    String m1, String m2 ->
+
+                    int  urgencyCompare = ( m1 <=> m2 )
+                    if ( urgencyCompare != 0 ){ return urgencyCompare }
+
+                    - ( m1 <=> m2 )
+                }
+            }
+
+        }
+
+        """
+
+        def a = create_instance_of(source)
+        a.sortForAll(["test1", "test2"]) == ["test1", "test2"]
+
+    }
 }

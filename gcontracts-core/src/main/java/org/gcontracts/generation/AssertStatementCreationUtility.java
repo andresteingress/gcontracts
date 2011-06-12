@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.ClassCodeVisitorSupport;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.ClosureExpression;
 import org.codehaus.groovy.ast.expr.DeclarationExpression;
 import org.codehaus.groovy.ast.expr.VariableExpression;
 import org.codehaus.groovy.ast.stmt.*;
@@ -159,6 +160,11 @@ public final class AssertStatementCreationUtility {
         @Override
         public void visitReturnStatement(ReturnStatement statement) {
             returnStatements.add(statement);
+        }
+
+        @Override
+        public void visitClosureExpression(ClosureExpression expression) {
+            // do nothing to prevent getting return statements from closures
         }
 
         public List<ReturnStatement> getReturnStatements() {
