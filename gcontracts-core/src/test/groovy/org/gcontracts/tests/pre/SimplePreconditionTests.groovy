@@ -244,4 +244,26 @@ class Account
         clazz.create(null)
       }
     }
+
+    @Test void no_explicit_return_statement()  {
+
+       def source = """
+        import org.gcontracts.annotations.*
+
+        class A {
+        @Requires({ g != null })
+        def someMethod(def g = "test") {
+            new Object()
+        }
+        }
+     """
+
+        def obj = create_instance_of(source)
+        shouldFail PreconditionViolation, {
+            obj.someMethod(null)
+        }
+
+        assert obj.someMethod() != null
+
+    }
 }

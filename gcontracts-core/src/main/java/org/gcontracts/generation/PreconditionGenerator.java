@@ -24,6 +24,7 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.ConstructorNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
@@ -94,7 +95,7 @@ public class PreconditionGenerator extends BaseGenerator {
 
             BlockStatement methodBlock = (BlockStatement) method.getCode();
             for (Statement statement : methodBlock.getStatements())  {
-                if (statement instanceof ExpressionStatement && ((ExpressionStatement) statement).getExpression() instanceof ConstructorCallExpression)  {
+                if (method instanceof ConstructorNode && statement instanceof ExpressionStatement && ((ExpressionStatement) statement).getExpression() instanceof ConstructorCallExpression)  {
                     modifiedMethodCode.getStatements().add(0, statement);
                 } else {
                     modifiedMethodCode.getStatements().add(statement);

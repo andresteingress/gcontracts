@@ -161,4 +161,26 @@ class Account {
     def clazz = add_class_to_classpath(source)
     assert clazz.withdraw(null) == null
   }
+
+    @Test void use_result_with_parameter_value()  {
+
+
+        def source = """
+
+        import org.gcontracts.annotations.*
+
+        class A {
+
+            @Ensures({ result.size() == 2 && result.contains(s) && result.contains(s2) })
+            List<String> toList(String s, String s2)  {
+               [s, s2].sort()
+            }
+
+        }
+        """
+
+        def a = create_instance_of(source)
+        a.toList("a", "b") == ["a", "b"]
+
+    }
 }
