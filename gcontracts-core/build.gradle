@@ -1,7 +1,8 @@
 project(":gcontracts-core") {
   dependencies {
     compile asm
-    compile junit
+    testCompile junit
+    testRuntime junit
   }
 }
 
