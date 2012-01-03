@@ -3,11 +3,9 @@ dependsOnChildren()
 buildscript {
     repositories {
         mavenCentral()
-        mavenRepo urls: 'http://evgeny-goldin.org/artifactory/repo/'
     }
     dependencies {
         classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.4'
-        classpath 'com.goldin.plugins:gradle:0.1-RC'
     }    
 }
 
@@ -31,7 +29,6 @@ subprojects {
   apply plugin: "groovy"
   apply plugin: 'maven'
   apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
-  apply plugin: 'about'
 
   compileGroovy.options.fork = true
   compileTestGroovy.options.fork = true
@@ -55,14 +52,6 @@ subprojects {
   task javadocJar(type: Jar, dependsOn:javadoc) {
      classifier = 'javadoc'
      from javadoc.destinationDir
-  }
-
-  about { 
-     dumpDependencies = true
-     dumpPaths = false
-     gitStatusProject = false
-     fileName = 'dependencies.txt'
-     
   }
 
   assemble.doLast { about.execute() }
