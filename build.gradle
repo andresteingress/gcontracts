@@ -54,8 +54,6 @@ subprojects {
      from javadoc.destinationDir
   }
 
-  assemble.doLast { about.execute() }
-
   // add javadoc/source jar the artifacts
   artifacts {
      archives sourcesJar
