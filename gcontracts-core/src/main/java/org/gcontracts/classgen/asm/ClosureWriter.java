@@ -79,7 +79,7 @@ public class ClosureWriter {
         Parameter[] localVariableParams = getClosureSharedVariables(expression);
         removeInitialValues(localVariableParams);
 
-        InnerClassNode answer = new InnerClassNode(outerClass, name, mods, ClassHelper.CLOSURE_TYPE); // closures are local inners and not public
+        InnerClassNode answer = new InnerClassNode(outerClass, name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference()); // closures are local inners and not public
         answer.setEnclosingMethod(null);
         answer.setSynthetic(true);
         answer.setUsingGenerics(outerClass.isUsingGenerics());
