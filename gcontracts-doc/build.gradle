@@ -1,9 +1,11 @@
 dependsOn(':gcontracts-core')
 
 project(":gcontracts-doc") {
-  dependencies {
-    compile project(':gcontracts-core')
+    dependencies {
+        compile project(':gcontracts-core')
 
-    compile "org.apache.ant:ant:1.8.2"
-  }
+        compile "org.apache.ant:ant:1.8.2"
+        testCompile junit
+        testRuntime "junit:junit:3.8.2"
+    }
 }
