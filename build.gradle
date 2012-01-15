@@ -4,17 +4,15 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.4'
-    }    
 }
 
 allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'
+    apply plugin: 'signing'
 
     group = "org.gcontracts"
-    version = "1.2.5-SNAPSHOT"
+    version = "1.2.5"
 
     asm = "asm:asm:3.2"
     junit = "junit:junit:4.8.2"
@@ -28,7 +26,6 @@ allprojects {
 subprojects {
   apply plugin: "groovy"
   apply plugin: 'maven'
-  apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
 
   compileGroovy.options.fork = true
   compileTestGroovy.options.fork = true
@@ -41,7 +38,6 @@ subprojects {
   repositories {
     mavenCentral()
   }
-
 
   // custom tasks for creating source/javadoc jars
   task sourcesJar(type: Jar, dependsOn:classes) {
@@ -60,13 +56,15 @@ subprojects {
      archives javadocJar
   }
 
-pgp {
-  secretKeyRingFile = new File("${System.properties['user.home']}/.gnupg/secring.gpg")
-}
+  signing {
+    sign configurations.archives
+  }
 
 uploadArchives {
   repositories.mavenDeployer {
     configuration = configurations.archives
+
+    beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
 
     repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
       authentication(userName: nexusUsername, password: nexusPassword)
