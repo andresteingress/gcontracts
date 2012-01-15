@@ -2,6 +2,7 @@ project(":gcontracts-core") {
   dependencies {
     compile asm
     testCompile junit
+    testCompile "org.spockframework:spock-core:0.5-groovy-1.8"
     testRuntime junit
   }
 }
