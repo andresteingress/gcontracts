@@ -298,4 +298,53 @@ class AnnotationContractTests {
 
         tester.method(null)
     }
+
+    @Test(expected = PreconditionViolation.class)
+    void single_notnull_parameter_in_interface() {
+
+        def source_anno_parameter = '''
+        package tests
+
+        import org.gcontracts.annotations.*
+        import org.gcontracts.annotations.meta.*
+
+        @Precondition
+        @AnnotationContract({ it != null })
+        public @interface NotNull {}
+    '''
+        def source_interface = '''
+        @Contracted
+        package tests
+
+        import org.gcontracts.annotations.*
+
+        interface Tester {
+            def method(@NotNull param)
+        }
+
+        '''
+
+        def source_class = '''
+        @Contracted
+        package tests
+
+        import org.gcontracts.annotations.*
+
+        class TesterImpl implements Tester {
+            def method(def param) {  ;; }
+        }
+
+        '''
+
+        GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader())
+        loader.parseClass(source_anno_parameter)
+        loader.parseClass(source_interface)
+        def clz = loader.parseClass(source_class)
+
+        assertNotNull(clz)
+
+        def tester = clz.newInstance()
+
+        tester.method(null)
+    }
 }

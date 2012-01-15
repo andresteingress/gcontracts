@@ -65,12 +65,9 @@ public class ContractElementVisitor extends BaseVisitor {
         foundContractElement |= AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName()).size() > 0;
         if (foundContractElement) return;
 
-        // check parameters for annotation contracts (interfaces not supported by now)
-        if (CandidateChecks.isContractsCandidate(classNode))  {
-            for (Parameter param : methodNode.getParameters())  {
-                foundContractElement |= AnnotationUtils.hasMetaAnnotations(param, ContractElement.class.getName()).size() > 0;
-                if (foundContractElement) return;
-            }
+        for (Parameter param : methodNode.getParameters())  {
+            foundContractElement |= AnnotationUtils.hasMetaAnnotations(param, ContractElement.class.getName()).size() > 0;
+            if (foundContractElement) return;
         }
     }
 
