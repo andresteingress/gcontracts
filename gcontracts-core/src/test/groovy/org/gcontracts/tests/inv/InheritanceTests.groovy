@@ -342,4 +342,30 @@ class Account {
      def b = create_instance_of(source71)
      assert b != null
   }
+    
+  @Test void abstract_method_with_postcondition()  {
+
+      add_class_to_classpath """
+      package tests
+
+      import org.gcontracts.annotations.*
+
+      abstract class Base {
+        @Ensures({ result })
+        abstract List<String> sources()
+      }
+      """
+
+      def c = add_class_to_classpath """
+      package tests
+
+      class DirectImpl extends Base {
+
+          List<String> sources() { ['a','b','c'] }
+
+      }
+      """
+
+      c.newInstance().sources()
+  }
 }

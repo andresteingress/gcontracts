@@ -59,7 +59,7 @@ import java.util.List;
  *
  * @author ast
  */
-@GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
+@GroovyASTTransformation(phase = CompilePhase.INSTRUCTION_SELECTION)
 public class GContractsASTTransformation extends BaseASTTransformation {
 
     private void generateAnnotationClosureClasses(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
@@ -95,6 +95,7 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
             final ContractElementVisitor contractElementVisitor = new ContractElementVisitor(unit, source);
             contractElementVisitor.visitClass(classNode);
+
             if (!contractElementVisitor.isFoundContractElement()) continue;
 
             final ProcessingContextInformation pci = new ProcessingContextInformation(classNode, unit, source);

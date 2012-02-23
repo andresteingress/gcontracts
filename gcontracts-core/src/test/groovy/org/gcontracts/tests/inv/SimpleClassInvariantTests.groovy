@@ -215,4 +215,21 @@ class Rocket {
             rocket.increase()
         }
     }
+
+    @Test void direct_field_access_in_class_invariant()  {
+
+        add_class_to_classpath """
+            import org.gcontracts.annotations.*
+
+            @Invariant({ this.speed >= 0.0 })
+            class Rocket {
+                def speed = 0.0
+
+                def increase() {
+                    this.speed -= 1
+                }
+            }"""
+
+
+    }
 }
