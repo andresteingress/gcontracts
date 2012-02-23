@@ -31,7 +31,7 @@ subprojects {
   compileTestGroovy.options.fork = true
 
   dependencies {
-    groovy "org.codehaus.groovy:groovy-all:1.8.5"
+    groovy "org.codehaus.groovy:groovy-all:1.8.6"
     compile asm
   }
 
