@@ -44,7 +44,7 @@ class A {
     def a = create_instance_of(source)
     a.change_property_value('test')
 
-    shouldFail AssertionError, {
+    shouldFail PreconditionViolation, {
       a.change_property_value(null)
     }
   }
@@ -54,15 +54,15 @@ class A {
     def a = create_instance_of(source)
     a.change_property_values('test', 'test2')
 
-    shouldFail AssertionError, {
+    shouldFail PreconditionViolation, {
       a.change_property_values(null, 'test2')
     }
 
-    shouldFail AssertionError, {
+    shouldFail PreconditionViolation, {
       a.change_property_values('test1', null)
     }
 
-    shouldFail AssertionError, {
+    shouldFail PreconditionViolation, {
       a.change_property_values(null, null)
     }
   }
