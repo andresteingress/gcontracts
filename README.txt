@@ -1,5 +1,4 @@
-====
-    Copyright (c) 2010, Andre Steingress
+    Copyright (c) 2012, Andre Steingress
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -19,7 +18,7 @@
     SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
     WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
     USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====
+
 To download the current version of gcontracts visit: http://github.com/andresteingress/gcontracts/downloads
 
 If you want to fork, or send pull requests, check out http://help.github.com/.
