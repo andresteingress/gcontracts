@@ -23,10 +23,9 @@
 package org.gcontracts.ast.visitor;
 
 import org.codehaus.groovy.ast.*;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.expr.ClassExpression;
-import org.codehaus.groovy.ast.expr.ClosureExpression;
+import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.ClassInvariantViolation;
@@ -34,6 +33,7 @@ import org.gcontracts.PostconditionViolation;
 import org.gcontracts.PreconditionViolation;
 import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.annotations.meta.ContractElement;
+import org.gcontracts.annotations.meta.Postcondition;
 import org.gcontracts.classgen.asm.ClosureWriter;
 import org.gcontracts.generation.AssertStatementCreationUtility;
 import org.gcontracts.generation.CandidateChecks;
@@ -63,6 +63,8 @@ import java.util.List;
  */
 public class AnnotationClosureVisitor extends BaseVisitor {
 
+    private static final String POSTCONDITION_TYPE_NAME = Postcondition.class.getName();
+
     private ClassNode classNode;
     private final ClosureWriter closureWriter = new ClosureWriter();
 
@@ -82,6 +84,8 @@ public class AnnotationClosureVisitor extends BaseVisitor {
             for (AnnotationNode annotationNode : annotationNodes)  {
                 ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
                 if (closureExpression == null) continue;
+
+                new ClosureExpressionValidator(annotationNode, sourceUnit).visitClosureExpression(closureExpression);
 
                 List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
@@ -149,6 +153,8 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
         ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
         if (closureExpression == null) return;
+
+        new ClosureExpressionValidator(annotationNode, sourceUnit).visitClosureExpression(closureExpression);
 
         List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
@@ -225,4 +231,73 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
         processorAnnotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
     }
+
+    static class ClosureExpressionValidator extends ClassCodeVisitorSupport implements Opcodes {
+
+        private final AnnotationNode annotationNode;
+        private final SourceUnit sourceUnit;
+
+        public ClosureExpressionValidator(AnnotationNode annotationNode, SourceUnit sourceUnit)  {
+            this.annotationNode = annotationNode;
+            this.sourceUnit = sourceUnit;
+        }
+
+        @Override
+        public void visitClosureExpression(ClosureExpression expression) {
+            if (expression.getCode() == null || expression.getCode() instanceof EmptyStatement)  {
+                addError("Annotation does not contain any expressions (e.g. use '@Requires({ argument1 })').", expression);
+            }
+
+            if (expression.getCode() instanceof BlockStatement &&
+                    ((BlockStatement) expression.getCode()).getStatements().isEmpty())  {
+                addError("Annotation does not contain any expressions (e.g. use '@Requires({ argument1 })').", expression);
+            }
+
+            if (expression.isParameterSpecified() && !AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), POSTCONDITION_TYPE_NAME))  {
+                addError("Annotation does not support parameters (the only exception are postconditions).", expression);
+            }
+
+            if (expression.isParameterSpecified())  {
+                for (Parameter param : expression.getParameters())  {
+                    if (!("result".equals(param.getName()) || "old".equals(param.getName())))  {
+                        addError("Postconditions only allow 'old' and 'result' closure parameters.", expression);
+                    }
+
+                    if (!param.isDynamicTyped())  {
+                        addError("Postconditions do not support explicit types.", expression);
+                    }
+                }
+            }
+
+            super.visitClosureExpression(expression);
+        }
+
+        @Override
+        public void visitVariableExpression(VariableExpression expression) {
+
+            Variable accessedVariable = expression.getAccessedVariable();
+            if (accessedVariable instanceof FieldNode)  {
+                FieldNode fieldNode = (FieldNode) accessedVariable;
+
+                if ((fieldNode.getModifiers() & ACC_PRIVATE) != 0)  {
+                    addError("Access to private fields is not supported.", expression);
+                }
+            }
+
+            if (accessedVariable instanceof Parameter)  {
+                Parameter parameter = (Parameter) accessedVariable;
+                if ("it".equals(parameter.getName()))  {
+                    addError("Access to 'it' is not supported.", expression);
+                }
+            }
+
+            super.visitVariableExpression(expression);
+        }
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            return sourceUnit;
+        }
+    }
+
 }
