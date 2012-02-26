@@ -248,6 +248,8 @@ public final class AssertStatementCreationUtility {
                     blockStatement.getStatements().remove(statement);
 
                     final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.DYNAMIC_TYPE);
+                    $_gc_result.setAccessedVariable($_gc_result);
+
                     blockStatement.addStatement(new ExpressionStatement(
                             new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), returnStatement.getExpression())
                     ));

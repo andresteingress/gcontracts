@@ -119,6 +119,8 @@ public class PostconditionGenerator extends BaseGenerator {
 
                 // Assign the return statement expression to a local variable of type Object
                 final VariableExpression oldVariableExpression = new VariableExpression("old");
+                oldVariableExpression.setAccessedVariable(oldVariableExpression);
+
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
                         new BinaryExpression(oldVariableExpression,
                                 Token.newSymbol(Types.ASSIGN, -1, -1),
@@ -136,6 +138,8 @@ public class PostconditionGenerator extends BaseGenerator {
             } else {
                 // Assign the return statement expression to a local variable of type Object
                 final VariableExpression oldVariableExpression = new VariableExpression("old");
+                oldVariableExpression.setAccessedVariable(oldVariableExpression);
+
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
                         new BinaryExpression(oldVariableExpression,
                                 Token.newSymbol(Types.ASSIGN, -1, -1),

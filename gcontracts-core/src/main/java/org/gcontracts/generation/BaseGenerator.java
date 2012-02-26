@@ -77,6 +77,7 @@ public abstract class BaseGenerator {
 
         final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
         final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
+        $_gc_result.setAccessedVariable($_gc_result);
 
         final FieldExpression lockFieldExpression = methodNode.isStatic() ? new FieldExpression(type.getField(LOCK_STATIC_FIELD_NAME)) : new FieldExpression(type.getField(LOCK_FIELD_NAME));
 
@@ -156,11 +157,17 @@ public abstract class BaseGenerator {
             }
 
             if (isPostcondition && methodNode.getReturnType() != ClassHelper.VOID_TYPE && !(methodNode instanceof ConstructorNode))  {
-                callArgumentList.addExpression(new VariableExpression("result"));
+                VariableExpression variableExpression = new VariableExpression("result");
+                variableExpression.setAccessedVariable(variableExpression);
+
+                callArgumentList.addExpression(variableExpression);
             }
 
             if (isPostcondition && !(methodNode instanceof ConstructorNode)) {
-                callArgumentList.addExpression(new VariableExpression("old"));
+                VariableExpression variableExpression = new VariableExpression("old");
+                variableExpression.setAccessedVariable(variableExpression);
+
+                callArgumentList.addExpression(variableExpression);
             }
 
             MethodCallExpression doCall = new MethodCallExpression(

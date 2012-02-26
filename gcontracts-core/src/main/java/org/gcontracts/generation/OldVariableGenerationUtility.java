@@ -102,6 +102,8 @@ public class OldVariableGenerationUtility {
         }
 
         VariableExpression oldVariable = new VariableExpression("old", ClassHelper.MAP_TYPE);
+        oldVariable.setAccessedVariable(oldVariable);
+
         ExpressionStatement oldVariabeStatement = new ExpressionStatement(
                 new DeclarationExpression(oldVariable,
                         Token.newSymbol(Types.ASSIGN, -1, -1),

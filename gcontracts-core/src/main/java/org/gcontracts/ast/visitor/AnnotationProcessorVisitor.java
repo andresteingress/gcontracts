@@ -182,11 +182,17 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 }
 
                 if (methodNode.getReturnType() != ClassHelper.VOID_TYPE && isPostcondition && !(methodNode instanceof ConstructorNode))  {
-                    closureArgumentList.addExpression(new VariableExpression("result"));
+                    VariableExpression variableExpression = new VariableExpression("result");
+                    variableExpression.setAccessedVariable(variableExpression);
+
+                    closureArgumentList.addExpression(variableExpression);
                 }
 
                 if (isPostcondition && !(methodNode instanceof ConstructorNode)) {
-                    closureArgumentList.addExpression(new VariableExpression("old"));
+                    VariableExpression variableExpression = new VariableExpression("old");
+                    variableExpression.setAccessedVariable(variableExpression);
+
+                    closureArgumentList.addExpression(variableExpression);
                 }
 
                 MethodCallExpression doCall = new MethodCallExpression(
