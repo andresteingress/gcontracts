@@ -286,7 +286,9 @@ public class AnnotationClosureVisitor extends BaseVisitor {
                 if ((fieldNode.getModifiers() & ACC_PRIVATE) != 0)  {
                     // if this is a class invariant we'll change the field node access
                     if (AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), INVARIANT_TYPE_NAME))  {
-                        // TODO: handle access to private fields in class invariants
+
+
+
                     } else {
                         addError("Access to private fields is not allowed, except in class invariants.", expression);
                     }
