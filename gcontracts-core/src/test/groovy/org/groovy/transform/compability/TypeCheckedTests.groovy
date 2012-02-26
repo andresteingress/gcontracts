@@ -24,19 +24,19 @@ class TypeCheckedTests extends GroovyShellTestCase {
 
     void testPostcondition()  {
         evaluate """
-                import org.gcontracts.annotations.*
+            import org.gcontracts.annotations.*
 
-                @groovy.transform.TypeChecked
-                class A {
+            @groovy.transform.TypeChecked
+            class A {
 
-                    @Ensures({ result.size() > 0 })
-                    def op(String some) {
-                        some
-                    }
+                @Ensures({ result.size() > 0 })
+                def op(String some) {
+                    some
                 }
+            }
 
-                def a = new A()
-            """
+            def a = new A()
+        """
 
         evaluate """
             import org.gcontracts.annotations.*
@@ -58,16 +58,16 @@ class TypeCheckedTests extends GroovyShellTestCase {
 
     void testClassInvariant()  {
         evaluate """
-                    import org.gcontracts.annotations.*
+            import org.gcontracts.annotations.*
 
-                    @groovy.transform.TypeChecked
-                    @Invariant({ i >= 0 })
-                    class A {
-                        private int i = 12
-                    }
+            @groovy.transform.TypeChecked
+            @Invariant({ i >= 0 })
+            class A {
+                private int i = 12
+            }
 
-                    def a = new A()
-                """
+            def a = new A()
+        """
     }
 
 }

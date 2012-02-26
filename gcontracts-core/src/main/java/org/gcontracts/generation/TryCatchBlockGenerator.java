@@ -58,11 +58,14 @@ public class TryCatchBlockGenerator {
        
        if (powerAssertionErrorClass == null) throw new GroovyBugError("GContracts >= 1.1.2 needs Groovy 1.7 or above!");
 
-       ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(new VariableExpression("newError", assertionErrorClass), Token.newSymbol(Types.ASSIGN, -1, -1),
+       VariableExpression newErrorVariableExpression = new VariableExpression("newError", assertionErrorClass);
+       newErrorVariableExpression.setAccessedVariable(newErrorVariableExpression);
+
+       ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(newErrorVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1),
                new ConstructorCallExpression(assertionErrorClass,
                        new ArgumentListExpression(new BinaryExpression(new ConstantExpression(message), Token.newSymbol(Types.PLUS, -1, -1), new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getMessage", ArgumentListExpression.EMPTY_ARGUMENTS))))));
 
-       ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(new VariableExpression("newError", assertionErrorClass), "setStackTrace", new ArgumentListExpression(
+       ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(newErrorVariableExpression, "setStackTrace", new ArgumentListExpression(
                new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getStackTrace", ArgumentListExpression.EMPTY_ARGUMENTS)
        )));
 
