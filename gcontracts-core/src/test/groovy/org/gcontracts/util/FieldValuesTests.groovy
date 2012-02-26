@@ -14,7 +14,7 @@ class FieldValuesTests extends GroovyTestCase {
     void testPrivateFieldValueAccessFromBaseClass() {
         def b = new B()
         
-        def value = FieldValues.fieldValue(b, "i")
+        int value = FieldValues.fieldValue(b, "i", int)
         assertEquals value, 12
     }
 }

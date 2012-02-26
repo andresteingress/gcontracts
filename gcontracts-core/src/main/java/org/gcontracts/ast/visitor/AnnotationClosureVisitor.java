@@ -33,8 +33,8 @@ import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ClassInvariantViolation;
 import org.gcontracts.PostconditionViolation;
 import org.gcontracts.PreconditionViolation;
-import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.meta.AnnotationContract;
+import org.gcontracts.annotations.meta.ClassInvariant;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.annotations.meta.Postcondition;
 import org.gcontracts.classgen.asm.ClosureWriter;
@@ -43,12 +43,11 @@ import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.TryCatchBlockGenerator;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.ExpressionUtils;
+import org.gcontracts.util.FieldValues;
 import org.gcontracts.util.Validate;
 import org.objectweb.asm.Opcodes;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Visits interfaces &amp; classes and looks for <tt>@Requires</tt> or <tt>@Ensures</tt> and creates {@link groovy.lang.Closure}
@@ -66,8 +65,10 @@ import java.util.List;
  */
 public class AnnotationClosureVisitor extends BaseVisitor {
 
-    private static final String INVARIANT_TYPE_NAME = Invariant.class.getName();
+    private static final String CLASS_INVARIANT_TYPE_NAME = ClassInvariant.class.getName();
     private static final String POSTCONDITION_TYPE_NAME = Postcondition.class.getName();
+
+    private static final ClassNode FIELD_VALUES = ClassHelper.makeCached(FieldValues.class);
 
     private ClassNode classNode;
     private final ClosureWriter closureWriter = new ClosureWriter();
@@ -89,7 +90,9 @@ public class AnnotationClosureVisitor extends BaseVisitor {
                 ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
                 if (closureExpression == null) continue;
 
-                new ClosureExpressionValidator(annotationNode, sourceUnit).visitClosureExpression(closureExpression);
+                ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, annotationNode, sourceUnit);
+                validator.visitClosureExpression(closureExpression);
+                validator.secondPass(closureExpression);
 
                 List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
@@ -158,7 +161,9 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
         if (closureExpression == null) return;
 
-        new ClosureExpressionValidator(annotationNode, sourceUnit).visitClosureExpression(closureExpression);
+        ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, annotationNode, sourceUnit);
+        validator.visitClosureExpression(closureExpression);
+        validator.secondPass(closureExpression);
 
         List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 
@@ -238,16 +243,25 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
     static class ClosureExpressionValidator extends ClassCodeVisitorSupport implements Opcodes {
 
+        private final ClassNode classNode;
         private final AnnotationNode annotationNode;
         private final SourceUnit sourceUnit;
 
-        public ClosureExpressionValidator(AnnotationNode annotationNode, SourceUnit sourceUnit)  {
+        private final Map<VariableExpression, StaticMethodCallExpression> variableExpressions;
+
+        private boolean secondPass = false;
+
+        public ClosureExpressionValidator(ClassNode classNode, AnnotationNode annotationNode, SourceUnit sourceUnit)  {
+            this.classNode = classNode;
             this.annotationNode = annotationNode;
             this.sourceUnit = sourceUnit;
+            this.variableExpressions = new HashMap<VariableExpression, StaticMethodCallExpression> ();
         }
 
         @Override
         public void visitClosureExpression(ClosureExpression expression) {
+            secondPass = false;
+
             if (expression.getCode() == null || expression.getCode() instanceof EmptyStatement)  {
                 addError("Annotation does not contain any expressions (e.g. use '@Requires({ argument1 })').", expression);
             }
@@ -283,15 +297,10 @@ public class AnnotationClosureVisitor extends BaseVisitor {
             if (accessedVariable instanceof FieldNode)  {
                 FieldNode fieldNode = (FieldNode) accessedVariable;
 
-                if ((fieldNode.getModifiers() & ACC_PRIVATE) != 0)  {
+                if ((fieldNode.getModifiers() & ACC_PRIVATE) != 0 && !classNode.hasProperty(fieldNode.getName()))  {
                     // if this is a class invariant we'll change the field node access
-                    if (AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), INVARIANT_TYPE_NAME))  {
-
-
-
-                    } else {
-                        addError("Access to private fields is not allowed, except in class invariants.", expression);
-                    }
+                    StaticMethodCallExpression staticMethodCallExpression = new StaticMethodCallExpression(FIELD_VALUES, "fieldValue", new ArgumentListExpression(VariableExpression.THIS_EXPRESSION, new ConstantExpression(fieldNode.getName()), new ClassExpression(fieldNode.getType())));
+                    variableExpressions.put(expression, staticMethodCallExpression);
                 }
             }
 
@@ -309,6 +318,15 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         public void visitPostfixExpression(PostfixExpression expression) {
             checkOperation(expression, expression.getOperation());
 
+            if (secondPass)  {
+                if (expression.getExpression() instanceof VariableExpression)  {
+                    VariableExpression variableExpression = (VariableExpression) expression.getExpression();
+                    if (variableExpressions.containsKey(variableExpression))  {
+                        expression.setExpression(variableExpressions.get(variableExpression));
+                    }
+                }
+            }
+
             super.visitPostfixExpression(expression);
         }
 
@@ -316,12 +334,36 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         public void visitPrefixExpression(PrefixExpression expression) {
             checkOperation(expression, expression.getOperation());
 
+            if (secondPass)  {
+                if (expression.getExpression() instanceof VariableExpression)  {
+                    VariableExpression variableExpression = (VariableExpression) expression.getExpression();
+                    if (variableExpressions.containsKey(variableExpression))  {
+                        expression.setExpression(variableExpressions.get(variableExpression));
+                    }
+                }
+            }
+
             super.visitPrefixExpression(expression);
         }
 
         @Override
         public void visitBinaryExpression(BinaryExpression expression) {
             checkOperation(expression, expression.getOperation());
+
+            if (secondPass)  {
+                if (expression.getLeftExpression() instanceof VariableExpression)  {
+                    VariableExpression variableExpression = (VariableExpression) expression.getLeftExpression();
+                    if (variableExpressions.containsKey(variableExpression))  {
+                        expression.setLeftExpression(variableExpressions.get(variableExpression));
+                    }
+                }
+                if (expression.getRightExpression() instanceof VariableExpression)  {
+                    VariableExpression variableExpression = (VariableExpression) expression.getRightExpression();
+                    if (variableExpressions.containsKey(variableExpression))  {
+                        expression.setRightExpression(variableExpressions.get(variableExpression));
+                    }
+                }
+            }
 
             super.visitBinaryExpression(expression);
         }
@@ -333,6 +375,11 @@ public class AnnotationClosureVisitor extends BaseVisitor {
             if (Types.ofType(operation.getType(), Types.POSTFIX_OPERATOR))  {
                 addError("State changing postfix & prefix operators are not supported.", expression);
             }
+        }
+
+        public void secondPass(ClosureExpression closureExpression)  {
+            secondPass = true;
+            super.visitClosureExpression(closureExpression);
         }
 
         @Override

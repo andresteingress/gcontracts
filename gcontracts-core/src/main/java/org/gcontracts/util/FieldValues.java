@@ -10,7 +10,8 @@ import java.lang.reflect.Field;
  */
 public class FieldValues {
 
-    public static Object fieldValue(Object obj, String fieldName) throws IllegalAccessException {
+    @SuppressWarnings("unchecked")
+    public static <T> T fieldValue(Object obj, String fieldName, Class<T> type) throws IllegalAccessException {
         Validate.notNull(obj);
         Validate.notNull(fieldName);
         
@@ -18,7 +19,7 @@ public class FieldValues {
         if (f == null) throw new IllegalArgumentException("Field " + fieldName + " could not be found!");
     
         f.setAccessible(true);
-        return f.get(obj);
+        return (T) f.get(obj);
     }
     
 }

@@ -229,7 +229,52 @@ class Rocket {
                     this.speed -= 1
                 }
             }"""
+    }
 
+    @Test void private_field_access_in_direct_class()  {
 
+        def c = add_class_to_classpath """
+                import org.gcontracts.annotations.*
+
+                @Invariant({ speed >= 0.0 })
+                class Rocket {
+                    private double speed = 0.0
+
+                    def increase() {
+                        this.speed -= 1
+                    }
+                }"""
+
+        def rocket = c.newInstance()
+
+        shouldFail ClassInvariantViolation, {
+            rocket.increase()
+        }
+    }
+
+    @Test void private_field_access_in_descendant_class()  {
+
+        def c = add_class_to_classpath """
+                    import org.gcontracts.annotations.*
+
+                    @Invariant({ speed >= 0.0 })
+                    class Rocket {
+                        private double speed = 0.0
+
+                        def increase() {
+                            this.speed -= 1
+                        }
+                    }
+                    """
+
+        def c2 = add_class_to_classpath """
+            class BetterRocket extends Rocket {}
+        """
+
+        def betterRocket = c2.newInstance()
+
+        shouldFail ClassInvariantViolation, {
+            betterRocket.increase()
+        }
     }
 }

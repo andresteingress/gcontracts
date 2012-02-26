@@ -128,27 +128,6 @@ class ClosureExpressionValidationTests extends GroovyShellTestCase {
         assertTrue msg.contains("Postconditions do not support explicit types")
     }
 
-    void testPrivateVariableAccess() {
-
-        def msg = shouldFail  CompilationFailedException, {
-            evaluate """
-                    import org.gcontracts.annotations.*
-
-                    class A {
-                        private int i
-
-                        @Requires({ i })
-                        def op() {}
-                    }
-
-                    def a = new A()
-                """
-        }
-
-        assertTrue msg.contains("Access to private fields is not allowed, except in class invariants.")
-    }
-
-
     void testClosureItAccess() {
 
         def msg = shouldFail  CompilationFailedException, {
