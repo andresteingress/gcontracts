@@ -28,9 +28,12 @@ import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
+import org.codehaus.groovy.syntax.Token;
+import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ClassInvariantViolation;
 import org.gcontracts.PostconditionViolation;
 import org.gcontracts.PreconditionViolation;
+import org.gcontracts.annotations.Invariant;
 import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.annotations.meta.Postcondition;
@@ -63,6 +66,7 @@ import java.util.List;
  */
 public class AnnotationClosureVisitor extends BaseVisitor {
 
+    private static final String INVARIANT_TYPE_NAME = Invariant.class.getName();
     private static final String POSTCONDITION_TYPE_NAME = Postcondition.class.getName();
 
     private ClassNode classNode;
@@ -280,7 +284,12 @@ public class AnnotationClosureVisitor extends BaseVisitor {
                 FieldNode fieldNode = (FieldNode) accessedVariable;
 
                 if ((fieldNode.getModifiers() & ACC_PRIVATE) != 0)  {
-                    addError("Access to private fields is not supported.", expression);
+                    // if this is a class invariant we'll change the field node access
+                    if (AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), INVARIANT_TYPE_NAME))  {
+                        // TODO: handle access to private fields in class invariants
+                    } else {
+                        addError("Access to private fields is not allowed, except in class invariants.", expression);
+                    }
                 }
             }
 
@@ -292,6 +301,36 @@ public class AnnotationClosureVisitor extends BaseVisitor {
             }
 
             super.visitVariableExpression(expression);
+        }
+
+        @Override
+        public void visitPostfixExpression(PostfixExpression expression) {
+            checkOperation(expression, expression.getOperation());
+
+            super.visitPostfixExpression(expression);
+        }
+
+        @Override
+        public void visitPrefixExpression(PrefixExpression expression) {
+            checkOperation(expression, expression.getOperation());
+
+            super.visitPrefixExpression(expression);
+        }
+
+        @Override
+        public void visitBinaryExpression(BinaryExpression expression) {
+            checkOperation(expression, expression.getOperation());
+
+            super.visitBinaryExpression(expression);
+        }
+
+        private void checkOperation(Expression expression, Token operation) {
+            if (Types.ofType(operation.getType(), Types.ASSIGNMENT_OPERATOR))  {
+                addError("Assignment operators are not supported.", expression);
+            }
+            if (Types.ofType(operation.getType(), Types.POSTFIX_OPERATOR))  {
+                addError("State changing postfix & prefix operators are not supported.", expression);
+            }
         }
 
         @Override

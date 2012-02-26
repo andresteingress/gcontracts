@@ -134,16 +134,18 @@ class ClosureExpressionValidationTests extends GroovyShellTestCase {
             evaluate """
                     import org.gcontracts.annotations.*
 
-                    @Invariant({ i })
                     class A {
                         private int i
+
+                        @Requires({ i })
+                        def op() {}
                     }
 
                     def a = new A()
                 """
         }
 
-        assertTrue msg.contains("Access to private fields is not supported.")
+        assertTrue msg.contains("Access to private fields is not allowed, except in class invariants.")
     }
 
 
@@ -163,5 +165,43 @@ class ClosureExpressionValidationTests extends GroovyShellTestCase {
         }
 
         assertTrue msg.contains("Access to 'it' is not supported.")
+    }
+
+    void testPrefixOperatorUsage() {
+
+        def msg = shouldFail  CompilationFailedException, {
+            evaluate """
+                import org.gcontracts.annotations.*
+
+                class A {
+
+                    @Requires({ ++arg })
+                    def op(def arg) {}
+                }
+
+                def a = new A()
+            """
+        }
+
+        assertTrue msg.contains("State changing postfix & prefix operators are not supported.")
+    }
+
+    void testPostfixOperatorUsage() {
+
+        def msg = shouldFail  CompilationFailedException, {
+            evaluate """
+                    import org.gcontracts.annotations.*
+
+                    class A {
+
+                        @Requires({ arg++ })
+                        def op(def arg) {}
+                    }
+
+                    def a = new A()
+                """
+        }
+
+        assertTrue msg.contains("State changing postfix & prefix operators are not supported.")
     }
 }
