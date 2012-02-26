@@ -205,7 +205,11 @@ public final class AssertStatementCreationUtility {
                 if (statement == returnStatement) {
                     blockStatement.getStatements().remove(statement);
                     blockStatement.addStatements(assertionCallStatement.getStatements());
-                    blockStatement.addStatement(new ReturnStatement(new VariableExpression("result")));
+
+                    VariableExpression variableExpression = new VariableExpression("result");
+                    variableExpression.setAccessedVariable(variableExpression);
+
+                    blockStatement.addStatement(new ReturnStatement(variableExpression));
                     return; // we found the return statement under target, let's cancel tree traversal
                 }
             }

@@ -44,6 +44,7 @@ public class TryCatchBlockGenerator {
        final String $_gc_closure_result = "$_gc_closure_result";
 
        final VariableExpression variableExpression = new VariableExpression($_gc_closure_result, ClassHelper.Boolean_TYPE);
+       variableExpression.setAccessedVariable(variableExpression);
 
        // if the assert statement is successful the return variable will be true else false
        final BlockStatement overallBlock = new BlockStatement();

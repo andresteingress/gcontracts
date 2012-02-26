@@ -70,6 +70,7 @@ public class OldVariableGenerationUtility {
                 // if a clone classNode is available, the value is cloned
                 if (cloneMethod != null && fieldType.implementsInterface(ClassHelper.make("java.lang.Cloneable")))  {
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
+                    oldVariable.setAccessedVariable(oldVariable);
 
                     final MethodCallExpression methodCall = new MethodCallExpression(new FieldExpression(fieldNode), "clone", ArgumentListExpression.EMPTY_ARGUMENTS);
                     // return null if field is null
@@ -90,6 +91,8 @@ public class OldVariableGenerationUtility {
                         || fieldType.getName().equals("java.lang.String")) {
 
                     VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
+                    oldVariable.setAccessedVariable(oldVariable);
+
                     ExpressionStatement oldVariableAssignment = new ExpressionStatement(
                         new DeclarationExpression(oldVariable,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
@@ -116,6 +119,8 @@ public class OldVariableGenerationUtility {
         // let's ask the super class for old variables...
         if (classNode.getSuperClass() != null && classNode.getSuperClass().getMethod(OLD_VARIABLES_METHOD, Parameter.EMPTY_ARRAY) != null)  {
             mergedOldVariables = new VariableExpression("mergedOldVariables", ClassHelper.MAP_TYPE);
+            mergedOldVariables.setAccessedVariable(mergedOldVariables);
+
             ExpressionStatement mergedOldVariablesStatement = new ExpressionStatement(
                 new DeclarationExpression(mergedOldVariables,
                         Token.newSymbol(Types.ASSIGN, -1, -1),
