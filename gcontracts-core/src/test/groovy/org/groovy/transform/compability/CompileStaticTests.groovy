@@ -13,7 +13,7 @@ class CompileStaticTests extends GroovyShellTestCase {
             class A {
 
                 @Requires({ param.size() > 0 })
-                void someOperation(String param) {}
+                void someOperation(String param) { }
             }
             def a = new A()
         """
