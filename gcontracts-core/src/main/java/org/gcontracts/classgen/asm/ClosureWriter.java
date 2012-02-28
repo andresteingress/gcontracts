@@ -29,10 +29,7 @@ import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.classgen.Verifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -52,30 +49,22 @@ public class ClosureWriter {
         ClassNode outerClass = getOutermostClass(classNode);
         String name = outerClass.getName() + "$" + getClosureInnerName(outerClass, classNode);
 
+        // fetch all method parameters, and possibly add 'old' and 'result'
         ArrayList<Parameter> parametersTemp = new ArrayList<Parameter>(Arrays.asList(expression.getParameters()));
         removeParameter("old", parametersTemp);
         removeParameter("result", parametersTemp);
 
         if (methodNode != null && addResultVariable && methodNode.getReturnType() != ClassHelper.VOID_TYPE)  {
-            parametersTemp.add(new Parameter(ClassHelper.DYNAMIC_TYPE, "result"));
+            parametersTemp.add(new Parameter(methodNode.getReturnType(), "result"));
         }
 
         if (addOldVariable)  {
-            parametersTemp.add(new Parameter(ClassHelper.DYNAMIC_TYPE, "old"));
+            parametersTemp.add(new Parameter(new ClassNode(Map.class), "old"));
         }
 
+        // contains all params of the original method
         Parameter[] parameters = parametersTemp.toArray(new Parameter[parametersTemp.size()]);
-
-        if (parameters == null) {
-            parameters = Parameter.EMPTY_ARRAY;
-        } else if (parameters.length == 0) {
-            // let's create a default 'it' parameter
-            Parameter it = new Parameter(ClassHelper.OBJECT_TYPE, "it", ConstantExpression.NULL);
-            parameters = new Parameter[]{it};
-            Variable ref = expression.getVariableScope().getDeclaredVariable("it");
-            if (ref!=null) it.setClosureSharedVariable(ref.isClosureSharedVariable());
-        }
-
+        
         Parameter[] localVariableParams = getClosureSharedVariables(expression);
         removeInitialValues(localVariableParams);
 
@@ -88,13 +77,6 @@ public class ClosureWriter {
                 answer.addMethod("doCall", ACC_PUBLIC, ClassHelper.OBJECT_TYPE, parameters, ClassNode.EMPTY_ARRAY, expression.getCode());
         method.setSourcePosition(expression);
 
-        VariableScope varScope = expression.getVariableScope();
-        if (varScope == null) {
-            throw new RuntimeException(
-                    "Must have a VariableScope by now! for expression: " + expression + " class: " + name);
-        } else {
-            method.setVariableScope(varScope.copy());
-        }
         if (parameters.length > 1
                 || (parameters.length == 1
                 && parameters[0].getType() != null
@@ -163,12 +145,11 @@ public class ClosureWriter {
         Parameter[] params = new Parameter[2];
         params[0] = new Parameter(ClassHelper.OBJECT_TYPE, "_outerInstance");
         params[1] = new Parameter(ClassHelper.OBJECT_TYPE, "_thisObject");
-        // System.arraycopy(localVariableParams, 0, params, 2, localVariableParams.length);
 
         ASTNode sn = answer.addConstructor(ACC_PUBLIC, params, ClassNode.EMPTY_ARRAY, block);
         sn.setSourcePosition(expression);
 
-        correctAccessedVariable(answer,expression);
+        correctAccessedVariable(answer, method, expression);
 
         return answer;
     }
@@ -219,16 +200,25 @@ public class ClosureWriter {
         }
     }
 
-    private void correctAccessedVariable(final InnerClassNode closureClass, ClosureExpression ce) {
+    private void correctAccessedVariable(final InnerClassNode closureClass, final MethodNode methodNode, ClosureExpression ce) {
+        
         CodeVisitorSupport visitor = new CodeVisitorSupport() {
             @Override
             public void visitVariableExpression(VariableExpression expression) {
                 Variable v = expression.getAccessedVariable();
                 if (v==null) return;
-                if (!(v instanceof FieldNode)) return;
                 String name = expression.getName();
-                FieldNode fn = closureClass.getDeclaredField(name);
-                expression.setAccessedVariable(fn);
+                if (v instanceof DynamicVariable)  {
+                    for (Parameter param : methodNode.getParameters())  {
+                        if (name.equals(param.getName()))  {
+                            expression.setAccessedVariable(param);
+                        }
+                    }
+
+                } else if (v instanceof FieldNode)  {
+                    FieldNode fn = closureClass.getDeclaredField(name);
+                    expression.setAccessedVariable(fn);
+                }
             }
         };
         visitor.visitClosureExpression(ce);

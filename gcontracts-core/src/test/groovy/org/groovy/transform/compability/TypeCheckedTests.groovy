@@ -30,7 +30,7 @@ class TypeCheckedTests extends GroovyShellTestCase {
             class A {
 
                 @Ensures({ result.size() > 0 })
-                def op(String some) {
+                String op(String some) {
                     some
                 }
             }
@@ -46,7 +46,7 @@ class TypeCheckedTests extends GroovyShellTestCase {
 
                 private int i = 12
 
-                @Ensures({ old.i == 12 })
+                @Ensures({ old.i + 2 == 12 })
                 def op(String some) {
                     some
                 }
@@ -69,5 +69,4 @@ class TypeCheckedTests extends GroovyShellTestCase {
             def a = new A()
         """
     }
-
 }
