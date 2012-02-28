@@ -37,7 +37,7 @@ import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.annotations.meta.ClassInvariant;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.annotations.meta.Postcondition;
-import org.gcontracts.classgen.asm.ClosureWriter;
+import org.gcontracts.classgen.asm.ContractClosureWriter;
 import org.gcontracts.generation.AssertStatementCreationUtility;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.generation.TryCatchBlockGenerator;
@@ -71,7 +71,7 @@ public class AnnotationClosureVisitor extends BaseVisitor {
     private static final ClassNode FIELD_VALUES = ClassHelper.makeCached(FieldValues.class);
 
     private ClassNode classNode;
-    private final ClosureWriter closureWriter = new ClosureWriter();
+    private final ContractClosureWriter contractClosureWriter = new ContractClosureWriter();
 
     public AnnotationClosureVisitor(final SourceUnit sourceUnit, final ReaderSource source) {
         super(sourceUnit, source);
@@ -116,7 +116,7 @@ public class AnnotationClosureVisitor extends BaseVisitor {
                 rewrittenClosureExpression.setVariableScope(closureExpression.getVariableScope());
                 rewrittenClosureExpression.setType(closureExpression.getType());
 
-                ClassNode closureClassNode = closureWriter.createClosureClass(classNode, null, rewrittenClosureExpression, false, false, Opcodes.ACC_PUBLIC);
+                ClassNode closureClassNode = contractClosureWriter.createClosureClass(classNode, null, rewrittenClosureExpression, false, false, Opcodes.ACC_PUBLIC);
                 classNode.getModule().addClass(closureClassNode);
 
                 final ClassExpression value = new ClassExpression(closureClassNode);
@@ -190,7 +190,7 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         rewrittenClosureExpression.setType(closureExpression.getType());
 
         boolean isConstructor = methodNode instanceof ConstructorNode;
-        ClassNode closureClassNode = closureWriter.createClosureClass(classNode, methodNode, rewrittenClosureExpression, isPostcondition && !isConstructor, isPostcondition && !isConstructor, Opcodes.ACC_PUBLIC);
+        ClassNode closureClassNode = contractClosureWriter.createClosureClass(classNode, methodNode, rewrittenClosureExpression, isPostcondition && !isConstructor, isPostcondition && !isConstructor, Opcodes.ACC_PUBLIC);
         classNode.getModule().addClass(closureClassNode);
 
         final ClassExpression value = new ClassExpression(closureClassNode);
@@ -232,7 +232,7 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         rewrittenClosureExpression.setVariableScope(closureExpression.getVariableScope());
         rewrittenClosureExpression.setType(closureExpression.getType());
 
-        ClassNode closureClassNode = closureWriter.createClosureClass(classNode, null, rewrittenClosureExpression, false, false, Opcodes.ACC_PUBLIC);
+        ClassNode closureClassNode = contractClosureWriter.createClosureClass(classNode, null, rewrittenClosureExpression, false, false, Opcodes.ACC_PUBLIC);
         classNode.getModule().addClass(closureClassNode);
 
         final ClassExpression value = new ClassExpression(closureClassNode);

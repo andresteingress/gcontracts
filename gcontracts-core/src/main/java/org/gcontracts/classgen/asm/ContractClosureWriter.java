@@ -41,7 +41,7 @@ import static org.objectweb.asm.Opcodes.*;
  *
  * @author ast
  */
-public class ClosureWriter {
+public class ContractClosureWriter {
 
     private int closureCount = 1;
 
