@@ -4,13 +4,13 @@ import org.gcontracts.PreconditionViolation
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
- /**
+/**
  * @author ast
  */
 
 class SimplePreconditionTests extends BaseTestClass {
 
-  def source = '''
+    def source = '''
 @Contracted
 package tests
 
@@ -39,43 +39,43 @@ class A {
 }
 '''
 
-  @Test void simple_boolean_expression()  {
+    @Test void simple_boolean_expression()  {
 
-    def a = create_instance_of(source)
-    a.change_property_value('test')
+        def a = create_instance_of(source)
+        a.change_property_value('test')
 
-    shouldFail PreconditionViolation, {
-      a.change_property_value(null)
-    }
-  }
-
-  @Test void binary_boolean_expression()  {
-
-    def a = create_instance_of(source)
-    a.change_property_values('test', 'test2')
-
-    shouldFail PreconditionViolation, {
-      a.change_property_values(null, 'test2')
+        shouldFail PreconditionViolation, {
+            a.change_property_value(null)
+        }
     }
 
-    shouldFail PreconditionViolation, {
-      a.change_property_values('test1', null)
+    @Test void binary_boolean_expression()  {
+
+        def a = create_instance_of(source)
+        a.change_property_values('test', 'test2')
+
+        shouldFail PreconditionViolation, {
+            a.change_property_values(null, 'test2')
+        }
+
+        shouldFail PreconditionViolation, {
+            a.change_property_values('test1', null)
+        }
+
+        shouldFail PreconditionViolation, {
+            a.change_property_values(null, null)
+        }
     }
 
-    shouldFail PreconditionViolation, {
-      a.change_property_values(null, null)
+    @Test void negated_boolean_expression()  {
+
+        def a = create_instance_of(source)
+        a.change_property_value_not('test')
     }
-  }
 
-  @Test void negated_boolean_expression()  {
+    @Test void precondition_in_constructor_declaration()  {
 
-    def a = create_instance_of(source)
-    a.change_property_value_not('test')
-  }
-
-  @Test void precondition_in_constructor_declaration()  {
-
-    def source = """
+        def source = """
 import org.gcontracts.annotations.*
 
 class Account
@@ -89,14 +89,14 @@ class Account
     }
 }
     """
-    shouldFail PreconditionViolation, {
-        create_instance_of(source, [-10.0])
+        shouldFail PreconditionViolation, {
+            create_instance_of(source, [-10.0])
+        }
     }
-  }
 
-  @Test void precondition_in_private_constructor_declaration()  {
+    @Test void precondition_in_private_constructor_declaration()  {
 
-    def source = """
+        def source = """
 import org.gcontracts.annotations.*
 
 class Account
@@ -110,14 +110,14 @@ class Account
     }
 }
     """
-    shouldFail PreconditionViolation, {
-        create_instance_of(source, [-10.0])
+        shouldFail PreconditionViolation, {
+            create_instance_of(source, [-10.0])
+        }
     }
-  }
 
-  @Test void precondition_in_private_method()  {
+    @Test void precondition_in_private_method()  {
 
-    def source = """
+        def source = """
 import org.gcontracts.annotations.*
 
 class Account
@@ -127,15 +127,15 @@ class Account
     private def withdraw(def amount) { println amount }
 }
     """
-    shouldFail PreconditionViolation, {
-        def account = create_instance_of(source)
-        account.withdraw(null)
+        shouldFail PreconditionViolation, {
+            def account = create_instance_of(source)
+            account.withdraw(null)
+        }
     }
-  }
 
-  @Test void recursive_preconditions()  {
+    @Test void recursive_preconditions()  {
 
-    def source = """
+        def source = """
 import org.gcontracts.annotations.*
 
 class Account
@@ -145,13 +145,13 @@ class Account
     private def withdraw(def amount) { if (amount < 0) return 0 else withdraw (amount - 10) }
 }
     """
-    def account = create_instance_of(source)
-    account.withdraw(10)
-  }
+        def account = create_instance_of(source)
+        account.withdraw(10)
+    }
 
-  @Test void sueer_precondition_call_should_be_done()  {
+    @Test void sueer_precondition_call_should_be_done()  {
 
-    def accountClassSource = """
+        def accountClassSource = """
 import org.gcontracts.annotations.*
 
 class Account
@@ -161,7 +161,7 @@ class Account
     def withdraw(def amount) { if (amount < 0) return 0 else withdraw (amount - 10) }
 }
     """
-    def descendantAccountClassSource = """
+        def descendantAccountClassSource = """
 import org.gcontracts.annotations.*
 
 class BetterAccount extends Account
@@ -172,18 +172,18 @@ class BetterAccount extends Account
 }
     """
 
-    add_class_to_classpath accountClassSource
+        add_class_to_classpath accountClassSource
 
-    def account = create_instance_of(descendantAccountClassSource)
+        def account = create_instance_of(descendantAccountClassSource)
 
-    shouldFail PreconditionViolation, {
-        account.withdraw(null)
+        shouldFail PreconditionViolation, {
+            account.withdraw(null)
+        }
     }
-  }
 
-  @Test void precondition_in_static_method()  {
+    @Test void precondition_in_static_method()  {
 
-    def source = """
+        def source = """
 import org.gcontracts.annotations.*
 
 class Account
@@ -195,15 +195,15 @@ class Account
     }
 }
     """
-    shouldFail PreconditionViolation, {
-        def clazz = add_class_to_classpath(source)
-        clazz.withdraw(null)
+        shouldFail PreconditionViolation, {
+            def clazz = add_class_to_classpath(source)
+            clazz.withdraw(null)
+        }
     }
-  }
 
-  @Test void precondition_in_factory_method()  {
+    @Test void precondition_in_factory_method()  {
 
-      def source = """
+        def source = """
         import org.gcontracts.annotations.*
 
         class Factory {
@@ -214,40 +214,40 @@ class Account
         }
      """
 
-      shouldFail PreconditionViolation, {
+        shouldFail PreconditionViolation, {
+            def clazz = add_class_to_classpath(source)
+            clazz.create(null)
+        }
+
+    }
+
+    @Test void multiple_precondition_checks_in_single_thread()  {
+
+        def source = """
+        import org.gcontracts.annotations.*
+
+        class Factory {
+        @Requires({ g != null })
+        static void create(def g) {
+            println g
+        }
+        }
+     """
+
         def clazz = add_class_to_classpath(source)
-        clazz.create(null)
-      }
 
-  }
-
-  @Test void multiple_precondition_checks_in_single_thread()  {
-
-      def source = """
-        import org.gcontracts.annotations.*
-
-        class Factory {
-        @Requires({ g != null })
-        static void create(def g) {
-            println g
+        shouldFail PreconditionViolation, {
+            clazz.create(null)
         }
+
+        shouldFail PreconditionViolation, {
+            clazz.create(null)
         }
-     """
-
-      def clazz = add_class_to_classpath(source)
-
-      shouldFail PreconditionViolation, {
-        clazz.create(null)
-      }
-
-      shouldFail PreconditionViolation, {
-        clazz.create(null)
-      }
     }
 
     @Test void no_explicit_return_statement()  {
 
-       def source = """
+        def source = """
         import org.gcontracts.annotations.*
 
         class A {
@@ -257,6 +257,28 @@ class Account
         }
         }
      """
+
+        def obj = create_instance_of(source)
+        shouldFail PreconditionViolation, {
+            obj.someMethod(null)
+        }
+
+        assert obj.someMethod() != null
+
+    }
+
+    @Test void requires_on_private_method()  {
+
+        def source = """
+            import org.gcontracts.annotations.*
+
+            class A {
+            @Requires({ g != null })
+            private def someMethod(def g = "test") {
+                new Object()
+            }
+            }
+         """
 
         def obj = create_instance_of(source)
         shouldFail PreconditionViolation, {

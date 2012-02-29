@@ -2,13 +2,14 @@ package org.gcontracts.tests.pre
 
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
+import org.gcontracts.PostconditionViolation
 
 /**
  * @author ast
  */
 class InheritanceTests extends BaseTestClass {
 
-  def source_parent = '''
+    def source_parent = '''
 @Contracted
 package tests
 
@@ -44,7 +45,7 @@ class Parent {
 }
 '''
 
-  def source_descendant = '''
+    def source_descendant = '''
 @Contracted
 package tests
 
@@ -77,56 +78,83 @@ class Descendant extends Parent {
 }
 '''
 
-  @Test void redefined_precondition() throws Exception {
-    // create_instance_of(source_parent)
-      add_class_to_classpath(source_parent)
-    def child = create_instance_of(source_descendant)
+    @Test void redefined_precondition() throws Exception {
+        // create_instance_of(source_parent)
+        add_class_to_classpath(source_parent)
+        def child = create_instance_of(source_descendant)
 
-    child.some_operation1(1, 1)
-  }
-
-  @Test void redefined_precondition2() throws Exception {
-    create_instance_of(source_parent)
-    def child = create_instance_of(source_descendant)
-
-    shouldFail AssertionError, {
-      child.some_operation1(0, 0)
+        child.some_operation1(1, 1)
     }
-  }
 
-  @Test void method_call_of_super_class_in_precondition() throws Exception {
-    create_instance_of(source_parent)
-    def child = create_instance_of(source_descendant)
+    @Test void redefined_precondition2() throws Exception {
+        create_instance_of(source_parent)
+        def child = create_instance_of(source_descendant)
 
-    println child.boolean_operation()
-
-    child.some_operation2()
-  }
-
-  @Test void refined_precondition_with_other_param_names() throws Exception {
-    create_instance_of(source_parent)
-    def child = create_instance_of(source_descendant)
-
-    shouldFail AssertionError, {
-      child.some_operation3(0, 0)
+        shouldFail AssertionError, {
+            child.some_operation1(0, 0)
+        }
     }
-  }
 
-  @Test void refined_precondition_with_other_param_names1() throws Exception {
-    create_instance_of(source_parent)
-    def child = create_instance_of(source_descendant)
+    @Test void method_call_of_super_class_in_precondition() throws Exception {
+        create_instance_of(source_parent)
+        def child = create_instance_of(source_descendant)
 
-    shouldFail AssertionError, {
-      child.some_operation3(0, 1)
+        println child.boolean_operation()
+
+        child.some_operation2()
     }
-  }
 
-  @Test void refined_precondition_with_other_param_names2() throws Exception {
-    create_instance_of(source_parent)
-    def child = create_instance_of(source_descendant)
+    @Test void refined_precondition_with_other_param_names() throws Exception {
+        create_instance_of(source_parent)
+        def child = create_instance_of(source_descendant)
 
-    child.some_operation3(1, 2)
-  }
+        shouldFail AssertionError, {
+            child.some_operation3(0, 0)
+        }
+    }
+
+    @Test void refined_precondition_with_other_param_names1() throws Exception {
+        create_instance_of(source_parent)
+        def child = create_instance_of(source_descendant)
+
+        shouldFail AssertionError, {
+            child.some_operation3(0, 1)
+        }
+    }
+
+    @Test void refined_precondition_with_other_param_names2() throws Exception {
+        create_instance_of(source_parent)
+        def child = create_instance_of(source_descendant)
+
+        child.some_operation3(1, 2)
+    }
+
+
+    @Test void abstract_class_and_concrete_class_in_single_script() {
+
+        add_class_to_classpath """
+            import org.gcontracts.annotations.*
+
+            abstract class Base {
+                @Ensures({ result })
+                abstract List<String> sources()
+            }
+        """
+
+        def concreteClass = add_class_to_classpath """
+            import org.gcontracts.annotations.*
+
+            class ConcreteClass extends Base {
+                public List<String> sources
+                public List<String> sources () { sources }
+            }
+        """
+        def c = concreteClass.newInstance()
+
+        shouldFail PostconditionViolation, {
+            c.sources()
+        }
+    }
 
 
 }
