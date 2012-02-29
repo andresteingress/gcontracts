@@ -79,6 +79,9 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
     @Override
     public void visitClass(ClassNode node) {
+        // in case of interfaces
+        if (node == null) return;
+
         if ( !(CandidateChecks.isInterfaceContractsCandidate(node) || CandidateChecks.isContractsCandidate(node)) ) return;
 
         classNode = node;
@@ -87,8 +90,10 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         if (CandidateChecks.isContractsCandidate(node))  {
             final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(node, ContractElement.class.getName());
             for (AnnotationNode annotationNode : annotationNodes)  {
-                ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
-                if (closureExpression == null) continue;
+                Expression expression = annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
+                if (expression == null || expression instanceof ClassExpression) continue;
+
+                ClosureExpression closureExpression = (ClosureExpression) expression;
 
                 ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, annotationNode, sourceUnit);
                 validator.visitClosureExpression(closureExpression);
@@ -137,6 +142,12 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         }
 
         super.visitClass(node);
+
+        // generate closure classes for the super class and all implemented interfaces
+        visitClass(node.getSuperClass());
+        for (ClassNode i : node.getInterfaces())  {
+            visitClass(i);
+        }
     }
 
     @Override
@@ -158,8 +169,10 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         // check whether this is a pre- or postcondition
         boolean isPostcondition = AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), org.gcontracts.annotations.meta.Postcondition.class.getName());
 
-        ClosureExpression closureExpression = (ClosureExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
-        if (closureExpression == null) return;
+        Expression expression = annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
+        if (expression == null || expression instanceof ClassExpression) return;
+
+        ClosureExpression closureExpression = (ClosureExpression) expression;
 
         ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, annotationNode, sourceUnit);
         validator.visitClosureExpression(closureExpression);
@@ -207,8 +220,10 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         // check whether this is a pre- or postcondition
         boolean isPostcondition = AnnotationUtils.hasAnnotationOfType(annotation, org.gcontracts.annotations.meta.Postcondition.class.getName());
 
-        ClosureExpression closureExpression = (ClosureExpression) processorAnnotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
-        if (closureExpression == null) return;
+        Expression expression = processorAnnotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
+        if (expression == null || expression instanceof ClassExpression) return;
+
+        ClosureExpression closureExpression = (ClosureExpression) expression;
 
         List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
 

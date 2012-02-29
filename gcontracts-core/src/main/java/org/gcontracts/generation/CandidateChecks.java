@@ -67,7 +67,7 @@ public class CandidateChecks {
      * @return whether the given <tt>type</tt> is a candidate for applying interface contract assertions
      */
     public static boolean isInterfaceContractsCandidate(final ClassNode type)  {
-        return type.isInterface() && !type.isSynthetic() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody() && !isRuntimeClass(type);
+        return type != null && type.isInterface() && !type.isSynthetic() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody() && !isRuntimeClass(type);
     }
 
     /**

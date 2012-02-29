@@ -29,13 +29,11 @@ class AnnotationContractTests {
     public @interface NotNull {}
 '''
         def source_parameter = '''
-    @Contracted
     package tests
 
     import org.gcontracts.annotations.*
 
     class Tester {
-
         def method(@NotNull param) {}
     }'''
 

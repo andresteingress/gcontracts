@@ -28,6 +28,7 @@ import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.codehaus.groovy.classgen.Verifier;
+import org.codehaus.groovy.transform.stc.StaticTypesMarker;
 
 import java.util.*;
 
