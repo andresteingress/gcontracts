@@ -79,9 +79,6 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
         generateAnnotationClosureClasses(unit, source, classNodes);
 
-        // at this point all classes in this module should not contain closure expressions as annotation arguments
-        final ConfiguratorSetupVisitor configuratorSetupVisitor = new ConfiguratorSetupVisitor(unit, source);
-
         for (final ClassNode classNode : moduleNode.getClasses())  {
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
@@ -89,18 +86,14 @@ public class GContractsASTTransformation extends BaseASTTransformation {
             contractElementVisitor.visitClass(classNode);
 
             if (!contractElementVisitor.isFoundContractElement()) continue;
-
-            final ProcessingContextInformation pci = new ProcessingContextInformation(classNode, unit, source);
-
-            configuratorSetupVisitor.visitClass(classNode);
-
             markClassNodeAsContracted(classNode);
 
-            new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
+            new ConfigurationSetup().init(classNode);
 
+            final ProcessingContextInformation pci = new ProcessingContextInformation(classNode, unit, source);
+            new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
             new AnnotationProcessorVisitor(unit, source, pci).visitClass(classNode);
             new DomainModelInjectionVisitor(unit, source, pci).visitClass(classNode);
-
             new LifecycleAfterTransformationVisitor(unit, source, pci).visitClass(classNode);
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
         }
@@ -111,19 +104,6 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
         if (classNode.getAnnotations(contractedAnnotationClassNode).isEmpty())
             classNode.addAnnotation(new AnnotationNode(contractedAnnotationClassNode));
-    }
-
-    private void markAnnotationContract(final ClassNode classNode) {
-        final ClassNode retentionClassNode = ClassHelper.makeWithoutCaching(Retention.class);
-        final AnnotationNode retentionAnnotationNode = new AnnotationNode(retentionClassNode);
-        retentionAnnotationNode.addMember("value", new PropertyExpression(new ClassExpression(ClassHelper.makeWithoutCaching(RetentionPolicy.class)), "RUNTIME"));
-
-        final ClassNode targetClassNode = ClassHelper.makeWithoutCaching(Target.class);
-        final AnnotationNode targetAnnotationNode = new AnnotationNode(targetClassNode);
-        targetAnnotationNode.addMember("value", new PropertyExpression(new ClassExpression(ClassHelper.makeWithoutCaching(ElementType.class)), "PARAMETER"));
-
-        classNode.addAnnotation(retentionAnnotationNode);
-        classNode.addAnnotation(targetAnnotationNode);
     }
 }
 

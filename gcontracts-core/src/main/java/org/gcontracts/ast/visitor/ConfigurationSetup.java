@@ -43,16 +43,7 @@ import org.objectweb.asm.Opcodes;
  *
  * @author ast
  */
-public class ConfiguratorSetupVisitor extends BaseVisitor {
-
-    public ConfiguratorSetupVisitor(SourceUnit sourceUnit, ReaderSource source) {
-        super(sourceUnit, source);
-    }
-
-    @Override
-    public void visitClass(ClassNode node) {
-        addConfigurationVariable(node);
-    }
+public class ConfigurationSetup {
 
     /**
      * Adds an instance field which allows to control whether GContract assertions
@@ -62,11 +53,11 @@ public class ConfiguratorSetupVisitor extends BaseVisitor {
      *
      * @param type the current {@link ClassNode}
      */
-    protected void addConfigurationVariable(final ClassNode type) {
+    public void init(final ClassNode type) {
         Validate.notNull(type);
 
         MethodCallExpression methodCall = new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(Configurator.class)), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
-        final FieldNode fieldNode = type.addField(GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, methodCall);
+        final FieldNode fieldNode = type.addField(BaseVisitor.GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, methodCall);
         fieldNode.setSynthetic(true);
     }
 }
