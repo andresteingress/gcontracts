@@ -1,8 +1,9 @@
 package org.gcontracts.ast.visitor;
 
 /**
- * User: asteingress
- * Date: 3/1/12
+ * Holds all constants to be used as AST node meta data keys.
+ *
+ * @author ast
  */
 public interface ASTNodeMetaData {
     public static final String PROCESSED = "org.gcontracts.CLOSURE_REPLACED";

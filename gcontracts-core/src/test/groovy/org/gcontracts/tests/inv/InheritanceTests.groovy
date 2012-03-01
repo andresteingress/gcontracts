@@ -2,13 +2,14 @@ package org.gcontracts.tests.inv
 
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
+import org.gcontracts.ClassInvariantViolation
 
 /**
  * @author ast
  */
 class InheritanceTests extends BaseTestClass {
 
-  def source1 = '''
+    def source1 = '''
 @Contracted
 package tests
 
@@ -22,7 +23,7 @@ class A {
 }
 '''
 
-  def source2 = '''
+    def source2 = '''
 @Contracted
 package tests
 
@@ -43,7 +44,7 @@ class B extends A {
 
 '''
 
-  def source3 = '''
+    def source3 = '''
 @Contracted
 package tests
 
@@ -59,7 +60,7 @@ class C extends B {
 
 '''
 
-  def source11 = '''
+    def source11 = '''
 @Contracted
 package tests
 
@@ -75,7 +76,7 @@ class A {
 
 '''
 
-  def source12 = '''
+    def source12 = '''
 @Contracted
 package tests
 
@@ -88,7 +89,7 @@ class B extends A {
 
 '''
 
-  def source21 = '''
+    def source21 = '''
 @Contracted
 package tests
 
@@ -109,7 +110,7 @@ class PrivateConstructor {
 }
 '''
 
-  def source31 = '''
+    def source31 = '''
 @Contracted
 package tests
 
@@ -123,7 +124,7 @@ abstract class A {
 
 '''
 
-  def source32 = '''
+    def source32 = '''
 @Contracted
 package tests
 
@@ -135,7 +136,7 @@ class B extends A {
 
 '''
 
-  def source41 = '''
+    def source41 = '''
 @Contracted
 package tests
 
@@ -147,7 +148,7 @@ class A {
 }
 '''
 
-  def source51 = '''
+    def source51 = '''
 @Contracted
 package tests
 
@@ -164,7 +165,7 @@ class A {
 }
 '''
 
-  def source52 = '''
+    def source52 = '''
 @Contracted
 package tests
 
@@ -181,7 +182,7 @@ class B extends A {
 }
 '''
 
-  def source61 = '''
+    def source61 = '''
 @Contracted
 package tests
 
@@ -198,7 +199,7 @@ class A {
 }
 '''
 
-  def source62 = '''
+    def source62 = '''
 @Contracted
 package tests
 
@@ -253,99 +254,99 @@ class Account {
 '''
 
 
-  @Test void two_way_inheritance_path()  {
-    create_instance_of(source1, ['test'])
-    create_instance_of(source2, ['test', 'test2'])
+    @Test void two_way_inheritance_path()  {
+        create_instance_of(source1, ['test'])
+        create_instance_of(source2, ['test', 'test2'])
 
-    shouldFail AssertionError, {
-      create_instance_of(source2, [null, 'test2'])
-    }
-  }
-
-  @Test void three_way_inheritance_path()  {
-    create_instance_of(source1, ['test'])
-    create_instance_of(source2, ['test', 'test2'])
-    create_instance_of(source3, ['test', 'test2', 'test3'])
-
-    shouldFail AssertionError, {
-      create_instance_of(source3, [null, 'test2', 'test3'])
+        shouldFail AssertionError, {
+            create_instance_of(source2, [null, 'test2'])
+        }
     }
 
-    shouldFail AssertionError, {
-      create_instance_of(source3, [null, null, 'test3'])
+    @Test void three_way_inheritance_path()  {
+        create_instance_of(source1, ['test'])
+        create_instance_of(source2, ['test', 'test2'])
+        create_instance_of(source3, ['test', 'test2', 'test3'])
+
+        shouldFail AssertionError, {
+            create_instance_of(source3, [null, 'test2', 'test3'])
+        }
+
+        shouldFail AssertionError, {
+            create_instance_of(source3, [null, null, 'test3'])
+        }
+
+        shouldFail AssertionError, {
+            create_instance_of(source3, ['test', null, 'test3'])
+        }
     }
 
-    shouldFail AssertionError, {
-      create_instance_of(source3, ['test', null, 'test3'])
-    }
-  }
+    /*
+   see: http://gcontracts.lighthouseapp.com/projects/71511/tickets/3-accessing-private-variables-from-invariant
+   @Test void with_private_instance_variable_in_super_class()  {
+      create_instance_of(source11, ['test'])
+      create_instance_of(source12, ['test'])
+  
+      shouldFail AssertionError, {
+        create_instance_of(source12, [''])
+      }
+    }*/
 
- /*
- see: http://gcontracts.lighthouseapp.com/projects/71511/tickets/3-accessing-private-variables-from-invariant
- @Test void with_private_instance_variable_in_super_class()  {
-    create_instance_of(source11, ['test'])
-    create_instance_of(source12, ['test'])
+    @Test void invariant_check_on_method_call()  {
+        create_instance_of(source1, ['test'])
+        def b = create_instance_of(source2, ['test', 'test2'])
 
-    shouldFail AssertionError, {
-      create_instance_of(source12, [''])
-    }
-  }*/
+        shouldFail AssertionError, {
+            b.set_values(null, null)
+        }
 
-  @Test void invariant_check_on_method_call()  {
-    create_instance_of(source1, ['test'])
-    def b = create_instance_of(source2, ['test', 'test2'])
+        shouldFail AssertionError, {
+            b.set_values(null, '')
+        }
 
-    shouldFail AssertionError, {
-      b.set_values(null, null)
-    }
-
-    shouldFail AssertionError, {
-      b.set_values(null, '')
-    }
-
-    shouldFail AssertionError, {
-      b.set_values('', null)
-    }
-  }
-
-  @Test void private_constructor_creation()  {
-    create_instance_of(source21)
-  }
-
-  @Test void public_constructor_creation()  {
-    shouldFail AssertionError, {
-      create_instance_of(source21, [ 'test1', null ])
-    }
-  }
-
-  @Test void inherited_class_invariant()  {
-    add_class_to_classpath(source51)
-    def b = create_instance_of(source52, [])
-
-    shouldFail AssertionError, {
-      b.set_values(null)
-    }
-  }
-
-  @Test void inherited_class_invariant_with_private_instance_variable()  {
-    add_class_to_classpath(source61)
-    def b = create_instance_of(source62, [])
-
-    shouldFail AssertionError, {
-      b.set_values(null)
+        shouldFail AssertionError, {
+            b.set_values('', null)
+        }
     }
 
-  }
+    @Test void private_constructor_creation()  {
+        create_instance_of(source21)
+    }
 
-  @Test void recursive_class_invariant()  {
+    @Test void public_constructor_creation()  {
+        shouldFail AssertionError, {
+            create_instance_of(source21, [ 'test1', null ])
+        }
+    }
 
-     def b = create_instance_of(source71)
-     assert b != null
-  }
-    
-  @Test void abstract_method_with_postcondition()  {
+    @Test void inherited_class_invariant()  {
+        add_class_to_classpath(source51)
+        def b = create_instance_of(source52, [])
 
-      add_class_to_classpath """
+        shouldFail AssertionError, {
+            b.set_values(null)
+        }
+    }
+
+    @Test void inherited_class_invariant_with_private_instance_variable()  {
+        add_class_to_classpath(source61)
+        def b = create_instance_of(source62, [])
+
+        shouldFail AssertionError, {
+            b.set_values(null)
+        }
+
+    }
+
+    @Test void recursive_class_invariant()  {
+
+        def b = create_instance_of(source71)
+        assert b != null
+    }
+
+    @Test void abstract_method_with_postcondition()  {
+
+        add_class_to_classpath """
       package tests
 
       import org.gcontracts.annotations.*
@@ -356,7 +357,7 @@ class Account {
       }
       """
 
-      def c = add_class_to_classpath """
+        def c = add_class_to_classpath """
       package tests
 
       class DirectImpl extends Base {
@@ -366,6 +367,25 @@ class Account {
       }
       """
 
-      c.newInstance().sources()
-  }
+        c.newInstance().sources()
+    }
+
+    @Test(expected = ClassInvariantViolation) void separate_class_invariant()  {
+        def c = add_class_to_classpath """
+            package tests
+      
+            import org.gcontracts.annotations.*
+      
+            @Invariant({
+                i_never_null: i != null
+                j_never_null: j != null
+            })
+            class Test {
+                private def i
+                private def j
+            }
+            """
+        
+        c.newInstance()
+    }
 }
