@@ -24,7 +24,6 @@ class A {
     def source2 = '''
 import org.gcontracts.annotations.*
 
-@Contracted
 @Invariant({ property != null })
 class A {
 

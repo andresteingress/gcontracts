@@ -38,17 +38,6 @@ public class CandidateChecks {
 
     /**
      * Checks whether the given {@link org.codehaus.groovy.ast.ClassNode} is a candidate
-     * for annotation contracts.
-     *
-     * @param type the {@link org.codehaus.groovy.ast.ClassNode} to be checked
-     * @return whether the given <tt>type</tt> is a candidate for annotation contracts
-     */
-    public static boolean isAnnotationContractCandidate(final ClassNode type)  {
-        return  type.isAnnotationDefinition() && !type.isSynthetic() && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody() && !isRuntimeClass(type);
-    }
-
-    /**
-     * Checks whether the given {@link org.codehaus.groovy.ast.ClassNode} is a candidate
      * for applying contracts.
      *
      * @param type the {@link org.codehaus.groovy.ast.ClassNode} to be checked

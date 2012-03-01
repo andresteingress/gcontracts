@@ -26,16 +26,13 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
-import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
-import org.gcontracts.common.impl.AnnotationContractProcessor;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
-import org.objectweb.asm.Opcodes;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -72,10 +69,6 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
             if (!CandidateChecks.isClassInvariantCandidate(type, methodNode) && !CandidateChecks.isPreOrPostconditionCandidate(type, methodNode)) continue;
 
             handleMethodNode(methodNode, AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName()));
-
-            for (Parameter parameter : methodNode.getParameters())  {
-                handleParameterNode(parameter, methodNode);
-            }
         }
 
         // visit all interfaces of this class
@@ -223,23 +216,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         }
     }
 
-    private void handleParameterNode(Parameter parameter, MethodNode methodNode) {
-        Validate.notNull(parameter);
-
-        final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(parameter, ContractElement.class.getName());
-
-        for (AnnotationNode annotationNode : annotationNodes)  {
-            AnnotationProcessor processor = createAnnotationProcessorFromClosure(annotationNode);
-            if (processor == null) continue;
-
-            processor.process(pci, pci.contract(), methodNode.getDeclaringClass(), methodNode, parameter);
-        }
-    }
-
     private AnnotationProcessor createAnnotationProcessor(AnnotationNode annotationNode) {
-        AnnotationProcessor processor = createAnnotationProcessorFromClosure(annotationNode);
-        if (processor != null) return processor;
-
         final AnnotationProcessorImplementation annotationProcessingAnno = (AnnotationProcessorImplementation) annotationNode.getClassNode().getTypeClass().getAnnotation(AnnotationProcessorImplementation.class);
         if (annotationProcessingAnno == null) return null;
 
@@ -251,20 +228,5 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
         } catch (IllegalAccessException e) {}
 
         return null;
-    }
-
-    private AnnotationProcessor createAnnotationProcessorFromClosure(AnnotationNode annotationNode) {
-        List<AnnotationNode> annotationNodes = annotationNode.getClassNode().getAnnotations(ClassHelper.makeWithoutCaching(AnnotationContract.class));
-        if (annotationNodes == null || annotationNodes.isEmpty()) return null;
-
-        List<ClassExpression> classExpressionList = new ArrayList<ClassExpression>();
-
-        for (AnnotationNode an : annotationNodes)  {
-            final ClassExpression closureClass = (ClassExpression) an.getMember(CLOSURE_ATTRIBUTE_NAME);
-            Validate.notNull(closureClass);
-            classExpressionList.add(closureClass);
-        }
-
-        return new AnnotationContractProcessor(annotationNode, classExpressionList);
     }
 }

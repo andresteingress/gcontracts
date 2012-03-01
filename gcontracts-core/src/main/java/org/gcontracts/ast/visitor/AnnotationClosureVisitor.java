@@ -33,7 +33,6 @@ import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ClassInvariantViolation;
 import org.gcontracts.PostconditionViolation;
 import org.gcontracts.PreconditionViolation;
-import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.annotations.meta.ClassInvariant;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.annotations.meta.Postcondition;
@@ -128,16 +127,6 @@ public class AnnotationClosureVisitor extends BaseVisitor {
                 value.setSourcePosition(annotationNode);
 
                 annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
-            }
-        }
-
-        // if the current class node has an annotationprocessor closure we'll
-        // generate a closure class too
-        if (AnnotationUtils.hasAnnotationOfType(node, AnnotationContract.class.getName()))  {
-            List<AnnotationNode> annotationProcessorClosureAnno = node.getAnnotations(ClassHelper.makeWithoutCaching(AnnotationContract.class.getName()));
-            // only handle the first processor
-            for (AnnotationNode annotationNode : annotationProcessorClosureAnno)  {
-                replaceWithAnnotationProcessorClosureWithClassReference(node, annotationNode);
             }
         }
 

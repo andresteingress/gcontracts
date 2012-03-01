@@ -30,11 +30,9 @@ import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.gcontracts.annotations.Contracted;
-import org.gcontracts.annotations.meta.AnnotationContract;
 import org.gcontracts.ast.visitor.*;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
-import org.gcontracts.util.AnnotationUtils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -85,12 +83,6 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         final ConfiguratorSetupVisitor configuratorSetupVisitor = new ConfiguratorSetupVisitor(unit, source);
 
         for (final ClassNode classNode : moduleNode.getClasses())  {
-            if (CandidateChecks.isAnnotationContractCandidate(classNode))  {
-                if (AnnotationUtils.hasAnnotationOfType(classNode, AnnotationContract.class.getName()))  {
-                    markAnnotationContract(classNode);
-                }
-            }
-
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 
             final ContractElementVisitor contractElementVisitor = new ContractElementVisitor(unit, source);
@@ -104,6 +96,8 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
             markClassNodeAsContracted(classNode);
 
+
+
             new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
 
             new AnnotationProcessorVisitor(unit, source, pci).visitClass(classNode);
@@ -116,7 +110,9 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
     private void markClassNodeAsContracted(final ClassNode classNode) {
         final ClassNode contractedAnnotationClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
-        classNode.addAnnotation(new AnnotationNode(contractedAnnotationClassNode));
+
+        if (classNode.getAnnotations(contractedAnnotationClassNode).isEmpty())
+            classNode.addAnnotation(new AnnotationNode(contractedAnnotationClassNode));
     }
 
     private void markAnnotationContract(final ClassNode classNode) {
