@@ -33,7 +33,6 @@ import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ClassInvariantViolation;
 import org.gcontracts.PostconditionViolation;
 import org.gcontracts.PreconditionViolation;
-import org.gcontracts.annotations.meta.ClassInvariant;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.annotations.meta.Postcondition;
 import org.gcontracts.classgen.asm.ContractClosureWriter;
@@ -64,7 +63,6 @@ import java.util.*;
  */
 public class AnnotationClosureVisitor extends BaseVisitor {
 
-    private static final String CLASS_INVARIANT_TYPE_NAME = ClassInvariant.class.getName();
     private static final String POSTCONDITION_TYPE_NAME = Postcondition.class.getName();
 
     private static final ClassNode FIELD_VALUES = ClassHelper.makeCached(FieldValues.class);
@@ -199,50 +197,6 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         value.setSourcePosition(annotationNode);
 
         annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
-    }
-
-    private void replaceWithAnnotationProcessorClosureWithClassReference(ClassNode annotation, AnnotationNode processorAnnotationNode) {
-        Validate.notNull(annotation);
-        Validate.notNull(processorAnnotationNode);
-        // methodNode could be null in the case of handling an annotation processor closure...
-
-        // check whether this is a pre- or postcondition
-        boolean isPostcondition = AnnotationUtils.hasAnnotationOfType(annotation, org.gcontracts.annotations.meta.Postcondition.class.getName());
-
-        Expression expression = processorAnnotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
-        if (expression == null || expression instanceof ClassExpression) return;
-
-        ClosureExpression closureExpression = (ClosureExpression) expression;
-
-        List<Parameter> parameters = new ArrayList<Parameter>(Arrays.asList(closureExpression.getParameters()));
-
-        final List<BooleanExpression> booleanExpressions = ExpressionUtils.getBooleanExpression(closureExpression);
-        if (booleanExpressions == null || booleanExpressions.isEmpty()) return;
-
-        BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
-
-        BlockStatement newClosureBlockStatement = TryCatchBlockGenerator.generateTryCatchBlock(
-                isPostcondition ? ClassHelper.makeWithoutCaching(PostconditionViolation.class) : ClassHelper.makeWithoutCaching(PreconditionViolation.class),
-                "<" + annotation.getName() + "> Annotation Closure Contract has been violated \n\n",
-                AssertStatementCreationUtility.getAssertionStatemens(booleanExpressions)
-        );
-
-        newClosureBlockStatement.setSourcePosition(closureBlockStatement);
-
-        ClosureExpression rewrittenClosureExpression = new ClosureExpression(parameters.toArray(new Parameter[parameters.size()]), newClosureBlockStatement);
-        rewrittenClosureExpression.setSourcePosition(closureExpression);
-        rewrittenClosureExpression.setDeclaringClass(closureExpression.getDeclaringClass());
-        rewrittenClosureExpression.setSynthetic(true);
-        rewrittenClosureExpression.setVariableScope(closureExpression.getVariableScope());
-        rewrittenClosureExpression.setType(closureExpression.getType());
-
-        ClassNode closureClassNode = contractClosureWriter.createClosureClass(classNode, null, rewrittenClosureExpression, false, false, Opcodes.ACC_PUBLIC);
-        classNode.getModule().addClass(closureClassNode);
-
-        final ClassExpression value = new ClassExpression(closureClassNode);
-        value.setSourcePosition(annotation);
-
-        processorAnnotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
     }
 
     static class ClosureExpressionValidator extends ClassCodeVisitorSupport implements Opcodes {
