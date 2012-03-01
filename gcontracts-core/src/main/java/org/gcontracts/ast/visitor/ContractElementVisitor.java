@@ -16,7 +16,7 @@ import org.gcontracts.util.AnnotationUtils;
  *
  * @author andre.steingress@gmail.com
  */
-public class ContractElementVisitor extends BaseVisitor {
+public class ContractElementVisitor extends BaseVisitor implements ASTNodeMetaData {
 
     private ClassNode classNode;
     private boolean foundContractElement = false;
@@ -27,8 +27,7 @@ public class ContractElementVisitor extends BaseVisitor {
 
     @Override
     public void visitClass(ClassNode node) {
-        if (!CandidateChecks.isContractsCandidate(node) &&
-                !CandidateChecks.isInterfaceContractsCandidate(node)) return;
+        if (!CandidateChecks.isContractsCandidate(node) && !CandidateChecks.isInterfaceContractsCandidate(node)) return;
 
         classNode = node;
 
@@ -38,9 +37,7 @@ public class ContractElementVisitor extends BaseVisitor {
             return;
         }
 
-
-
-        foundContractElement |= (AnnotationUtils.hasMetaAnnotations(node, ContractElement.class.getName()).size() > 0);
+        foundContractElement |= classNode.getNodeMetaData(CLOSURE_REPLACED) != null;
 
         if (!foundContractElement)  {
             super.visitClass(node);
@@ -63,14 +60,7 @@ public class ContractElementVisitor extends BaseVisitor {
     @Override
     protected void visitConstructorOrMethod(MethodNode methodNode, boolean isConstructor) {
         if (!CandidateChecks.couldBeContractElementMethodNode(classNode, methodNode) && !(CandidateChecks.isPreconditionCandidate(classNode, methodNode))) return;
-
-        foundContractElement |= AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName()).size() > 0;
-        if (foundContractElement) return;
-
-        for (Parameter param : methodNode.getParameters())  {
-            foundContractElement |= AnnotationUtils.hasMetaAnnotations(param, ContractElement.class.getName()).size() > 0;
-            if (foundContractElement) return;
-        }
+        foundContractElement |= methodNode.getNodeMetaData(CLOSURE_REPLACED) != null;
     }
 
     public boolean isFoundContractElement() {
