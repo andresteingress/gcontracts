@@ -66,12 +66,6 @@ public class ContractClosureWriter {
         // contains all params of the original method
         Parameter[] parameters = parametersTemp.toArray(new Parameter[parametersTemp.size()]);
 
-        if (parameters.length == 0) {
-            // let's create a default 'it' parameter
-            Parameter it = new Parameter(ClassHelper.OBJECT_TYPE, "it", ConstantExpression.NULL);
-            parameters = new Parameter[] { it };
-        }
-
         Parameter[] localVariableParams = getClosureSharedVariables(expression);
         removeInitialValues(localVariableParams);
 
