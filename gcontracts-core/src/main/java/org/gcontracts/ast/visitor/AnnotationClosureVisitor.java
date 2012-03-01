@@ -61,7 +61,7 @@ import java.util.*;
  *
  * @author ast
  */
-public class AnnotationClosureVisitor extends BaseVisitor {
+public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMetaData{
 
     private static final String POSTCONDITION_TYPE_NAME = Postcondition.class.getName();
 
@@ -76,15 +76,12 @@ public class AnnotationClosureVisitor extends BaseVisitor {
 
     @Override
     public void visitClass(ClassNode node) {
-        // in case of interfaces
         if (node == null) return;
-
         if ( !(CandidateChecks.isInterfaceContractsCandidate(node) || CandidateChecks.isContractsCandidate(node)) ) return;
 
         classNode = node;
 
-        // only check classes for invariants
-        if (CandidateChecks.isContractsCandidate(node))  {
+        if (classNode.getNodeMetaData(PROCESSED) == null  && CandidateChecks.isContractsCandidate(node))  {
             final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(node, ContractElement.class.getName());
             for (AnnotationNode annotationNode : annotationNodes)  {
                 Expression expression = annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
@@ -125,6 +122,8 @@ public class AnnotationClosureVisitor extends BaseVisitor {
                 value.setSourcePosition(annotationNode);
 
                 annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
+
+                markClosureReplaced(classNode);
             }
         }
 
@@ -135,16 +134,21 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         for (ClassNode i : node.getInterfaces())  {
             visitClass(i);
         }
+
+        markProcessed(classNode);
     }
 
     @Override
     public void visitConstructorOrMethod(MethodNode methodNode, boolean isConstructor) {
         if (!CandidateChecks.couldBeContractElementMethodNode(classNode, methodNode) && !(CandidateChecks.isPreconditionCandidate(classNode, methodNode))) return;
+        if (methodNode.getNodeMetaData(PROCESSED) != null) return;
 
         final List<AnnotationNode> annotationNodes = AnnotationUtils.hasMetaAnnotations(methodNode, ContractElement.class.getName());
         for (AnnotationNode annotationNode : annotationNodes)  {
             replaceWithClosureClassReference(annotationNode, methodNode);
         }
+
+        markProcessed(methodNode);
 
         super.visitConstructorOrMethod(methodNode, isConstructor);
     }
@@ -197,6 +201,18 @@ public class AnnotationClosureVisitor extends BaseVisitor {
         value.setSourcePosition(annotationNode);
 
         annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
+
+        markClosureReplaced(methodNode);
+    }
+
+    private void markProcessed(ASTNode someNode) {
+        if (someNode.getNodeMetaData(PROCESSED) == null)
+            someNode.setNodeMetaData(PROCESSED, Boolean.TRUE);
+    }
+
+    private void markClosureReplaced(ASTNode someNode) {
+        if (someNode.getNodeMetaData(CLOSURE_REPLACED) == null)
+            someNode.setNodeMetaData(CLOSURE_REPLACED, Boolean.TRUE);
     }
 
     static class ClosureExpressionValidator extends ClassCodeVisitorSupport implements Opcodes {

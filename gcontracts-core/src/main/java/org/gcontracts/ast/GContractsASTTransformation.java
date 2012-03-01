@@ -96,8 +96,6 @@ public class GContractsASTTransformation extends BaseASTTransformation {
 
             markClassNodeAsContracted(classNode);
 
-
-
             new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
 
             new AnnotationProcessorVisitor(unit, source, pci).visitClass(classNode);

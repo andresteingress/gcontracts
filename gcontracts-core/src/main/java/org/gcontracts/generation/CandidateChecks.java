@@ -25,6 +25,7 @@ package org.gcontracts.generation;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.PropertyNode;
+import org.gcontracts.ast.visitor.AnnotationClosureVisitor;
 
 /**
  * <p>
@@ -38,14 +39,17 @@ public class CandidateChecks {
 
     /**
      * Checks whether the given {@link org.codehaus.groovy.ast.ClassNode} is a candidate
-     * for applying contracts.
+     * for applying contracts. <p/>
+     *
+     * If the given class node has already been processed in this compilation run, this
+     * method will return <tt>false</tt>.
      *
      * @param type the {@link org.codehaus.groovy.ast.ClassNode} to be checked
      * @return whether the given <tt>type</tt> is a candidate for applying contract assertions
      */
     public static boolean isContractsCandidate(final ClassNode type)  {
         return
-                !type.isSynthetic() && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody() && !isRuntimeClass(type);
+               type != null && !type.isSynthetic() && !type.isInterface() && !type.isEnum() && !type.isGenericsPlaceHolder() && !type.isScript() && !type.isScriptBody() && !isRuntimeClass(type);
     }
 
     /**

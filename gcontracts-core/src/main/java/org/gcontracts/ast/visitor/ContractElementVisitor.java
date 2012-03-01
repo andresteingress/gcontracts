@@ -38,6 +38,8 @@ public class ContractElementVisitor extends BaseVisitor {
             return;
         }
 
+
+
         foundContractElement |= (AnnotationUtils.hasMetaAnnotations(node, ContractElement.class.getName()).size() > 0);
 
         if (!foundContractElement)  {
