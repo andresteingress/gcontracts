@@ -37,7 +37,7 @@ import java.util.TreeMap;
  */
 public class ViolationTracker {
 
-    public static final ThreadLocal<ViolationTracker> INSTANCE = new ThreadLocal<ViolationTracker>();
+    public static ThreadLocal<ViolationTracker> INSTANCE = new ThreadLocal<ViolationTracker>();
 
     public static void init()  {
         INSTANCE.set(new ViolationTracker());

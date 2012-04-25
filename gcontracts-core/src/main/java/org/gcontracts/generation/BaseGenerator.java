@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>
+ * <pe
  * Base class for GContracts code generators.
  * </p>
  *
@@ -46,8 +46,6 @@ import java.util.List;
 public abstract class BaseGenerator {
 
     public static final String INVARIANT_CLOSURE_PREFIX = "invariant";
-    public static final String LOCK_FIELD_NAME = "$_gc_lock";
-    public static final String LOCK_STATIC_FIELD_NAME = "$_gc_slock";
 
     protected final ReaderSource source;
 
@@ -79,16 +77,11 @@ public abstract class BaseGenerator {
         final VariableExpression $_gc_result = new VariableExpression("$_gc_result", ClassHelper.boolean_TYPE);
         $_gc_result.setAccessedVariable($_gc_result);
 
-        final FieldExpression lockFieldExpression = methodNode.isStatic() ? new FieldExpression(type.getField(LOCK_STATIC_FIELD_NAME)) : new FieldExpression(type.getField(LOCK_FIELD_NAME));
-
         final BlockStatement assertBlockStatement = new BlockStatement();
         final TryCatchStatement lockTryCatchStatement = new TryCatchStatement(assertBlockStatement, new BlockStatement(Arrays.<Statement>asList(
-                new ExpressionStatement(new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "clear", new ArgumentListExpression(Arrays.<Expression>asList(new ConstantExpression(type.getName()), new ConstantExpression(methodNode.getTypeDescriptor()), new ConstantExpression(assertionType), methodNode.isStatic() ? ConstantExpression.TRUE : ConstantExpression.FALSE)))),
-                new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "unlock", ArgumentListExpression.EMPTY_ARGUMENTS))
+                new ExpressionStatement(new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "clear", new ArgumentListExpression(Arrays.<Expression>asList(new ConstantExpression(type.getName()), new ConstantExpression(methodNode.getTypeDescriptor()), new ConstantExpression(assertionType), methodNode.isStatic() ? ConstantExpression.TRUE : ConstantExpression.FALSE))))
         ), new VariableScope()));
         final BlockStatement ifBlockStatement = new BlockStatement();
-
-        assertBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(lockFieldExpression, "lock", ArgumentListExpression.EMPTY_ARGUMENTS)));
 
         assertBlockStatement.addStatement(new IfStatement(new BooleanExpression(
                 new MethodCallExpression(new ClassExpression(ClassHelper.make(ContractExecutionTracker.class)), "track", new ArgumentListExpression(Arrays.<Expression>asList(new ConstantExpression(type.getName()), new ConstantExpression(methodNode.getTypeDescriptor()), new ConstantExpression(assertionType), methodNode.isStatic() ? ConstantExpression.TRUE : ConstantExpression.FALSE)))),

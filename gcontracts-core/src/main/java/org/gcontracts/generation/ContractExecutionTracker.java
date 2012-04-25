@@ -71,13 +71,16 @@ public class ContractExecutionTracker {
         }
     }
 
-    private static ThreadLocal<Stack<ContractExecution>> executions = new ThreadLocal<Stack<ContractExecution>>()  {
+
+    static class ContractExecutionThreadLocal extends ThreadLocal<Stack<ContractExecution>> {
 
         @Override
         protected Stack<ContractExecution> initialValue() {
             return new Stack<ContractExecution>();
         }
-    };
+    }
+
+    private static ThreadLocal<Stack<ContractExecution>> executions = new ContractExecutionThreadLocal();
 
     public static boolean track(String className, String methodIdentifier, String assertionType, boolean isStatic)  {
         final ContractExecution ce = new ContractExecution(className, methodIdentifier, assertionType, isStatic);

@@ -45,19 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class BaseLifecycle implements Lifecycle {
 
-    public void beforeProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {
-        addConcurrentLockField(classNode);
-    }
-
-    private void addConcurrentLockField(final ClassNode classNode) {
-        final ClassNode reentrantLockClassNode = ClassHelper.make(ReentrantLock.class);
-
-        if (classNode.getDeclaredField(BaseGenerator.LOCK_FIELD_NAME) == null)
-            classNode.addField(BaseGenerator.LOCK_FIELD_NAME, Opcodes.ACC_PRIVATE, reentrantLockClassNode, new ConstructorCallExpression(reentrantLockClassNode, ArgumentListExpression.EMPTY_ARGUMENTS));
-
-        if (classNode.getDeclaredField(BaseGenerator.LOCK_STATIC_FIELD_NAME) == null)
-            classNode.addField(BaseGenerator.LOCK_STATIC_FIELD_NAME, Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, reentrantLockClassNode, new ConstructorCallExpression(reentrantLockClassNode, ArgumentListExpression.EMPTY_ARGUMENTS));
-    }
+    public void beforeProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
 
     public void afterProcessingClassNode(ProcessingContextInformation processingContextInformation, ClassNode classNode) {}
 
