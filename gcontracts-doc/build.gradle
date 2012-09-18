@@ -1,5 +1,3 @@
-dependsOn(':gcontracts-core')
-
 project(":gcontracts-doc") {
     dependencies {
         compile project(':gcontracts-core')

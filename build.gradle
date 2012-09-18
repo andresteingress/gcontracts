@@ -1,9 +1,15 @@
-dependsOnChildren()
-
 buildscript {
     repositories {
         mavenCentral()
     }
+}
+
+project.ext {
+    asm = "asm:asm:3.3.1"
+    junit = "junit:junit:4.10"
+
+    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_5
+    targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_5
 }
 
 allprojects {
@@ -14,13 +20,7 @@ allprojects {
     group = "org.gcontracts"
     version = "1.2.6-SNAPSHOT"
 
-    asm = "asm:asm:3.3.1"
-    junit = "junit:junit:4.10"
-
     description = "GContracts provides closure annotations to support Programming by Contract for Groovy"
-
-    targetCompatibility = "1.5"
-    sourceCompatibility = "1.5"
 }
 
 subprojects {
