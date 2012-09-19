@@ -24,10 +24,10 @@ package org.gcontracts.classgen.asm;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
-import org.codehaus.groovy.ast.stmt.BlockStatement;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.codehaus.groovy.ast.stmt.ReturnStatement;
+import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.classgen.Verifier;
+import org.codehaus.groovy.syntax.Token;
+import org.codehaus.groovy.syntax.Types;
 import org.codehaus.groovy.transform.stc.StaticTypesMarker;
 
 import java.util.*;
@@ -69,14 +69,24 @@ public class ContractClosureWriter {
         Parameter[] localVariableParams = getClosureSharedVariables(expression);
         removeInitialValues(localVariableParams);
 
-        InnerClassNode answer = new InnerClassNode(outerClass, name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference()); // closures are local inners and not public
-        answer.setEnclosingMethod(null);
+        InnerClassNode answer = new InnerClassNode(outerClass, name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference());
+        answer.setEnclosingMethod(methodNode);
         answer.setSynthetic(true);
         answer.setUsingGenerics(outerClass.isUsingGenerics());
+        answer.setSourcePosition(expression);
+        answer.setStaticClass(true);
 
         MethodNode method =
-                answer.addMethod("doCall", ACC_PUBLIC, ClassHelper.OBJECT_TYPE, parameters, ClassNode.EMPTY_ARRAY, expression.getCode());
+                answer.addMethod("doCall", ACC_PUBLIC, ClassHelper.Boolean_TYPE, parameters, ClassNode.EMPTY_ARRAY, expression.getCode());
         method.setSourcePosition(expression);
+
+        VariableScope varScope = expression.getVariableScope();
+        if (varScope == null) {
+            throw new RuntimeException(
+                    "Must have a VariableScope by now! for expression: " + expression + " class: " + name);
+        } else {
+            method.setVariableScope(varScope.copy());
+        }
 
         if (parameters.length > 1
                 || (parameters.length == 1
@@ -84,18 +94,25 @@ public class ContractClosureWriter {
                 && parameters[0].getType() != ClassHelper.OBJECT_TYPE)) {
 
             // let's add a typesafe call method
+            ArgumentListExpression arguments = new ArgumentListExpression();
+            for (Parameter parameter : parameters)  {
+                arguments.addExpression(new VariableExpression(parameter));
+            }
+
             MethodNode call = answer.addMethod(
                     "call",
                     ACC_PUBLIC,
-                    ClassHelper.OBJECT_TYPE,
+                    ClassHelper.Boolean_TYPE,
                     parameters,
                     ClassNode.EMPTY_ARRAY,
                     new ReturnStatement(
                             new MethodCallExpression(
                                     VariableExpression.THIS_EXPRESSION,
                                     "doCall",
-                                    new ArgumentListExpression(parameters))));
+                                    arguments)));
+
             call.setSourcePosition(expression);
+            call.setSynthetic(true);
         }
 
         // let's make the constructor

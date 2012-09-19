@@ -5,7 +5,7 @@ buildscript {
 }
 
 project.ext {
-    asm = "asm:asm:3.3.1"
+    asm = "org.ow2.asm:asm:4.0"
     junit = "junit:junit:4.10"
 
     sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_5
@@ -31,7 +31,7 @@ subprojects {
   compileTestGroovy.options.fork = true
 
   dependencies {
-      groovy files('/Users/andre/Development/Projects/Adternity/groovy-core/target/install/embeddable/groovy-all-2.0.0-beta-3-SNAPSHOT.jar')
+	groovy group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.0.2'
     compile asm
   }
 

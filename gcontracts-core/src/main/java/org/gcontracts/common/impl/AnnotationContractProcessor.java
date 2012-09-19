@@ -62,12 +62,14 @@ public class AnnotationContractProcessor extends AnnotationProcessor {
                     VariableExpression.THIS_EXPRESSION,
                     VariableExpression.THIS_EXPRESSION);
 
+            MethodCallExpression methodCallExpression = new MethodCallExpression(
+                    closureClass,
+                    "newInstance",
+                    closureConstructorArgumentList
+            );
+
             MethodCallExpression doCall = new MethodCallExpression(
-                    new MethodCallExpression(
-                            closureClass,
-                            "newInstance",
-                            closureConstructorArgumentList
-                    ),
+                    methodCallExpression,
                     "call",
                     new ArgumentListExpression(new VariableExpression(parameter))
             );
