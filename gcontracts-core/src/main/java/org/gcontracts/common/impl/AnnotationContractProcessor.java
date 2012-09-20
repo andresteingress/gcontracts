@@ -70,7 +70,7 @@ public class AnnotationContractProcessor extends AnnotationProcessor {
 
             StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
                     ClassHelper.makeWithoutCaching(InvokerHelper.class),
-                    "newInstance",
+                    "invokeConstructorOf",
                     closureConstructorArgumentList
             );
 

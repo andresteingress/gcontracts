@@ -142,7 +142,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
                 StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
                         ClassHelper.makeWithoutCaching(InvokerHelper.class),
-                        "newInstance",
+                        "invokeConstructorOf",
                         closureConstructorArgumentList
                 );
 
@@ -207,7 +207,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
                 StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
                         ClassHelper.makeWithoutCaching(InvokerHelper.class),
-                        "newInstance",
+                        "invokeConstructorOf",
                         newInstanceArguments
                 );
 

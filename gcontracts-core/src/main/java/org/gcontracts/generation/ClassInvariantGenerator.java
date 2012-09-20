@@ -92,7 +92,7 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
             StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
                     ClassHelper.makeWithoutCaching(InvokerHelper.class),
-                    "newInstance",
+                    "invokeConstructorOf",
                     newInstanceArguments
             );
 
