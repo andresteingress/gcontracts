@@ -88,32 +88,26 @@ public class ContractClosureWriter {
             method.setVariableScope(varScope.copy());
         }
 
-        if (parameters.length > 1
-                || (parameters.length == 1
-                && parameters[0].getType() != null
-                && parameters[0].getType() != ClassHelper.OBJECT_TYPE)) {
-
-            // let's add a typesafe call method
-            ArgumentListExpression arguments = new ArgumentListExpression();
-            for (Parameter parameter : parameters)  {
-                arguments.addExpression(new VariableExpression(parameter));
-            }
-
-            MethodNode call = answer.addMethod(
-                    "call",
-                    ACC_PUBLIC,
-                    ClassHelper.Boolean_TYPE,
-                    parameters,
-                    ClassNode.EMPTY_ARRAY,
-                    new ReturnStatement(
-                            new MethodCallExpression(
-                                    VariableExpression.THIS_EXPRESSION,
-                                    "doCall",
-                                    arguments)));
-
-            call.setSourcePosition(expression);
-            call.setSynthetic(true);
+        // let's add a typesafe call method
+        ArgumentListExpression arguments = new ArgumentListExpression();
+        for (Parameter parameter : parameters)  {
+            arguments.addExpression(new VariableExpression(parameter));
         }
+
+        MethodNode call = answer.addMethod(
+                "call",
+                ACC_PUBLIC,
+                ClassHelper.Boolean_TYPE,
+                parameters,
+                ClassNode.EMPTY_ARRAY,
+                new ReturnStatement(
+                        new MethodCallExpression(
+                                VariableExpression.THIS_EXPRESSION,
+                                "doCall",
+                                arguments)));
+
+        call.setSourcePosition(expression);
+        call.setSynthetic(true);
 
         // let's make the constructor
         BlockStatement block = new BlockStatement();
@@ -233,9 +227,6 @@ public class ContractClosureWriter {
                         }
                     }
 
-                } else if (v instanceof FieldNode)  {
-                    FieldNode fn = closureClass.getDeclaredField(name);
-                    expression.setAccessedVariable(fn);
                 }
             }
         };

@@ -89,7 +89,7 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
 
                 ClosureExpression closureExpression = (ClosureExpression) expression;
 
-                ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, annotationNode, sourceUnit);
+                ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, null, annotationNode, sourceUnit);
                 validator.visitClosureExpression(closureExpression);
                 validator.secondPass(closureExpression);
 
@@ -165,7 +165,7 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
 
         ClosureExpression closureExpression = (ClosureExpression) expression;
 
-        ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, annotationNode, sourceUnit);
+        ClosureExpressionValidator validator = new ClosureExpressionValidator(classNode, methodNode, annotationNode, sourceUnit);
         validator.visitClosureExpression(closureExpression);
         validator.secondPass(closureExpression);
 
@@ -218,6 +218,7 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
     static class ClosureExpressionValidator extends ClassCodeVisitorSupport implements Opcodes {
 
         private final ClassNode classNode;
+        private final MethodNode methodNode;
         private final AnnotationNode annotationNode;
         private final SourceUnit sourceUnit;
 
@@ -225,8 +226,9 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
 
         private boolean secondPass = false;
 
-        public ClosureExpressionValidator(ClassNode classNode, AnnotationNode annotationNode, SourceUnit sourceUnit)  {
+        public ClosureExpressionValidator(ClassNode classNode, MethodNode methodNode, AnnotationNode annotationNode, SourceUnit sourceUnit)  {
             this.classNode = classNode;
+            this.methodNode = methodNode;
             this.annotationNode = annotationNode;
             this.sourceUnit = sourceUnit;
             this.variableExpressions = new HashMap<VariableExpression, StaticMethodCallExpression> ();

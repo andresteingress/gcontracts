@@ -15,9 +15,8 @@ class CompileStaticTests extends GroovyShellTestCase {
                 @Requires({ param.size() > 0 })
                 void someOperation(String param) { }
             }
-            def a = new A()
+            new A()
         """
-        
     }
 
     void testPostcondition()  {
@@ -27,13 +26,24 @@ class CompileStaticTests extends GroovyShellTestCase {
                 @groovy.transform.CompileStatic
                 class A {
 
-                    @Ensures({ false  })
+                    @Ensures({ result == 3  })
                     Integer add() { return 1 + 1 }
                 }
-                def a = new A()
-                a.add()
+                new A()
             """
+    }
 
+    void testClassInvariant()  {
+        evaluate """
+            import org.gcontracts.annotations.*
+
+            @groovy.transform.CompileStatic
+            @Invariant({ speed >= 0 })
+            class A {
+                Integer speed = 1
+            }
+            new A()
+        """
     }
     
 }
