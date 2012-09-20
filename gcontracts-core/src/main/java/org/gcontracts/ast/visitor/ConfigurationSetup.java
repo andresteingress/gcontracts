@@ -25,10 +25,7 @@ package org.gcontracts.ast.visitor;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.FieldNode;
-import org.codehaus.groovy.ast.expr.ArgumentListExpression;
-import org.codehaus.groovy.ast.expr.ClassExpression;
-import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.codehaus.groovy.ast.expr.MethodCallExpression;
+import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.generation.Configurator;
@@ -56,8 +53,10 @@ public class ConfigurationSetup {
     public void init(final ClassNode type) {
         Validate.notNull(type);
 
-        MethodCallExpression methodCall = new MethodCallExpression(new ClassExpression(ClassHelper.makeWithoutCaching(Configurator.class)), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
-        final FieldNode fieldNode = type.addField(BaseVisitor.GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, methodCall);
+        StaticMethodCallExpression checkAssertionsEnabledMethodCall = new StaticMethodCallExpression(ClassHelper.makeWithoutCaching(Configurator.class), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
+
+        final FieldNode fieldNode = type.addField(BaseVisitor.GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, checkAssertionsEnabledMethodCall);
+
         fieldNode.setSynthetic(true);
     }
 }

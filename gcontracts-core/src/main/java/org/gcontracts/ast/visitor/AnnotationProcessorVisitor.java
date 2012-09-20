@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.gcontracts.annotations.meta.AnnotationProcessorImplementation;
 import org.gcontracts.annotations.meta.ContractElement;
 import org.gcontracts.common.spi.AnnotationProcessor;
@@ -36,7 +37,9 @@ import org.gcontracts.util.Validate;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Visits annotations of meta-type {@link ContractElement} and applies the AST transformations of the underlying
@@ -130,15 +133,21 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 final ClassExpression closureClassExpression = (ClassExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
 
                 ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
-                        VariableExpression.THIS_EXPRESSION,
-                        VariableExpression.THIS_EXPRESSION);
+                        closureClassExpression,
+                        new ArrayExpression(
+                                ClassHelper.DYNAMIC_TYPE,
+                                Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
+                        )
+                );
+
+                StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
+                        ClassHelper.makeWithoutCaching(InvokerHelper.class),
+                        "newInstance",
+                        closureConstructorArgumentList
+                );
 
                 MethodCallExpression doCall = new MethodCallExpression(
-                        new MethodCallExpression(
-                                closureClassExpression,
-                                "newInstance",
-                                closureConstructorArgumentList
-                        ),
+                        methodCallExpression,
                         "call",
                         ArgumentListExpression.EMPTY_ARGUMENTS
                 );
@@ -175,25 +184,35 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 }
 
                 if (methodNode.getReturnType() != ClassHelper.VOID_TYPE && isPostcondition && !(methodNode instanceof ConstructorNode))  {
-                    VariableExpression variableExpression = new VariableExpression("result");
+                    VariableExpression variableExpression = new VariableExpression("result", methodNode.getReturnType());
                     variableExpression.setAccessedVariable(variableExpression);
 
                     closureArgumentList.addExpression(variableExpression);
                 }
 
                 if (isPostcondition && !(methodNode instanceof ConstructorNode)) {
-                    VariableExpression variableExpression = new VariableExpression("old");
+                    VariableExpression variableExpression = new VariableExpression("old", new ClassNode(Map.class));
                     variableExpression.setAccessedVariable(variableExpression);
 
                     closureArgumentList.addExpression(variableExpression);
                 }
 
+                ArgumentListExpression newInstanceArguments = new ArgumentListExpression(
+                        annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME),
+                                new ArrayExpression(
+                                        ClassHelper.DYNAMIC_TYPE,
+                                        Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
+                                )
+                        );
+
+                StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
+                        ClassHelper.makeWithoutCaching(InvokerHelper.class),
+                        "newInstance",
+                        newInstanceArguments
+                );
+
                 MethodCallExpression doCall = new MethodCallExpression(
-                        new MethodCallExpression(
-                                annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME),
-                                "newInstance",
-                                closureConstructorArgumentList
-                        ),
+                        methodCallExpression,
                         "call",
                         closureArgumentList
                 );

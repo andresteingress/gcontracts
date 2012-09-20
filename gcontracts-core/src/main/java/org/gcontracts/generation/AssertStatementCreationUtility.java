@@ -24,6 +24,7 @@ package org.gcontracts.generation;
 
 import org.codehaus.groovy.ast.ClassCodeVisitorSupport;
 import org.codehaus.groovy.ast.ClassHelper;
+import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ClosureExpression;
@@ -135,8 +136,8 @@ public final class AssertStatementCreationUtility {
         }
     }
 
-    public static void injectResultVariableReturnStatementAndAssertionCallStatement(BlockStatement statement, ReturnStatement returnStatement, BlockStatement assertionCallStatement)  {
-        final AddResultReturnStatementVisitor addResultReturnStatementVisitor = new AddResultReturnStatementVisitor(returnStatement, assertionCallStatement);
+    public static void injectResultVariableReturnStatementAndAssertionCallStatement(BlockStatement statement, ClassNode returnType, ReturnStatement returnStatement, BlockStatement assertionCallStatement)  {
+        final AddResultReturnStatementVisitor addResultReturnStatementVisitor = new AddResultReturnStatementVisitor(returnStatement, returnType, assertionCallStatement);
         addResultReturnStatementVisitor.visitBlockStatement(statement);
     }
 
@@ -186,10 +187,12 @@ public final class AssertStatementCreationUtility {
         private BlockStatement blockStatementCopy;
 
         private final ReturnStatement returnStatement;
+        private final ClassNode returnType;
         private final BlockStatement assertionCallStatement;
 
-        public AddResultReturnStatementVisitor(ReturnStatement returnStatement, BlockStatement assertionCallStatement)  {
+        public AddResultReturnStatementVisitor(ReturnStatement returnStatement, ClassNode returnType, BlockStatement assertionCallStatement)  {
             this.returnStatement = returnStatement;
+            this.returnType = returnType;
             this.assertionCallStatement = assertionCallStatement;
         }
 
@@ -206,7 +209,7 @@ public final class AssertStatementCreationUtility {
                     blockStatement.getStatements().remove(statement);
                     blockStatement.addStatements(assertionCallStatement.getStatements());
 
-                    VariableExpression variableExpression = new VariableExpression("result");
+                    VariableExpression variableExpression = new VariableExpression("result", returnType);
                     variableExpression.setAccessedVariable(variableExpression);
 
                     blockStatement.addStatement(new ReturnStatement(variableExpression));

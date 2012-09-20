@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ViolationTracker;
@@ -35,6 +36,7 @@ import org.gcontracts.util.AnnotationUtils;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <pe
@@ -124,7 +126,7 @@ public abstract class BaseGenerator {
         );
 
         final BlockStatement blockStatement = new BlockStatement();
-        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR)), lockTryCatchStatement, new BlockStatement()));
+        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.Boolean_TYPE)), lockTryCatchStatement, new BlockStatement()));
 
         return blockStatement;
     }
@@ -150,25 +152,35 @@ public abstract class BaseGenerator {
             }
 
             if (isPostcondition && methodNode.getReturnType() != ClassHelper.VOID_TYPE && !(methodNode instanceof ConstructorNode))  {
-                VariableExpression variableExpression = new VariableExpression("result");
+                VariableExpression variableExpression = new VariableExpression("result", methodNode.getReturnType());
                 variableExpression.setAccessedVariable(variableExpression);
 
                 callArgumentList.addExpression(variableExpression);
             }
 
             if (isPostcondition && !(methodNode instanceof ConstructorNode)) {
-                VariableExpression variableExpression = new VariableExpression("old");
+                VariableExpression variableExpression = new VariableExpression("old", new ClassNode(Map.class));
                 variableExpression.setAccessedVariable(variableExpression);
 
                 callArgumentList.addExpression(variableExpression);
             }
 
+            ArgumentListExpression newInstanceArguments = new ArgumentListExpression(
+                    classExpression,
+                    new ArrayExpression(
+                            ClassHelper.DYNAMIC_TYPE,
+                            Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
+                    )
+            );
+
+            StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
+                    ClassHelper.makeWithoutCaching(InvokerHelper.class),
+                    "newInstance",
+                    newInstanceArguments
+            );
+
             MethodCallExpression doCall = new MethodCallExpression(
-                    new MethodCallExpression(
-                            classExpression,
-                            "newInstance",
-                            closureConstructorArgumentList
-                    ),
+                    methodCallExpression,
                     "call",
                     callArgumentList
             );

@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
 import org.codehaus.groovy.control.io.ReaderSource;
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.meta.ClassInvariant;
@@ -34,6 +35,7 @@ import org.gcontracts.util.AnnotationUtils;
 import org.objectweb.asm.Opcodes;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -80,16 +82,22 @@ public class ClassInvariantGenerator extends BaseGenerator {
             ClassExpression classExpression = (ClassExpression) nextContractElementAnnotation.getMember(BaseVisitor.CLOSURE_ATTRIBUTE_NAME);
             if (classExpression == null) continue;
 
-            ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
-                    VariableExpression.THIS_EXPRESSION,
-                    VariableExpression.THIS_EXPRESSION);
+            ArgumentListExpression newInstanceArguments = new ArgumentListExpression(
+                    classExpression,
+                    new ArrayExpression(
+                            ClassHelper.DYNAMIC_TYPE,
+                            Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
+                    )
+            );
+
+            StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
+                    ClassHelper.makeWithoutCaching(InvokerHelper.class),
+                    "newInstance",
+                    newInstanceArguments
+            );
 
             MethodCallExpression doCall = new MethodCallExpression(
-                    new MethodCallExpression(
-                            classExpression,
-                            "newInstance",
-                            closureConstructorArgumentList
-                    ),
+                    methodCallExpression,
                     "call",
                     ArgumentListExpression.EMPTY_ARGUMENTS
             );

@@ -34,6 +34,7 @@ import org.gcontracts.util.AnnotationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -101,7 +102,7 @@ public class PostconditionGenerator extends BaseGenerator {
         // if return type is not void, than a "result" variable is provided in the postcondition expression
         final List<Statement> statements = methodCode.getStatements();
         if (statements.size() > 0)  {
-            VariableExpression enabledVariableExpression = new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR);
+            VariableExpression enabledVariableExpression = new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.Boolean_TYPE);
             enabledVariableExpression.setAccessedVariable(enabledVariableExpression);
 
             if (method.getReturnType() != ClassHelper.VOID_TYPE)  {
@@ -111,7 +112,7 @@ public class PostconditionGenerator extends BaseGenerator {
                     BlockStatement localPostconditionBlockStatement = new BlockStatement(new ArrayList<Statement>(postconditionBlockStatement.getStatements()), new VariableScope());
 
                     // Assign the return statement expression to a local variable of type Object
-                    VariableExpression variableExpression = new VariableExpression("result");
+                    VariableExpression variableExpression = new VariableExpression("result", method.getReturnType());
                     variableExpression.setAccessedVariable(variableExpression);
 
                     ExpressionStatement resultVariableStatement = new ExpressionStatement(
@@ -120,11 +121,12 @@ public class PostconditionGenerator extends BaseGenerator {
                                     returnStatement.getExpression()));
 
                     localPostconditionBlockStatement.getStatements().add(0, resultVariableStatement);
-                    AssertStatementCreationUtility.injectResultVariableReturnStatementAndAssertionCallStatement(methodCode, returnStatement, localPostconditionBlockStatement);
+
+                    AssertStatementCreationUtility.injectResultVariableReturnStatementAndAssertionCallStatement(methodCode, method.getReturnType().redirect(), returnStatement, localPostconditionBlockStatement);
                 }
 
                 // Assign the return statement expression to a local variable of type Object
-                final VariableExpression oldVariableExpression = new VariableExpression("old");
+                final VariableExpression oldVariableExpression = new VariableExpression("old", new ClassNode(Map.class));
                 oldVariableExpression.setAccessedVariable(oldVariableExpression);
 
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(
@@ -143,7 +145,7 @@ public class PostconditionGenerator extends BaseGenerator {
 
             } else {
                 // Assign the return statement expression to a local variable of type Object
-                final VariableExpression oldVariableExpression = new VariableExpression("old");
+                final VariableExpression oldVariableExpression = new VariableExpression("old", new ClassNode(Map.class));
                 oldVariableExpression.setAccessedVariable(oldVariableExpression);
 
                 ExpressionStatement oldVariabeStatement = new ExpressionStatement(

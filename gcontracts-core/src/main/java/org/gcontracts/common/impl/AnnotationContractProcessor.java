@@ -24,6 +24,7 @@ package org.gcontracts.common.impl;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.Contract;
@@ -32,6 +33,7 @@ import org.gcontracts.domain.Precondition;
 import org.gcontracts.util.AnnotationUtils;
 import org.gcontracts.util.Validate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,11 +61,15 @@ public class AnnotationContractProcessor extends AnnotationProcessor {
     public void process(ProcessingContextInformation processingContextInformation, Contract contract, ClassNode classNode, MethodNode methodNode, Parameter parameter) {
         for (ClassExpression closureClass : closureClasses)  {
             ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
-                    VariableExpression.THIS_EXPRESSION,
-                    VariableExpression.THIS_EXPRESSION);
-
-            MethodCallExpression methodCallExpression = new MethodCallExpression(
                     closureClass,
+                    new ArrayExpression(
+                            ClassHelper.DYNAMIC_TYPE,
+                            Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
+                    )
+            );
+
+            StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
+                    ClassHelper.makeWithoutCaching(InvokerHelper.class),
                     "newInstance",
                     closureConstructorArgumentList
             );

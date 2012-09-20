@@ -31,6 +31,8 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.objectweb.asm.Opcodes;
 
+import java.util.Map;
+
 /**
  * <p>Central place where code generation for the <tt>old</tt> closure variable
  * takes place.</p>
@@ -69,7 +71,7 @@ public class OldVariableGenerationUtility {
                 MethodNode cloneMethod = fieldType.getMethod("clone", Parameter.EMPTY_ARRAY);
                 // if a clone classNode is available, the value is cloned
                 if (cloneMethod != null && fieldType.implementsInterface(ClassHelper.make("java.lang.Cloneable")))  {
-                    VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
+                    VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName(), fieldNode.getType());
                     oldVariable.setAccessedVariable(oldVariable);
 
                     final MethodCallExpression methodCall = new MethodCallExpression(new FieldExpression(fieldNode), "clone", ArgumentListExpression.EMPTY_ARGUMENTS);
@@ -90,7 +92,7 @@ public class OldVariableGenerationUtility {
                         || fieldType.getName().equals("groovy.lang.GString")
                         || fieldType.getName().equals("java.lang.String")) {
 
-                    VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName());
+                    VariableExpression oldVariable = new VariableExpression("$old$" + fieldNode.getName(), fieldNode.getType());
                     oldVariable.setAccessedVariable(oldVariable);
 
                     ExpressionStatement oldVariableAssignment = new ExpressionStatement(
@@ -104,7 +106,7 @@ public class OldVariableGenerationUtility {
             }
         }
 
-        VariableExpression oldVariable = new VariableExpression("old", ClassHelper.MAP_TYPE);
+        VariableExpression oldVariable = new VariableExpression("old", new ClassNode(Map.class));
         oldVariable.setAccessedVariable(oldVariable);
 
         ExpressionStatement oldVariabeStatement = new ExpressionStatement(
@@ -118,7 +120,7 @@ public class OldVariableGenerationUtility {
 
         // let's ask the super class for old variables...
         if (classNode.getSuperClass() != null && classNode.getSuperClass().getMethod(OLD_VARIABLES_METHOD, Parameter.EMPTY_ARRAY) != null)  {
-            mergedOldVariables = new VariableExpression("mergedOldVariables", ClassHelper.MAP_TYPE);
+            mergedOldVariables = new VariableExpression("mergedOldVariables", new ClassNode(Map.class));
             mergedOldVariables.setAccessedVariable(mergedOldVariables);
 
             ExpressionStatement mergedOldVariablesStatement = new ExpressionStatement(
@@ -132,7 +134,7 @@ public class OldVariableGenerationUtility {
 
         methodBlockStatement.addStatement(new ReturnStatement(mergedOldVariables != null ? mergedOldVariables : oldVariable));
 
-        final MethodNode preconditionMethodNode = classNode.addMethod(OLD_VARIABLES_METHOD, Opcodes.ACC_PROTECTED, ClassHelper.DYNAMIC_TYPE, Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, methodBlockStatement);
+        final MethodNode preconditionMethodNode = classNode.addMethod(OLD_VARIABLES_METHOD, Opcodes.ACC_PROTECTED, new ClassNode(Map.class), Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, methodBlockStatement);
         preconditionMethodNode.setSynthetic(true);
 
     }
