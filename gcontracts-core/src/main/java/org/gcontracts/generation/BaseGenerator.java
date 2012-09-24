@@ -181,9 +181,10 @@ public abstract class BaseGenerator {
 
             MethodCallExpression doCall = new MethodCallExpression(
                     methodCallExpression,
-                    "call",
+                    "doCall",
                     callArgumentList
             );
+            doCall.setMethodTarget(classExpression.getType().getMethods("doCall").get(0));
 
             final BooleanExpression rightExpression = new BooleanExpression(doCall);
             booleanExpression.setSourcePosition(nextContractElementAnnotation);

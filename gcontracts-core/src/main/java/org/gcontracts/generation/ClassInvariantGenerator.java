@@ -98,9 +98,10 @@ public class ClassInvariantGenerator extends BaseGenerator {
 
             MethodCallExpression doCall = new MethodCallExpression(
                     methodCallExpression,
-                    "call",
+                    "doCall",
                     ArgumentListExpression.EMPTY_ARGUMENTS
             );
+            doCall.setMethodTarget(classExpression.getType().getMethods("doCall").get(0));
 
             final BooleanExpression rightExpression = new BooleanExpression(doCall);
             booleanExpression.setSourcePosition(nextContractElementAnnotation);

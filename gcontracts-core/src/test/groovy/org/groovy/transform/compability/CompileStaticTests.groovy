@@ -1,5 +1,8 @@
 package org.groovy.transform.compability
 
+import org.gcontracts.PreconditionViolation
+import org.gcontracts.PostconditionViolation
+
 /**
  * @author me@andresteingress.com
  */
@@ -19,6 +22,22 @@ class CompileStaticTests extends GroovyShellTestCase {
         """
     }
 
+    void testPreconditionViolation()  {
+        shouldFail PreconditionViolation.class, {
+            evaluate """
+                import org.gcontracts.annotations.*
+
+                @groovy.transform.CompileStatic
+                class A {
+
+                    @Requires({ param.size() > 0 })
+                    void someOperation(String param) { }
+                }
+                new A().someOperation('')
+            """
+        }
+    }
+
     void testPostcondition()  {
         evaluate """
                 import org.gcontracts.annotations.*
@@ -31,6 +50,22 @@ class CompileStaticTests extends GroovyShellTestCase {
                 }
                 new A()
             """
+    }
+
+    void testPostconditionViolation()  {
+        shouldFail PostconditionViolation.class, {
+            evaluate """
+                import org.gcontracts.annotations.*
+
+                @groovy.transform.CompileStatic
+                class A {
+
+                    @Ensures({ result == 3  })
+                    Integer add() { return 1 + 1 }
+                }
+                new A().add()
+            """
+        }
     }
 
     void testClassInvariant()  {

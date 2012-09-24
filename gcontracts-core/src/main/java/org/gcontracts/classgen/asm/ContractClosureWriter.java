@@ -69,12 +69,9 @@ public class ContractClosureWriter {
         Parameter[] localVariableParams = getClosureSharedVariables(expression);
         removeInitialValues(localVariableParams);
 
-        InnerClassNode answer = new InnerClassNode(outerClass, name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference());
-        answer.setEnclosingMethod(methodNode);
+        ClassNode answer = new ClassNode(name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference());
         answer.setSynthetic(true);
-        answer.setUsingGenerics(outerClass.isUsingGenerics());
         answer.setSourcePosition(expression);
-        answer.setStaticClass(true);
 
         MethodNode method =
                 answer.addMethod("doCall", ACC_PUBLIC, ClassHelper.Boolean_TYPE, parameters, ClassNode.EMPTY_ARRAY, expression.getCode());
@@ -161,7 +158,7 @@ public class ContractClosureWriter {
         ASTNode sn = answer.addConstructor(ACC_PUBLIC, params, ClassNode.EMPTY_ARRAY, block);
         sn.setSourcePosition(expression);
 
-        correctAccessedVariable(answer, method, expression);
+        correctAccessedVariable(method, expression);
 
         return answer;
     }
@@ -212,7 +209,7 @@ public class ContractClosureWriter {
         }
     }
 
-    private void correctAccessedVariable(final InnerClassNode closureClass, final MethodNode methodNode, ClosureExpression ce) {
+    private void correctAccessedVariable(final MethodNode methodNode, ClosureExpression ce) {
 
         CodeVisitorSupport visitor = new CodeVisitorSupport() {
             @Override

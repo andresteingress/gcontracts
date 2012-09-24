@@ -76,9 +76,10 @@ public class AnnotationContractProcessor extends AnnotationProcessor {
 
             MethodCallExpression doCall = new MethodCallExpression(
                     methodCallExpression,
-                    "call",
+                    "doCall",
                     new ArgumentListExpression(new VariableExpression(parameter))
             );
+            doCall.setMethodTarget(closureClass.getType().getMethods("doCall").get(0));
 
             BooleanExpression booleanExpression = new BooleanExpression(doCall);
             booleanExpression.setSourcePosition(annotationNode);

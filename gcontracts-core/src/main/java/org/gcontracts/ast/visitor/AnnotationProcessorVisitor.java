@@ -148,9 +148,10 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
                 MethodCallExpression doCall = new MethodCallExpression(
                         methodCallExpression,
-                        "call",
+                        "doCall",
                         ArgumentListExpression.EMPTY_ARGUMENTS
                 );
+                doCall.setMethodTarget(closureClassExpression.getType().getMethods("doCall").get(0));
 
                 final BooleanExpression booleanExpression = new BooleanExpression(doCall);
                 booleanExpression.setSourcePosition(annotationNode);
@@ -213,9 +214,11 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
                 MethodCallExpression doCall = new MethodCallExpression(
                         methodCallExpression,
-                        "call",
+                        "doCall",
                         closureArgumentList
                 );
+                ClassNode type = annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME).getType();
+                doCall.setMethodTarget(type.getMethods("doCall").get(0));
 
                 final BooleanExpression booleanExpression = new BooleanExpression(doCall);
                 booleanExpression.setSourcePosition(annotationNode);
