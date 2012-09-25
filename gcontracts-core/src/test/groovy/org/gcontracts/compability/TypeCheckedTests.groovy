@@ -1,4 +1,4 @@
-package org.groovy.transform.compability
+package org.gcontracts.compability
 
 /**
  * @author me@andresteingress.com
@@ -14,6 +14,21 @@ class TypeCheckedTests extends GroovyShellTestCase {
 
                 @Requires({ some?.size() > 0 })
                 def op(String some) {
+
+                }
+            }
+
+            def a = new A()
+        """
+
+        evaluate """
+            import org.gcontracts.annotations.*
+
+            @groovy.transform.TypeChecked
+            class A {
+
+                @Requires({ some?.size() > 0 })
+                def op(def some) {
 
                 }
             }
@@ -38,26 +53,22 @@ class TypeCheckedTests extends GroovyShellTestCase {
             def a = new A()
         """
 
-        def msg = shouldFail {
-            evaluate """
-                import org.gcontracts.annotations.*
-    
-                @groovy.transform.TypeChecked
-                class A {
-    
-                    private int i = 12
-    
-                    @Ensures({ old.i + 2 == 12 })
-                    def op(String some) {
-                        some
-                    }
+        evaluate """
+            import org.gcontracts.annotations.*
+
+            @groovy.transform.TypeChecked
+            class A {
+
+                private int i = 12
+
+                @Ensures({ old.i + 2 == 12 })
+                def op(String some) {
+                    some
                 }
-    
-                def a = new A()
-            """
-        }
-        
-        assert msg.contains("[Static type checking] - Cannot find matching method java.lang.Object#plus(int)")
+            }
+
+            def a = new A()
+        """
     }
 
     void testClassInvariant()  {

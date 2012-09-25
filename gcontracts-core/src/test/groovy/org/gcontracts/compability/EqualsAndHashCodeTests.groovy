@@ -1,4 +1,4 @@
-package org.groovy.transform.compability
+package org.gcontracts.compability
 
 /**
  * @author me@andresteingress.com

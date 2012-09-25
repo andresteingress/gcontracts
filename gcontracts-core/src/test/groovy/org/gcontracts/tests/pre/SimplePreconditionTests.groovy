@@ -288,4 +288,31 @@ class Account
         assert obj.someMethod() != null
 
     }
+
+    @Test void requires_on_optional_arguments_method()  {
+
+        def source = """
+                import org.gcontracts.annotations.*
+
+                class A {
+                @Requires({ g.size() > 0 })
+                private def someMethod(def i = 12, def g = "") {
+                    new Object()
+                }
+                }
+             """
+
+        def obj = create_instance_of(source)
+        shouldFail PreconditionViolation, {
+            obj.someMethod()
+        }
+
+        shouldFail PreconditionViolation, {
+            obj.someMethod(1)
+        }
+
+        shouldFail PreconditionViolation, {
+            obj.someMethod(1, "")
+        }
+    }
 }

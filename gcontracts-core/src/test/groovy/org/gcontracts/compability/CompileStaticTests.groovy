@@ -1,4 +1,4 @@
-package org.groovy.transform.compability
+package org.gcontracts.compability
 
 import org.gcontracts.PreconditionViolation
 import org.gcontracts.PostconditionViolation
