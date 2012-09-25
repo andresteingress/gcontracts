@@ -141,11 +141,6 @@ public abstract class BaseGenerator {
             ClassExpression classExpression = (ClassExpression) nextContractElementAnnotation.getMember(BaseVisitor.CLOSURE_ATTRIBUTE_NAME);
             if (classExpression == null) continue;
 
-            ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
-                    VariableExpression.THIS_EXPRESSION,
-                    VariableExpression.THIS_EXPRESSION);
-
-
             ArgumentListExpression callArgumentList = new ArgumentListExpression();
             for (Parameter parameter : methodNode.getParameters())  {
                 callArgumentList.addExpression(new VariableExpression(parameter));

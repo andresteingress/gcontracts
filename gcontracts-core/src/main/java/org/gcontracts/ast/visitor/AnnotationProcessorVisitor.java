@@ -174,10 +174,6 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
             if (annotationProcessor != null && annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClassExpression)  {
                 boolean isPostcondition = AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), org.gcontracts.annotations.meta.Postcondition.class.getName());
 
-                ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
-                        VariableExpression.THIS_EXPRESSION,
-                        VariableExpression.THIS_EXPRESSION);
-
                 ArgumentListExpression closureArgumentList = new ArgumentListExpression();
 
                 for (Parameter parameter : methodNode.getParameters())  {
@@ -228,7 +224,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 // if the implementation method has no annotation, we need to set a dummy marker in order to find parent pre/postconditions
                 if (!AnnotationUtils.hasAnnotationOfType(methodNode, annotationNode.getClassNode().getName()))  {
                     AnnotationNode annotationMarker = new AnnotationNode(annotationNode.getClassNode());
-                    annotationMarker.setMember(CLOSURE_ATTRIBUTE_NAME, (ClassExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME));
+                    annotationMarker.setMember(CLOSURE_ATTRIBUTE_NAME, annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME));
                     annotationMarker.setRuntimeRetention(true);
                     annotationMarker.setSourceRetention(false);
 
