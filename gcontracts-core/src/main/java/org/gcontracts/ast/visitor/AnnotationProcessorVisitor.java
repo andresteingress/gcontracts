@@ -22,6 +22,7 @@
  */
 package org.gcontracts.ast.visitor;
 
+import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.control.SourceUnit;
@@ -33,8 +34,10 @@ import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.generation.CandidateChecks;
 import org.gcontracts.util.AnnotationUtils;
+import org.gcontracts.util.ClosureInstanceHelper;
 import org.gcontracts.util.Validate;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,8 +144,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 );
 
                 StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
-                        ClassHelper.makeWithoutCaching(InvokerHelper.class),
-                        "invokeConstructorOf",
+                        ClassHelper.makeWithoutCaching(ClosureInstanceHelper.class),
+                        "createInstance",
                         closureConstructorArgumentList
                 );
 
@@ -203,8 +206,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                         );
 
                 StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
-                        ClassHelper.makeWithoutCaching(InvokerHelper.class),
-                        "invokeConstructorOf",
+                        ClassHelper.makeWithoutCaching(ClosureInstanceHelper.class),
+                        "createInstance",
                         newInstanceArguments
                 );
 
@@ -235,16 +238,27 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
     }
 
     private AnnotationProcessor createAnnotationProcessor(AnnotationNode annotationNode) {
-        final AnnotationProcessorImplementation annotationProcessingAnno = (AnnotationProcessorImplementation) annotationNode.getClassNode().getTypeClass().getAnnotation(AnnotationProcessorImplementation.class);
-        if (annotationProcessingAnno == null) return null;
+        ClassExpression annotationProcessingAnno = null;
 
-        final Class clz = annotationProcessingAnno.value();
+        List<AnnotationNode> annotations = annotationNode.getClassNode().redirect().getAnnotations();
+        for (AnnotationNode anno : annotations)  {
+            Class typeClass = anno.getClassNode().getTypeClass();
+
+            if (typeClass.getName().equals("org.gcontracts.annotations.meta.AnnotationProcessorImplementation"))  {
+                annotationProcessingAnno = (ClassExpression) anno.getMember("value");
+                break;
+            }
+        }
+
+        if (annotationProcessingAnno == null) throw new GroovyBugError("Annotation processing class could not be found! This indicates a bug in GContracts, please file an issue!");
 
         try {
+            final Class clz = Class.forName(annotationProcessingAnno.getType().getTypeClass().getName());
             return (AnnotationProcessor) clz.newInstance();
         } catch (InstantiationException e) {
-        } catch (IllegalAccessException e) {}
+        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException e) {}
 
-        return null;
+        throw new GroovyBugError("Annotation processing class could not be instantiated! This indicates a bug in GContracts, please file an issue!");
     }
 }

@@ -57,11 +57,7 @@ public final class Configurator {
 
         RuntimeMXBean runtimemxBean = ManagementFactory.getRuntimeMXBean();
         for (String arg : runtimemxBean.getInputArguments())  {
-            // disable all assertions
-            if (ENABLED_ASSERTIONS.equals(arg))  {
-                assertionConfiguration.put(null, Boolean.TRUE);
-
-            } else if (DISABLED_ASSERTIONS.equals(arg))  {
+            if (DISABLED_ASSERTIONS.equals(arg))  {
                 assertionConfiguration.put(null, Boolean.FALSE);
 
             } else if (arg.startsWith(ENABLE_PACKAGE_ASSERTIONS) && arg.endsWith(PACKAGE_POSTFIX))  {

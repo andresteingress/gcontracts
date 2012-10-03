@@ -97,12 +97,11 @@ public abstract class BaseGenerator {
                new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "init", ArgumentListExpression.EMPTY_ARGUMENTS))
         );
 
-        ifBlockStatement.addStatement(new TryCatchStatement(
+        ifBlockStatement.addStatement(
               new ExpressionStatement(new BinaryExpression($_gc_result,
                 Token.newSymbol(Types.ASSIGN, -1, -1),
                 classInvariantExpression
-              )),
-              EmptyStatement.INSTANCE
+              )
         ));
 
         BlockStatement finallyBlockStatement = new BlockStatement();
@@ -121,12 +120,12 @@ public abstract class BaseGenerator {
                                 new ExpressionStatement(new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "rethrowFirst", ArgumentListExpression.EMPTY_ARGUMENTS)),
                                 finallyBlockStatement
                         ),
-                        new BlockStatement()
+                        EmptyStatement.INSTANCE
                 )
         );
 
         final BlockStatement blockStatement = new BlockStatement();
-        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.Boolean_TYPE)), lockTryCatchStatement, new BlockStatement()));
+        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.Boolean_TYPE)), lockTryCatchStatement, EmptyStatement.INSTANCE));
 
         return blockStatement;
     }
