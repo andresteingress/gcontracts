@@ -239,26 +239,26 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
             secondPass = false;
 
             if (expression.getCode() == null || expression.getCode() instanceof EmptyStatement)  {
-                addError("Annotation does not contain any expressions (e.g. use '@Requires({ argument1 })').", expression);
+                addError("[GContracts] Annotation does not contain any expressions (e.g. use '@Requires({ argument1 })').", expression);
             }
 
             if (expression.getCode() instanceof BlockStatement &&
                     ((BlockStatement) expression.getCode()).getStatements().isEmpty())  {
-                addError("Annotation does not contain any expressions (e.g. use '@Requires({ argument1 })').", expression);
+                addError("[GContracts] Annotation does not contain any expressions (e.g. use '@Requires({ argument1 })').", expression);
             }
 
             if (expression.isParameterSpecified() && !AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), POSTCONDITION_TYPE_NAME))  {
-                addError("Annotation does not support parameters (the only exception are postconditions).", expression);
+                addError("[GContracts] Annotation does not support parameters (the only exception are postconditions).", expression);
             }
 
             if (expression.isParameterSpecified())  {
                 for (Parameter param : expression.getParameters())  {
                     if (!("result".equals(param.getName()) || "old".equals(param.getName())))  {
-                        addError("Postconditions only allow 'old' and 'result' closure parameters.", expression);
+                        addError("[GContracts] Postconditions only allow 'old' and 'result' closure parameters.", expression);
                     }
 
                     if (!param.isDynamicTyped())  {
-                        addError("Postconditions do not support explicit types.", expression);
+                        addError("[GContracts] Postconditions do not support explicit types.", expression);
                     }
                 }
             }
@@ -283,7 +283,7 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
             if (accessedVariable instanceof Parameter)  {
                 Parameter parameter = (Parameter) accessedVariable;
                 if ("it".equals(parameter.getName()))  {
-                    addError("Access to 'it' is not supported.", expression);
+                    addError("[GContracts] Access to 'it' is not supported.", expression);
                 }
             }
 
@@ -346,10 +346,10 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
 
         private void checkOperation(Expression expression, Token operation) {
             if (Types.ofType(operation.getType(), Types.ASSIGNMENT_OPERATOR))  {
-                addError("Assignment operators are not supported.", expression);
+                addError("[GContracts] Assignment operators are not supported.", expression);
             }
             if (Types.ofType(operation.getType(), Types.POSTFIX_OPERATOR))  {
-                addError("State changing postfix & prefix operators are not supported.", expression);
+                addError("[GContracts] State changing postfix & prefix operators are not supported.", expression);
             }
         }
 
