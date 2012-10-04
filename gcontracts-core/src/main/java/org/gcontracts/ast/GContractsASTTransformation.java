@@ -57,7 +57,7 @@ import java.util.List;
  *
  * @author ast
  */
-@GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
+@GroovyASTTransformation(phase = CompilePhase.INSTRUCTION_SELECTION)
 public class GContractsASTTransformation extends BaseASTTransformation {
 
     private void generateAnnotationClosureClasses(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
