@@ -18,7 +18,7 @@ allprojects {
     apply plugin: 'signing'
 
     group = "org.gcontracts"
-    version = "1.2.7"
+    version = "1.2.9"
 
     description = "GContracts provides closure annotations to support Programming by Contract for Groovy"
 }
@@ -119,7 +119,7 @@ uploadArchives {
           name 'Andre Steingress'
           email 'me@andresteingress.com'
           url 'http://www.gcontracts.org'
-          gcontracts.orgroles{
+          roles{
             role 'Developer'
           }
           timezone '+1'
