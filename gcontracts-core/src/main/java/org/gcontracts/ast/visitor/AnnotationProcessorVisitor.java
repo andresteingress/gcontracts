@@ -135,22 +135,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
             if (annotationProcessor != null && annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClassExpression)  {
                 final ClassExpression closureClassExpression = (ClassExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
 
-                ArgumentListExpression closureConstructorArgumentList = new ArgumentListExpression(
-                        closureClassExpression,
-                        new ArrayExpression(
-                                ClassHelper.DYNAMIC_TYPE,
-                                Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
-                        )
-                );
-
-                StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
-                        ClassHelper.makeWithoutCaching(ClosureInstanceHelper.class),
-                        "createInstance",
-                        closureConstructorArgumentList
-                );
-
                 MethodCallExpression doCall = new MethodCallExpression(
-                        methodCallExpression,
+                        new ConstructorCallExpression(closureClassExpression.getType(), new ArgumentListExpression(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)),
                         "doCall",
                         ArgumentListExpression.EMPTY_ARGUMENTS
                 );
@@ -197,22 +183,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                     closureArgumentList.addExpression(variableExpression);
                 }
 
-                ArgumentListExpression newInstanceArguments = new ArgumentListExpression(
-                        annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME),
-                                new ArrayExpression(
-                                        ClassHelper.DYNAMIC_TYPE,
-                                        Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
-                                )
-                        );
-
-                StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
-                        ClassHelper.makeWithoutCaching(ClosureInstanceHelper.class),
-                        "createInstance",
-                        newInstanceArguments
-                );
-
                 MethodCallExpression doCall = new MethodCallExpression(
-                        methodCallExpression,
+                        new ConstructorCallExpression(annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME).getType(), new ArgumentListExpression(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)),
                         "doCall",
                         closureArgumentList
                 );

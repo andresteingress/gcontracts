@@ -82,22 +82,8 @@ public class ClassInvariantGenerator extends BaseGenerator {
             ClassExpression classExpression = (ClassExpression) nextContractElementAnnotation.getMember(BaseVisitor.CLOSURE_ATTRIBUTE_NAME);
             if (classExpression == null) continue;
 
-            ArgumentListExpression newInstanceArguments = new ArgumentListExpression(
-                    classExpression,
-                    new ArrayExpression(
-                            ClassHelper.DYNAMIC_TYPE,
-                            Arrays.<Expression>asList(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)
-                    )
-            );
-
-            StaticMethodCallExpression methodCallExpression = new StaticMethodCallExpression(
-                    ClassHelper.makeWithoutCaching(ClosureInstanceHelper.class),
-                    "createInstance",
-                    newInstanceArguments
-            );
-
             MethodCallExpression doCall = new MethodCallExpression(
-                    methodCallExpression,
+                    new ConstructorCallExpression(classExpression.getType(), new ArgumentListExpression(VariableExpression.THIS_EXPRESSION, VariableExpression.THIS_EXPRESSION)),
                     "doCall",
                     ArgumentListExpression.EMPTY_ARGUMENTS
             );
