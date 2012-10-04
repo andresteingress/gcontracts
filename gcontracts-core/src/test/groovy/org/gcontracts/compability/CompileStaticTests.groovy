@@ -30,7 +30,7 @@ class CompileStaticTests extends GroovyShellTestCase {
                 @groovy.transform.CompileStatic
                 class A {
 
-                    @Requires({ param.size() > 0 })
+                    @Requires({ param.length() > 0 })
                     void someOperation(String param) { }
                 }
                 new A().someOperation('')
