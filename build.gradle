@@ -20,7 +20,7 @@ allprojects {
     group = "org.gcontracts"
     version = "1.2.9"
 
-    description = "GContracts provides closure annotations to support Programming by Contract for Groovy"
+    description = "GContracts provides Java annotations to support Programming by Contract for Groovy"
 }
 
 subprojects {
@@ -31,7 +31,7 @@ subprojects {
   compileTestGroovy.options.fork = true
 
   dependencies {
-	groovy group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.0.4'
+	groovy group: 'org.codehaus.groovy', name: 'groovy-all', version: '1.8.8'
     compile asm
   }
 
