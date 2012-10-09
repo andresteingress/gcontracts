@@ -190,7 +190,7 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
         rewrittenClosureExpression.setSourcePosition(closureExpression);
         rewrittenClosureExpression.setDeclaringClass(closureExpression.getDeclaringClass());
         rewrittenClosureExpression.setSynthetic(true);
-        rewrittenClosureExpression.setVariableScope(closureExpression.getVariableScope());
+        rewrittenClosureExpression.setVariableScope(correctVariableScope(closureExpression.getVariableScope(), methodNode));
         rewrittenClosureExpression.setType(closureExpression.getType());
 
         boolean isConstructor = methodNode instanceof ConstructorNode;
@@ -203,6 +203,38 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
         annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
 
         markClosureReplaced(methodNode);
+    }
+
+    private VariableScope correctVariableScope(VariableScope variableScope, MethodNode methodNode) {
+        if (variableScope ==  null) return null;
+        if (methodNode == null || methodNode.getParameters() == null || methodNode.getParameters().length == 0) return variableScope;
+
+        VariableScope copy = copy(variableScope);
+
+        for (Iterator<Variable> iterator = variableScope.getReferencedClassVariablesIterator(); iterator.hasNext();) {
+            Variable variable = iterator.next();
+            String name = variable.getName();
+
+            for (Parameter parameter : methodNode.getParameters())  {
+                if (parameter.getName().equals(name))  {
+                    copy.putReferencedLocalVariable(parameter);
+                    break;
+                }
+            }
+
+            if (!copy.isReferencedLocalVariable(name))  {
+                copy.putReferencedClassVariable(variable);
+            }
+        }
+
+        return copy;
+    }
+
+    private VariableScope copy(VariableScope original) {
+        VariableScope copy = new VariableScope(original.getParent());
+        copy.setClassScope(original.getClassScope());
+        copy.setInStaticContext(original.isInStaticContext());
+        return copy;
     }
 
     private void markProcessed(ASTNode someNode) {
@@ -269,7 +301,8 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
         @Override
         public void visitVariableExpression(VariableExpression expression) {
 
-            Variable accessedVariable = expression.getAccessedVariable();
+            // in case of a FieldNode, checks whether the FieldNode can be replaced with a Parameter
+            Variable accessedVariable = getParameterCandidate(expression.getAccessedVariable());
             if (accessedVariable instanceof FieldNode)  {
                 FieldNode fieldNode = (FieldNode) accessedVariable;
 
@@ -286,6 +319,8 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
                     addError("[GContracts] Access to 'it' is not supported.", expression);
                 }
             }
+
+            expression.setAccessedVariable(accessedVariable);
 
             super.visitVariableExpression(expression);
         }
@@ -351,6 +386,18 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
             if (Types.ofType(operation.getType(), Types.POSTFIX_OPERATOR))  {
                 addError("[GContracts] State changing postfix & prefix operators are not supported.", expression);
             }
+        }
+
+        private Variable getParameterCandidate(Variable variable)  {
+            if (variable == null || methodNode == null) return variable;
+            if (variable instanceof Parameter) return variable;
+
+            String name = variable.getName();
+            for (Parameter param : methodNode.getParameters())  {
+                if (name.equals(param.getName())) return param;
+            }
+
+            return variable;
         }
 
         public void secondPass(ClosureExpression closureExpression)  {

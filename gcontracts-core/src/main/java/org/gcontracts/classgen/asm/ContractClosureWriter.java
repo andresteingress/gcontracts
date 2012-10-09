@@ -63,9 +63,6 @@ public class ContractClosureWriter {
         // contains all params of the original method
         Parameter[] parameters = parametersTemp.toArray(new Parameter[parametersTemp.size()]);
 
-        Parameter[] localVariableParams = getClosureSharedVariables(expression);
-        removeInitialValues(localVariableParams);
-
         ClassNode answer = new ClassNode(name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference());
         answer.setSynthetic(true);
         answer.setSourcePosition(expression);
@@ -120,34 +117,6 @@ public class ContractClosureWriter {
                                 ClassNode.SUPER,
                                 conArgs)));
 
-        // let's assign all the parameter fields from the outer context
-        for (Parameter param : localVariableParams) {
-            String paramName = param.getName();
-            ClassNode type = param.getType();
-            if (true) {
-                VariableExpression initialValue = new VariableExpression(paramName);
-                initialValue.setAccessedVariable(param);
-                initialValue.setUseReferenceDirectly(true);
-                ClassNode realType = type;
-                type = ClassHelper.makeReference();
-                param.setType(ClassHelper.makeReference());
-                FieldNode paramField = answer.addField(paramName, ACC_PRIVATE | ACC_SYNTHETIC, type, initialValue);
-                paramField.setDeclaringClass(ClassHelper.getWrapper(param.getOriginType()));
-                paramField.setHolder(true);
-                String methodName = Verifier.capitalize(paramName);
-
-                // let's add a getter & setter
-                Expression fieldExp = new FieldExpression(paramField);
-                answer.addMethod(
-                        "get" + methodName,
-                        ACC_PUBLIC,
-                        realType,
-                        Parameter.EMPTY_ARRAY,
-                        ClassNode.EMPTY_ARRAY,
-                        new ReturnStatement(fieldExp));
-            }
-        }
-
         Parameter[] params = new Parameter[2];
         params[0] = new Parameter(ClassHelper.OBJECT_TYPE, "_outerInstance");
         params[1] = new Parameter(ClassHelper.OBJECT_TYPE, "_thisObject");
@@ -172,38 +141,6 @@ public class ContractClosureWriter {
         }
 
         return outermostClass;
-    }
-
-    private Parameter[] getClosureSharedVariables(ClosureExpression ce) {
-        VariableScope scope = ce.getVariableScope();
-        Parameter[] ret = new Parameter[scope.getReferencedLocalVariablesCount()];
-        int index = 0;
-        for (Iterator iter = scope.getReferencedLocalVariablesIterator(); iter.hasNext();) {
-            Variable element = (org.codehaus.groovy.ast.Variable) iter.next();
-            Parameter p = new Parameter(element.getType(), element.getName());
-            p.setDeclaringClass(element.getOriginType());
-            p.setClosureSharedVariable(element.isClosureSharedVariable());
-            ret[index] = p;
-            index++;
-        }
-        return ret;
-    }
-
-    /*
-     * this method is called for local variables shared between scopes.
-     * These variables must not have init values because these would
-     * then in later steps be used to create multiple versions of the
-     * same method, in this case the constructor. A closure should not
-     * have more than one constructor!
-     */
-    private void removeInitialValues(Parameter[] params) {
-        for (int i = 0; i < params.length; i++) {
-            if (params[i].hasInitialExpression()) {
-                Parameter p = new Parameter(params[i].getType(), params[i].getName());
-                p.setDeclaringClass(p.getOriginType());
-                params[i] = p;
-            }
-        }
     }
 
     private void correctAccessedVariable(final MethodNode methodNode, ClosureExpression ce) {

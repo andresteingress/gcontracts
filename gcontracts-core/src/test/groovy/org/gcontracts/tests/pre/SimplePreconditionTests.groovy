@@ -318,7 +318,7 @@ class Account
 
     @Test void requires_on_constructor_with_params_instance_vars_same_name()  {
 
-            def source = """
+        def source = """
                     import org.gcontracts.annotations.*
 
                         class A {
@@ -333,6 +333,70 @@ class Account
                             }
                         }
                  """
+
+        create_instance_of(source, ['test', 'test'])
+    }
+
+    @Test(expected = PreconditionViolation.class) void requires_on_constructor_with_params_properties_same_name()  {
+
+        def source = """
+                        import org.gcontracts.annotations.*
+
+                            class A {
+
+                                String a
+                                String b
+
+                                @Requires({ a && b })
+                                A(String a, String b) {
+                                    this.a = a
+                                    this.b = b
+                                }
+                            }
+                     """
+
+        create_instance_of(source, ['test', ''])
+    }
+
+    @Test void requires_on_constructor_with_params_dynamic_properties_same_name()  {
+
+        def source = """
+            import org.gcontracts.annotations.*
+
+                class A {
+
+                    def a
+                    def b
+
+                    @Requires({ a && b })
+                    A(String a, String b) {
+                        this.a = a
+                        this.b = b
+                    }
+                }
+         """
+
+        create_instance_of(source, ['test', 'test'])
+    }
+
+    @Test void requires_on_constructor_with_params_instance_vars_same_name_and_this_expression()  {
+
+            def source = """
+                        import org.gcontracts.annotations.*
+
+                            class A {
+
+                                private final String a
+                                private final String b
+
+                                @Requires({ this.a == null && this.b == null })
+                                @Ensures({ this.a == a && this.b == b })
+                                A(String a, String b) {
+                                    this.a = a
+                                    this.b = b
+                                }
+                            }
+                     """
 
             create_instance_of(source, ['test', 'test'])
         }
