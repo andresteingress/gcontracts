@@ -8,7 +8,6 @@ import org.junit.Ignore
 /**
  * @author me@andresteingress.com
  */
-@Ignore
 class SpockIntegrationTests extends BaseTestClass {
 
     @Test void spec_with_requires()  {
