@@ -125,7 +125,7 @@ public abstract class BaseGenerator {
         );
 
         final BlockStatement blockStatement = new BlockStatement();
-        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.Boolean_TYPE)), lockTryCatchStatement, EmptyStatement.INSTANCE));
+        blockStatement.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.boolean_TYPE)), lockTryCatchStatement, EmptyStatement.INSTANCE));
 
         return blockStatement;
     }

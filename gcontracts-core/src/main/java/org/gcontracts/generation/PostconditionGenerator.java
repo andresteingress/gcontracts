@@ -102,7 +102,7 @@ public class PostconditionGenerator extends BaseGenerator {
         // if return type is not void, than a "result" variable is provided in the postcondition expression
         final List<Statement> statements = methodCode.getStatements();
         if (statements.size() > 0)  {
-            VariableExpression enabledVariableExpression = new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.Boolean_TYPE);
+            VariableExpression enabledVariableExpression = new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.boolean_TYPE);
             enabledVariableExpression.setAccessedVariable(enabledVariableExpression);
 
             if (method.getReturnType() != ClassHelper.VOID_TYPE)  {

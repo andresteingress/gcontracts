@@ -55,7 +55,7 @@ public class ConfigurationSetup {
 
         StaticMethodCallExpression checkAssertionsEnabledMethodCall = new StaticMethodCallExpression(ClassHelper.makeWithoutCaching(Configurator.class), "checkAssertionsEnabled", new ArgumentListExpression(new ConstantExpression(type.getName())));
 
-        final FieldNode fieldNode = type.addField(BaseVisitor.GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.Boolean_TYPE, checkAssertionsEnabledMethodCall);
+        final FieldNode fieldNode = type.addField(BaseVisitor.GCONTRACTS_ENABLED_VAR, Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_FINAL, ClassHelper.boolean_TYPE, checkAssertionsEnabledMethodCall);
 
         fieldNode.setSynthetic(true);
     }

@@ -22,7 +22,7 @@
  */
 package org.gcontracts.generation;
 
-import java.util.Stack;
+import java.util.HashSet;
 
 /**
  * Keeps track of contract executions to avoid cyclic contract checks.
@@ -31,11 +31,11 @@ import java.util.Stack;
  */
 public class ContractExecutionTracker {
 
-    public static class ContractExecution {
-        String className;
-        String methodIdentifier;
-        String assertionType;
-        boolean isStatic;
+    public static final class ContractExecution {
+        final String className;
+        final String methodIdentifier;
+        final String assertionType;
+        final boolean isStatic;
 
         public ContractExecution(String className, String methodIdentifier, String assertionType, boolean isStatic)  {
             this.className = className;
@@ -72,22 +72,22 @@ public class ContractExecutionTracker {
     }
 
 
-    static class ContractExecutionThreadLocal extends ThreadLocal<Stack<ContractExecution>> {
+    static class ContractExecutionThreadLocal extends ThreadLocal<HashSet<ContractExecution>> {
 
         @Override
-        protected Stack<ContractExecution> initialValue() {
-            return new Stack<ContractExecution>();
+        protected HashSet<ContractExecution> initialValue() {
+            return new HashSet<ContractExecution>();
         }
     }
 
-    private static ThreadLocal<Stack<ContractExecution>> executions = new ContractExecutionThreadLocal();
+    private static ThreadLocal<HashSet<ContractExecution>> executions = new ContractExecutionThreadLocal();
 
     public static boolean track(String className, String methodIdentifier, String assertionType, boolean isStatic)  {
         final ContractExecution ce = new ContractExecution(className, methodIdentifier, assertionType, isStatic);
-        final Stack<ContractExecution> contractExecutions = executions.get();
+        final HashSet<ContractExecution> contractExecutions = executions.get();
 
         if (!contractExecutions.contains(ce))  {
-            contractExecutions.push(ce);
+            contractExecutions.add(ce);
             return true;
         }
 
@@ -95,10 +95,8 @@ public class ContractExecutionTracker {
     }
 
     public static void clear(String className, String methodIdentifier, String assertionType, boolean isStatic) {
-        final Stack<ContractExecution> contractExecutions = executions.get();
+        final HashSet<ContractExecution> contractExecutions = executions.get();
 
-        if (contractExecutions.size() > 0)  {
-            contractExecutions.pop();
-        }
+        contractExecutions.remove(new ContractExecution(className, methodIdentifier, assertionType, isStatic));
     }
 }
