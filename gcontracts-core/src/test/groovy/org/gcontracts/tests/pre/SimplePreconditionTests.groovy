@@ -315,4 +315,25 @@ class Account
             obj.someMethod(1, "")
         }
     }
+
+    @Test void requires_on_constructor_with_params_instance_vars_same_name()  {
+
+            def source = """
+                    import org.gcontracts.annotations.*
+
+                        class A {
+
+                            private final String a
+                            private final String b
+
+                            @Requires({ a && b })
+                            A(String a, String b) {
+                                this.a = a
+                                this.b = b
+                            }
+                        }
+                 """
+
+            create_instance_of(source, ['test', 'test'])
+        }
 }
