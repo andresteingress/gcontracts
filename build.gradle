@@ -18,7 +18,7 @@ allprojects {
     apply plugin: 'signing'
 
     group = "org.gcontracts"
-    version = "1.2.9"
+    version = "1.2.10"
 
     description = "GContracts provides Java annotations to support Programming by Contract for Groovy"
 }
