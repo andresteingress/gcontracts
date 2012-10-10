@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Internal utility class for extracting a boolean expression from the given closure expression.</p>
+ * <p>Internal utility class for extracting a boolean expression from the given expression or statement.</p>
  *
  * @see ClosureExpression
  * @see BooleanExpression
@@ -43,15 +43,19 @@ import java.util.List;
 public class ExpressionUtils {
 
     /**
-     * Returns the first {@link org.codehaus.groovy.ast.expr.BooleanExpression} in the given {@link org.codehaus.groovy.ast.expr.ClosureExpression}.
-     *
-     * @param closureExpression the assertion's {@link org.codehaus.groovy.ast.expr.ClosureExpression}
-     * @return the first {@link org.codehaus.groovy.ast.expr.Expression} found in the given {@link org.codehaus.groovy.ast.expr.ClosureExpression}
+     * Returns all {@link BooleanExpression} instances found in the given {@link ClosureExpression}.
      */
     public static List<BooleanExpression> getBooleanExpression(ClosureExpression closureExpression)  {
         if (closureExpression == null) return null;
 
         final BlockStatement closureBlockStatement = (BlockStatement) closureExpression.getCode();
+        return getBooleanExpressions(closureBlockStatement);
+    }
+
+    /**
+     * Returns all {@link BooleanExpression} instances found in the given {@link BlockStatement}.
+     */
+    private static List<BooleanExpression> getBooleanExpressions(BlockStatement closureBlockStatement) {
         final List<Statement> statementList = closureBlockStatement.getStatements();
 
         List<BooleanExpression> booleanExpressions = new ArrayList<BooleanExpression>();
