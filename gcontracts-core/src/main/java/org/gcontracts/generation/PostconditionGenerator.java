@@ -29,6 +29,7 @@ import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.annotations.meta.Postcondition;
+import org.gcontracts.ast.visitor.AnnotationClosureVisitor;
 import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
 
@@ -69,7 +70,19 @@ public class PostconditionGenerator extends BaseGenerator {
     public void generatePostconditionAssertionStatement(MethodNode method, org.gcontracts.domain.Postcondition postcondition)  {
 
         final BooleanExpression postconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Postcondition.class, postcondition.booleanExpression(), true);
-        final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, postconditionBooleanExpression, "postcondition");
+
+
+        BlockStatement blockStatement;
+        final BlockStatement originalBlockStatement = postcondition.originalBlockStatement();
+        // if use execution tracker flag is found in the meta-data the annotation closure visitor discovered
+        // method calls which might be subject to cycling boolean expressions -> no inline mode possible
+        final boolean useExecutionTracker = originalBlockStatement == null || Boolean.TRUE.equals(originalBlockStatement.getNodeMetaData(AnnotationClosureVisitor.META_DATA_USE_EXECUTION_TRACKER));
+
+        if (!useExecutionTracker && Boolean.TRUE.equals(method.getNodeMetaData(META_DATA_USE_INLINE_MODE)))  {
+            blockStatement = getInlineModeBlockStatement(method.getDeclaringClass(), method, originalBlockStatement, "postcondition");
+        } else {
+            blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, postconditionBooleanExpression, "postcondition");
+        }
 
         addPostcondition(method, blockStatement);
     }
