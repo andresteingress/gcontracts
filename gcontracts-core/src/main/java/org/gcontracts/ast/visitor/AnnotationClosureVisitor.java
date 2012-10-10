@@ -63,8 +63,10 @@ import java.util.*;
  */
 public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMetaData{
 
-    private static final String POSTCONDITION_TYPE_NAME = Postcondition.class.getName();
+    public static final String META_DATA_USE_EXECUTION_TRACKER = "org.gcontracts.META_DATA.USE_EXECUTION_TRACKER";
+    public static final String META_DATA_ORIGINAL_TRY_CATCH_BLOCK = "org.gcontracts.META_DATA.ORIGINAL_TRY_CATCH_BLOCK";
 
+    private static final String POSTCONDITION_TYPE_NAME = Postcondition.class.getName();
     private static final ClassNode FIELD_VALUES = ClassHelper.makeCached(FieldValues.class);
 
     private ClassNode classNode;
@@ -120,6 +122,9 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
 
                 final ClassExpression value = new ClassExpression(closureClassNode);
                 value.setSourcePosition(annotationNode);
+
+                value.setNodeMetaData(META_DATA_ORIGINAL_TRY_CATCH_BLOCK, newClosureBlockStatement);
+                value.setNodeMetaData(META_DATA_USE_EXECUTION_TRACKER, validator.isMethodCalls());
 
                 annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
 
@@ -200,6 +205,9 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
         final ClassExpression value = new ClassExpression(closureClassNode);
         value.setSourcePosition(annotationNode);
 
+        value.setNodeMetaData(META_DATA_ORIGINAL_TRY_CATCH_BLOCK, newClosureBlockStatement);
+        value.setNodeMetaData(META_DATA_USE_EXECUTION_TRACKER, validator.isMethodCalls());
+
         annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
 
         markClosureReplaced(methodNode);
@@ -257,6 +265,7 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
         private final Map<VariableExpression, StaticMethodCallExpression> variableExpressions;
 
         private boolean secondPass = false;
+        private boolean methodCalls = false;
 
         public ClosureExpressionValidator(ClassNode classNode, MethodNode methodNode, AnnotationNode annotationNode, SourceUnit sourceUnit)  {
             this.classNode = classNode;
@@ -379,6 +388,24 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
             super.visitBinaryExpression(expression);
         }
 
+        @Override
+        public void visitStaticMethodCallExpression(StaticMethodCallExpression call) {
+            methodCalls = true;
+            super.visitStaticMethodCallExpression(call);
+        }
+
+        @Override
+        public void visitMethodCallExpression(MethodCallExpression call) {
+            methodCalls = true;
+            super.visitMethodCallExpression(call);
+        }
+
+        @Override
+        public void visitConstructorCallExpression(ConstructorCallExpression call) {
+            methodCalls = true;
+            super.visitConstructorCallExpression(call);
+        }
+
         private void checkOperation(Expression expression, Token operation) {
             if (Types.ofType(operation.getType(), Types.ASSIGNMENT_OPERATOR))  {
                 addError("[GContracts] Assignment operators are not supported.", expression);
@@ -403,6 +430,10 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
         public void secondPass(ClosureExpression closureExpression)  {
             secondPass = true;
             super.visitClosureExpression(closureExpression);
+        }
+
+        public boolean isMethodCalls() {
+            return methodCalls;
         }
 
         @Override
