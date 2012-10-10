@@ -58,11 +58,11 @@ public class ClassInvariantGenerator extends BaseGenerator {
      * invariants.
      *
      * @param type the current {@link org.codehaus.groovy.ast.ClassNode}
-     * @param classInvariant the {@link org.codehaus.groovy.ast.expr.BooleanExpression} containing the assertion expression
+     * @param classInvariant the {@link org.gcontracts.domain.ClassInvariant} the assertion statement should be generated from
      */
-    public void generateInvariantAssertionStatement(final ClassNode type, final BooleanExpression classInvariant)  {
+    public void generateInvariantAssertionStatement(final ClassNode type, final org.gcontracts.domain.ClassInvariant classInvariant)  {
 
-        BooleanExpression classInvariantExpression = addCallsToSuperAnnotationClosure(type, ClassInvariant.class, classInvariant);
+        BooleanExpression classInvariantExpression = addCallsToSuperAnnotationClosure(type, ClassInvariant.class, classInvariant.booleanExpression());
 
         final BlockStatement blockStatement = new BlockStatement();
 

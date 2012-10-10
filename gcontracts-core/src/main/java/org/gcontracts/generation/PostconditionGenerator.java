@@ -64,11 +64,11 @@ public class PostconditionGenerator extends BaseGenerator {
      * Injects a postcondition assertion statement in the given <tt>method</tt>, based on the <tt>booleanExpression</tt>.
      *
      * @param method the {@link org.codehaus.groovy.ast.MethodNode} for assertion injection
-     * @param booleanExpression the {@link org.codehaus.groovy.ast.expr.BooleanExpression} holding the assertion expression
+     * @param postcondition the {@link org.gcontracts.domain.Postcondition} the assertion statement should be generated from
      */
-    public void generatePostconditionAssertionStatement(MethodNode method, BooleanExpression booleanExpression, boolean isConstructor)  {
+    public void generatePostconditionAssertionStatement(MethodNode method, org.gcontracts.domain.Postcondition postcondition)  {
 
-        final BooleanExpression postconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Postcondition.class, booleanExpression, true);
+        final BooleanExpression postconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Postcondition.class, postcondition.booleanExpression(), true);
         final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, postconditionBooleanExpression, "postcondition");
 
         addPostcondition(method, blockStatement);

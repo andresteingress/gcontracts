@@ -52,10 +52,10 @@ public class PreconditionGenerator extends BaseGenerator {
      * type {@link org.gcontracts.annotations.Requires}.
      *
      * @param method the {@link org.codehaus.groovy.ast.MethodNode} for assertion injection
-     * @param booleanExpression the {@link org.codehaus.groovy.ast.expr.BooleanExpression} containing the assertion expression
+     * @param precondition the {@link org.gcontracts.domain.Precondition} the assertion statement should be generated from
      */
-    public void generatePreconditionAssertionStatement(final MethodNode method, final BooleanExpression booleanExpression)  {
-        final BooleanExpression preconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Precondition.class, booleanExpression, false);
+    public void generatePreconditionAssertionStatement(final MethodNode method, final org.gcontracts.domain.Precondition precondition)  {
+        final BooleanExpression preconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Precondition.class, precondition.booleanExpression(), false);
         final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, preconditionBooleanExpression, "precondition");
 
         addPrecondition(method, blockStatement);

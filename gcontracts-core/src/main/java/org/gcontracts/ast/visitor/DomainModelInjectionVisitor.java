@@ -80,7 +80,7 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
         final ReaderSource source = pci.readerSource();
         final ClassInvariantGenerator classInvariantGenerator = new ClassInvariantGenerator(source);
 
-        classInvariantGenerator.generateInvariantAssertionStatement(type, classInvariant.booleanExpression());
+        classInvariantGenerator.generateInvariantAssertionStatement(type, classInvariant);
     }
 
     public void injectPrecondition(final MethodNode method, final Precondition precondition) {
@@ -89,7 +89,7 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
         final ReaderSource source = pci.readerSource();
         final PreconditionGenerator preconditionGenerator = new PreconditionGenerator(source);
 
-        preconditionGenerator.generatePreconditionAssertionStatement(method, precondition.booleanExpression());
+        preconditionGenerator.generatePreconditionAssertionStatement(method, precondition);
     }
 
     public void injectPostcondition(final MethodNode method, final Postcondition postcondition) {
@@ -98,6 +98,6 @@ public class DomainModelInjectionVisitor extends BaseVisitor {
         final ReaderSource source = pci.readerSource();
         final PostconditionGenerator postconditionGenerator = new PostconditionGenerator(source);
 
-        postconditionGenerator.generatePostconditionAssertionStatement(method, postcondition.booleanExpression(), postcondition.isPartOfConstructor());
+        postconditionGenerator.generatePostconditionAssertionStatement(method, postcondition);
     }
 }
