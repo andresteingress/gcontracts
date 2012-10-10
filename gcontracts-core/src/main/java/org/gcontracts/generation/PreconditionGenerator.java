@@ -66,7 +66,7 @@ public class PreconditionGenerator extends BaseGenerator {
         final boolean useExecutionTracker = originalBlockStatement == null || Boolean.TRUE.equals(originalBlockStatement.getNodeMetaData(AnnotationClosureVisitor.META_DATA_USE_EXECUTION_TRACKER));
 
         if (!useExecutionTracker && Boolean.TRUE.equals(method.getNodeMetaData(META_DATA_USE_INLINE_MODE)))  {
-            blockStatement = getInlineModeBlockStatement(method.getDeclaringClass(), method, precondition.originalBlockStatement(), "precondition");
+            blockStatement = getInlineModeBlockStatement(precondition.originalBlockStatement());
         } else {
             blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, preconditionBooleanExpression, "precondition");
         }

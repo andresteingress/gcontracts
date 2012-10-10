@@ -77,7 +77,7 @@ public abstract class BaseGenerator {
         return classNode.getDeclaredMethod(getInvariantMethodName(classNode), Parameter.EMPTY_ARRAY);
     }
 
-    protected BlockStatement getInlineModeBlockStatement(ClassNode type, MethodNode methodNode, BlockStatement blockStatement, String assertionType)  {
+    protected BlockStatement getInlineModeBlockStatement(BlockStatement blockStatement)  {
 
         final BlockStatement result = new BlockStatement();
         final BooleanExpression combinedBooleanExpression = ExpressionUtils.getBooleanExpression(ExpressionUtils.getBooleanExpressionsFromAssertionStatements(blockStatement));
