@@ -123,8 +123,14 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
                 final ClassExpression value = new ClassExpression(closureClassNode);
                 value.setSourcePosition(annotationNode);
 
-                value.setNodeMetaData(META_DATA_ORIGINAL_TRY_CATCH_BLOCK, newClosureBlockStatement);
-                value.setNodeMetaData(META_DATA_USE_EXECUTION_TRACKER, validator.isMethodCalls());
+                BlockStatement value1 = TryCatchBlockGenerator.generateTryCatchBlockForInlineMode(
+                        ClassHelper.makeWithoutCaching(ClassInvariantViolation.class),
+                        "<" + annotationNode.getClassNode().getName() + "> " + classNode.getName() + " \n\n",
+                        AssertStatementCreationUtility.getAssertionStatemens(booleanExpressions)
+                );
+                value1.setNodeMetaData(META_DATA_USE_EXECUTION_TRACKER, validator.isMethodCalls());
+
+                value.setNodeMetaData(META_DATA_ORIGINAL_TRY_CATCH_BLOCK, value1);
 
                 annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
 
@@ -205,9 +211,14 @@ public class AnnotationClosureVisitor extends BaseVisitor implements ASTNodeMeta
         final ClassExpression value = new ClassExpression(closureClassNode);
         value.setSourcePosition(annotationNode);
 
-        value.setNodeMetaData(META_DATA_ORIGINAL_TRY_CATCH_BLOCK, newClosureBlockStatement);
-        value.setNodeMetaData(META_DATA_USE_EXECUTION_TRACKER, validator.isMethodCalls());
+        BlockStatement value1 = TryCatchBlockGenerator.generateTryCatchBlockForInlineMode(
+                isPostcondition ? ClassHelper.makeWithoutCaching(PostconditionViolation.class) : ClassHelper.makeWithoutCaching(PreconditionViolation.class),
+                "<" + annotationNode.getClassNode().getName() + "> " + classNode.getName() + "." + methodNode.getTypeDescriptor() + " \n\n",
+                AssertStatementCreationUtility.getAssertionStatemens(booleanExpressions)
+        );
+        value1.setNodeMetaData(META_DATA_USE_EXECUTION_TRACKER, validator.isMethodCalls());
 
+        value.setNodeMetaData(META_DATA_ORIGINAL_TRY_CATCH_BLOCK, value1);
         annotationNode.setMember(CLOSURE_ATTRIBUTE_NAME, value);
 
         markClosureReplaced(methodNode);

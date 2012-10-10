@@ -34,6 +34,7 @@ import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.meta.Precondition;
+import org.gcontracts.ast.visitor.AnnotationClosureVisitor;
 import org.gcontracts.util.AnnotationUtils;
 
 /**
@@ -56,7 +57,19 @@ public class PreconditionGenerator extends BaseGenerator {
      */
     public void generatePreconditionAssertionStatement(final MethodNode method, final org.gcontracts.domain.Precondition precondition)  {
         final BooleanExpression preconditionBooleanExpression = addCallsToSuperMethodNodeAnnotationClosure(method.getDeclaringClass(), method, Precondition.class, precondition.booleanExpression(), false);
-        final BlockStatement blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, preconditionBooleanExpression, "precondition");
+
+        BlockStatement blockStatement;
+
+        final BlockStatement originalBlockStatement = precondition.originalBlockStatement();
+        // if use execution tracker flag is found in the meta-data the annotation closure visitor discovered
+        // method calls which might be subject to cycling boolean expressions -> no inline mode possible
+        final boolean useExecutionTracker = originalBlockStatement == null || Boolean.TRUE.equals(originalBlockStatement.getNodeMetaData(AnnotationClosureVisitor.META_DATA_USE_EXECUTION_TRACKER));
+
+        if (!useExecutionTracker && Boolean.TRUE.equals(method.getNodeMetaData(META_DATA_USE_INLINE_MODE)))  {
+            blockStatement = getInlineModeBlockStatement(method.getDeclaringClass(), method, precondition.originalBlockStatement(), "precondition");
+        } else {
+            blockStatement = wrapAssertionBooleanExpression(method.getDeclaringClass(), method, preconditionBooleanExpression, "precondition");
+        }
 
         addPrecondition(method, blockStatement);
     }

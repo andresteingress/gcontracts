@@ -22,14 +22,19 @@
  */
 package org.gcontracts.util;
 
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.expr.ClosureExpression;
-import org.codehaus.groovy.ast.expr.Expression;
+import org.codehaus.groovy.ast.ClassCodeVisitorSupport;
+import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.AssertStatement;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.control.SourceUnit;
+import org.codehaus.groovy.syntax.Token;
+import org.codehaus.groovy.syntax.Types;
+import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -77,5 +82,53 @@ public class ExpressionUtils {
         }
 
         return booleanExpressions;
+    }
+
+    /**
+     * Returns all {@link BooleanExpression} instances found in the given {@link BlockStatement}.
+     */
+    public static List<BooleanExpression> getBooleanExpressionsFromAssertionStatements(BlockStatement blockStatement) {
+        AssertStatementCollector collector = new AssertStatementCollector();
+        collector.visitBlockStatement(blockStatement);
+
+        List<AssertStatement> assertStatements = collector.assertStatements;
+        if (assertStatements.isEmpty()) return Collections.emptyList();
+
+        List<BooleanExpression> booleanExpressions = new ArrayList<BooleanExpression>();
+        for (AssertStatement assertStatement : assertStatements)  {
+            booleanExpressions.add(assertStatement.getBooleanExpression());
+        }
+
+        return booleanExpressions;
+    }
+
+    public static BooleanExpression getBooleanExpression(List<BooleanExpression> booleanExpressions)  {
+        if (booleanExpressions == null || booleanExpressions.isEmpty()) return new BooleanExpression(ConstantExpression.TRUE);
+
+        BooleanExpression result = null;
+        for (BooleanExpression booleanExpression : booleanExpressions)  {
+            if (result == null) {
+                result = booleanExpression;
+            } else {
+                result = new BooleanExpression(new BinaryExpression(result, Token.newSymbol(Types.LOGICAL_AND, -1, -1), booleanExpression));
+            }
+        }
+
+        return result;
+    }
+
+    static class AssertStatementCollector extends ClassCodeVisitorSupport implements Opcodes {
+
+        public List<AssertStatement> assertStatements = new ArrayList<AssertStatement>();
+
+        @Override
+        public void visitAssertStatement(AssertStatement statement) {
+            assertStatements.add(statement);
+        }
+
+        @Override
+        protected SourceUnit getSourceUnit() {
+            return null;
+        }
     }
 }

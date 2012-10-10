@@ -30,8 +30,11 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.gcontracts.ViolationTracker;
+import org.gcontracts.ast.visitor.AnnotationClosureVisitor;
+import org.gcontracts.ast.visitor.AnnotationProcessorVisitor;
 import org.gcontracts.ast.visitor.BaseVisitor;
 import org.gcontracts.util.AnnotationUtils;
+import org.gcontracts.util.ExpressionUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -48,6 +51,7 @@ import java.util.Map;
 public abstract class BaseGenerator {
 
     public static final String INVARIANT_CLOSURE_PREFIX = "invariant";
+    public static final String META_DATA_USE_INLINE_MODE = "org.gcontracts.USE_INLINE_MODE";
 
     protected final ReaderSource source;
 
@@ -73,6 +77,19 @@ public abstract class BaseGenerator {
         return classNode.getDeclaredMethod(getInvariantMethodName(classNode), Parameter.EMPTY_ARRAY);
     }
 
+    protected BlockStatement getInlineModeBlockStatement(ClassNode type, MethodNode methodNode, BlockStatement blockStatement, String assertionType)  {
+
+        final BlockStatement result = new BlockStatement();
+        final BooleanExpression combinedBooleanExpression = ExpressionUtils.getBooleanExpression(ExpressionUtils.getBooleanExpressionsFromAssertionStatements(blockStatement));
+
+        final BlockStatement assertionBlockStatement = new BlockStatement();
+        assertionBlockStatement.addStatement(new IfStatement(new NotExpression(combinedBooleanExpression), blockStatement, EmptyStatement.INSTANCE));
+
+        result.addStatement(new IfStatement(new BooleanExpression(new VariableExpression(BaseVisitor.GCONTRACTS_ENABLED_VAR, ClassHelper.boolean_TYPE)), assertionBlockStatement, EmptyStatement.INSTANCE));
+
+        return result;
+    }
+
     protected BlockStatement wrapAssertionBooleanExpression(ClassNode type, MethodNode methodNode, BooleanExpression classInvariantExpression, String assertionType) {
 
         final ClassNode violationTrackerClassNode = ClassHelper.makeWithoutCaching(ViolationTracker.class);
@@ -94,15 +111,15 @@ public abstract class BaseGenerator {
 
         ifBlockStatement.addStatement(new ExpressionStatement(new DeclarationExpression($_gc_result, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
         ifBlockStatement.addStatement(new ExpressionStatement(
-               new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "init", ArgumentListExpression.EMPTY_ARGUMENTS))
+                new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "init", ArgumentListExpression.EMPTY_ARGUMENTS))
         );
 
         ifBlockStatement.addStatement(
-              new ExpressionStatement(new BinaryExpression($_gc_result,
-                Token.newSymbol(Types.ASSIGN, -1, -1),
-                classInvariantExpression
-              )
-        ));
+                new ExpressionStatement(new BinaryExpression($_gc_result,
+                        Token.newSymbol(Types.ASSIGN, -1, -1),
+                        classInvariantExpression
+                )
+                ));
 
         BlockStatement finallyBlockStatement = new BlockStatement();
         finallyBlockStatement.addStatement(new ExpressionStatement(new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "deinit", ArgumentListExpression.EMPTY_ARGUMENTS)));
@@ -134,7 +151,10 @@ public abstract class BaseGenerator {
     protected BooleanExpression addCallsToSuperMethodNodeAnnotationClosure(final ClassNode type, final MethodNode methodNode, final Class<? extends Annotation> annotationType, BooleanExpression booleanExpression, boolean isPostcondition)  {
 
         final List<AnnotationNode> nextContractElementAnnotations = AnnotationUtils.getAnnotationNodeInHierarchyWithMetaAnnotation(type.getSuperClass(), methodNode, ClassHelper.makeWithoutCaching(annotationType));
-        if (nextContractElementAnnotations.isEmpty()) return booleanExpression;
+        if (nextContractElementAnnotations.isEmpty())  {
+            if (methodNode.getNodeMetaData(META_DATA_USE_INLINE_MODE) == null) methodNode.setNodeMetaData(META_DATA_USE_INLINE_MODE, Boolean.TRUE);
+            return booleanExpression;
+        }
 
         for (AnnotationNode nextContractElementAnnotation : nextContractElementAnnotations)  {
             ClassExpression classExpression = (ClassExpression) nextContractElementAnnotation.getMember(BaseVisitor.CLOSURE_ATTRIBUTE_NAME);

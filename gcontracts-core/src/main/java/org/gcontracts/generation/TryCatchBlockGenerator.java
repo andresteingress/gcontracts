@@ -33,55 +33,87 @@ import org.codehaus.groovy.syntax.Types;
 
 /**
  * Creates a try-catch block around a given {@link org.codehaus.groovy.ast.stmt.AssertStatement} and catches
- * a {@link org.codehaus.groovy.transform.powerassert.PowerAssertionError} to reuse the generated visual output.
+ * a PowerAssertionError to reuse the generated visual output.
  *
  * @author ast
  */
 public class TryCatchBlockGenerator {
 
-   public static BlockStatement generateTryCatchBlock(final ClassNode assertionErrorClass, final String message, final Statement assertStatement)  {
+    public static BlockStatement generateTryCatchBlockForInlineMode(final ClassNode assertionErrorClass, final String message, final Statement assertStatement)  {
 
-       final String $_gc_closure_result = "$_gc_closure_result";
+        final Class powerAssertionErrorClass = loadPowerAssertionErrorClass();
 
-       final VariableExpression variableExpression = new VariableExpression($_gc_closure_result, ClassHelper.Boolean_TYPE);
-       variableExpression.setAccessedVariable(variableExpression);
+        if (powerAssertionErrorClass == null) throw new GroovyBugError("GContracts >= 1.1.2 needs Groovy 1.7 or above!");
 
-       // if the assert statement is successful the return variable will be true else false
-       final BlockStatement overallBlock = new BlockStatement();
-       overallBlock.addStatement(new ExpressionStatement(new DeclarationExpression(variableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
+        VariableExpression newErrorVariableExpression = new VariableExpression("newError", assertionErrorClass);
+        newErrorVariableExpression.setAccessedVariable(newErrorVariableExpression);
 
-       final BlockStatement assertBlockStatement = new BlockStatement();
-       assertBlockStatement.addStatement(assertStatement);
-       assertBlockStatement.addStatement(new ExpressionStatement(new BinaryExpression(variableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.TRUE)));
+        ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(newErrorVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1),
+                new ConstructorCallExpression(assertionErrorClass,
+                        new ArgumentListExpression(new BinaryExpression(new ConstantExpression(message), Token.newSymbol(Types.PLUS, -1, -1), new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getMessage", ArgumentListExpression.EMPTY_ARGUMENTS))))));
 
-       final Class powerAssertionErrorClass = loadPowerAssertionErrorClass();
-       
-       if (powerAssertionErrorClass == null) throw new GroovyBugError("GContracts >= 1.1.2 needs Groovy 1.7 or above!");
-
-       VariableExpression newErrorVariableExpression = new VariableExpression("newError", assertionErrorClass);
-       newErrorVariableExpression.setAccessedVariable(newErrorVariableExpression);
-
-       ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(newErrorVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1),
-               new ConstructorCallExpression(assertionErrorClass,
-                       new ArgumentListExpression(new BinaryExpression(new ConstantExpression(message), Token.newSymbol(Types.PLUS, -1, -1), new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getMessage", ArgumentListExpression.EMPTY_ARGUMENTS))))));
-
-       ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(newErrorVariableExpression, "setStackTrace", new ArgumentListExpression(
-               new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getStackTrace", ArgumentListExpression.EMPTY_ARGUMENTS)
-       )));
+        ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(newErrorVariableExpression, "setStackTrace", new ArgumentListExpression(
+                new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getStackTrace", ArgumentListExpression.EMPTY_ARGUMENTS)
+        )));
 
 
-       final BlockStatement catchBlock = new BlockStatement();
-       catchBlock.addStatement(expr);
-       catchBlock.addStatement(exp2);
+        final BlockStatement catchBlock = new BlockStatement();
+        catchBlock.addStatement(expr);
+        catchBlock.addStatement(exp2);
+        catchBlock.addStatement(new ThrowStatement(newErrorVariableExpression));
 
-       final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertBlockStatement, new EmptyStatement());
-       tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error"), catchBlock));
+        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertStatement, new EmptyStatement());
+        tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error"), catchBlock));
 
-       overallBlock.addStatement(tryCatchStatement);
-       overallBlock.addStatement(new ReturnStatement(variableExpression));
+        final BlockStatement assertBlockStatement = new BlockStatement();
+        assertBlockStatement.addStatement(tryCatchStatement);
 
-       return overallBlock;
-   }
+        return assertBlockStatement;
+    }
+
+    public static BlockStatement generateTryCatchBlock(final ClassNode assertionErrorClass, final String message, final Statement assertStatement)  {
+
+        final String $_gc_closure_result = "$_gc_closure_result";
+
+        final VariableExpression variableExpression = new VariableExpression($_gc_closure_result, ClassHelper.Boolean_TYPE);
+        variableExpression.setAccessedVariable(variableExpression);
+
+        // if the assert statement is successful the return variable will be true else false
+        final BlockStatement overallBlock = new BlockStatement();
+        overallBlock.addStatement(new ExpressionStatement(new DeclarationExpression(variableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.FALSE)));
+
+        final BlockStatement assertBlockStatement = new BlockStatement();
+        assertBlockStatement.addStatement(assertStatement);
+        assertBlockStatement.addStatement(new ExpressionStatement(new BinaryExpression(variableExpression, Token.newSymbol(Types.ASSIGN, -1, -1), ConstantExpression.TRUE)));
+
+        final Class powerAssertionErrorClass = loadPowerAssertionErrorClass();
+
+        if (powerAssertionErrorClass == null) throw new GroovyBugError("GContracts >= 1.1.2 needs Groovy 1.7 or above!");
+
+        VariableExpression newErrorVariableExpression = new VariableExpression("newError", assertionErrorClass);
+        newErrorVariableExpression.setAccessedVariable(newErrorVariableExpression);
+
+        ExpressionStatement expr = new ExpressionStatement(new DeclarationExpression(newErrorVariableExpression, Token.newSymbol(Types.ASSIGN, -1, -1),
+                new ConstructorCallExpression(assertionErrorClass,
+                        new ArgumentListExpression(new BinaryExpression(new ConstantExpression(message), Token.newSymbol(Types.PLUS, -1, -1), new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getMessage", ArgumentListExpression.EMPTY_ARGUMENTS))))));
+
+        ExpressionStatement exp2 = new ExpressionStatement(new MethodCallExpression(newErrorVariableExpression, "setStackTrace", new ArgumentListExpression(
+                new MethodCallExpression(new VariableExpression(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error")), "getStackTrace", ArgumentListExpression.EMPTY_ARGUMENTS)
+        )));
+
+
+        final BlockStatement catchBlock = new BlockStatement();
+        catchBlock.addStatement(expr);
+        catchBlock.addStatement(exp2);
+
+        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertBlockStatement, new EmptyStatement());
+        tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error"), catchBlock));
+
+        overallBlock.addStatement(tryCatchStatement);
+        overallBlock.addStatement(new ReturnStatement(variableExpression));
+
+        return overallBlock;
+    }
 
     private static Class loadPowerAssertionErrorClass() {
 
