@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.gcontracts.domain.Contract;
 
 /**
@@ -37,8 +38,7 @@ import org.gcontracts.domain.Contract;
  */
 public abstract class AnnotationProcessor {
 
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final BooleanExpression booleanExpression) {}
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final BooleanExpression booleanExpression) {}
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final BlockStatement blockStatement, final BooleanExpression booleanExpression) {}
+    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final BlockStatement blockStatement, final BooleanExpression booleanExpression) {}
 
-    public void process(final ProcessingContextInformation processingContextInformation, final Contract contract, final ClassNode classNode, final MethodNode methodNode, final Parameter parameter) {}
 }

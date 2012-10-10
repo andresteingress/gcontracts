@@ -24,6 +24,7 @@ package org.gcontracts.common.impl;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.gcontracts.common.spi.AnnotationProcessor;
 import org.gcontracts.common.spi.ProcessingContextInformation;
 import org.gcontracts.domain.ClassInvariant;
@@ -37,10 +38,10 @@ import org.gcontracts.domain.Contract;
 public class ClassInvariantAnnotationProcessor extends AnnotationProcessor {
 
     @Override
-    public void process(ProcessingContextInformation processingContextInformation, Contract contract, ClassNode classNode, BooleanExpression booleanExpression) {
+    public void process(ProcessingContextInformation processingContextInformation, Contract contract, ClassNode classNode, BlockStatement blockStatement, BooleanExpression booleanExpression) {
         if (!processingContextInformation.isClassInvariantsEnabled()) return;
         if (booleanExpression == null) return;
 
-        contract.setClassInvariant(new ClassInvariant(booleanExpression));
+        contract.setClassInvariant(new ClassInvariant(blockStatement, booleanExpression));
     }
 }

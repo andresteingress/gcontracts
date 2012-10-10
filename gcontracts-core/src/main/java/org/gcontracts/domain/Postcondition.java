@@ -23,6 +23,7 @@
 package org.gcontracts.domain;
 
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 
 /**
  * <p>A post-condition assertion.</p>
@@ -35,8 +36,8 @@ public class Postcondition extends Assertion<Postcondition> {
 
     public Postcondition() {}
 
-    public Postcondition(BooleanExpression booleanExpression, boolean isPartOfConstructor) {
-        super(booleanExpression);
+    public Postcondition(BlockStatement blockStatement, BooleanExpression booleanExpression, boolean isPartOfConstructor) {
+        super(blockStatement, booleanExpression);
         this.isPartOfConstructor = isPartOfConstructor;
     }
 

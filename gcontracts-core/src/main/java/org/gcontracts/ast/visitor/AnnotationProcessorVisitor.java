@@ -25,6 +25,7 @@ package org.gcontracts.ast.visitor;
 import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.gcontracts.annotations.meta.ContractElement;
@@ -140,7 +141,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 final BooleanExpression booleanExpression = new BooleanExpression(doCall);
                 booleanExpression.setSourcePosition(annotationNode);
 
-                annotationProcessor.process(pci, pci.contract(), classNode, booleanExpression);
+                annotationProcessor.process(pci, pci.contract(), classNode, (BlockStatement) closureClassExpression.getNodeMetaData(AnnotationClosureVisitor.META_DATA_ORIGINAL_TRY_CATCH_BLOCK), booleanExpression);
             }
         }
     }
@@ -157,6 +158,8 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
 
             if (annotationProcessor != null && annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME) instanceof ClassExpression)  {
                 boolean isPostcondition = AnnotationUtils.hasAnnotationOfType(annotationNode.getClassNode(), org.gcontracts.annotations.meta.Postcondition.class.getName());
+
+                ClassExpression closureClassExpression = (ClassExpression) annotationNode.getMember(CLOSURE_ATTRIBUTE_NAME);
 
                 ArgumentListExpression closureArgumentList = new ArgumentListExpression();
 
@@ -189,7 +192,7 @@ public class AnnotationProcessorVisitor extends BaseVisitor {
                 final BooleanExpression booleanExpression = new BooleanExpression(doCall);
                 booleanExpression.setSourcePosition(annotationNode);
 
-                annotationProcessor.process(pci, pci.contract(), methodNode.getDeclaringClass(), methodNode, booleanExpression);
+                annotationProcessor.process(pci, pci.contract(), methodNode.getDeclaringClass(), methodNode, (BlockStatement) closureClassExpression.getNodeMetaData(AnnotationClosureVisitor.META_DATA_ORIGINAL_TRY_CATCH_BLOCK), booleanExpression);
 
                 // if the implementation method has no annotation, we need to set a dummy marker in order to find parent pre/postconditions
                 if (!AnnotationUtils.hasAnnotationOfType(methodNode, annotationNode.getClassNode().getName()))  {

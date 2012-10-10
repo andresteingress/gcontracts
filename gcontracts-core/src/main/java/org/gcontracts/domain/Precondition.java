@@ -23,6 +23,7 @@
 package org.gcontracts.domain;
 
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 
 /**
  * <p>A pre-condition assertion.</p>
@@ -33,7 +34,7 @@ public class Precondition extends Assertion<Precondition> {
 
     public Precondition() {}
 
-    public Precondition(BooleanExpression booleanExpression) {
-        super(booleanExpression);
+    public Precondition(BlockStatement blockStatement, BooleanExpression booleanExpression) {
+        super(blockStatement, booleanExpression);
     }
 }

@@ -24,6 +24,7 @@ package org.gcontracts.domain;
 
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.stmt.BlockStatement;
 
 /**
  * <p>A class-invariant assertion.</p>
@@ -32,11 +33,11 @@ import org.codehaus.groovy.ast.expr.ConstantExpression;
  */
 public class ClassInvariant extends Assertion<ClassInvariant> {
 
-    public static final ClassInvariant DEFAULT = new ClassInvariant(new BooleanExpression(new ConstantExpression(true)));
+    public static final ClassInvariant DEFAULT = new ClassInvariant(new BlockStatement(), new BooleanExpression(new ConstantExpression(true)));
 
     public ClassInvariant() {}
 
-    public ClassInvariant(BooleanExpression booleanExpression) {
-        super(booleanExpression);
+    public ClassInvariant(BlockStatement blockStatement, BooleanExpression booleanExpression) {
+        super(blockStatement, booleanExpression);
     }
 }
