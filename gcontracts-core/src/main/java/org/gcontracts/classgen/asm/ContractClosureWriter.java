@@ -61,14 +61,18 @@ public class ContractClosureWriter {
         }
 
         // contains all params of the original method
-        Parameter[] parameters = parametersTemp.toArray(new Parameter[parametersTemp.size()]);
+        ArrayList<Parameter> closureParameters = new ArrayList<Parameter>();
+        for (Parameter param : parametersTemp)  {
+            Parameter closureParameter = new Parameter(param.getType().getPlainNodeReference(), param.getName());
+            closureParameters.add(closureParameter);
+        }
 
         ClassNode answer = new ClassNode(name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference());
         answer.setSynthetic(true);
         answer.setSourcePosition(expression);
 
         MethodNode method =
-                answer.addMethod("doCall", ACC_PUBLIC, ClassHelper.Boolean_TYPE, parameters, ClassNode.EMPTY_ARRAY, expression.getCode());
+                answer.addMethod("doCall", ACC_PUBLIC, ClassHelper.Boolean_TYPE, closureParameters.toArray(new Parameter[closureParameters.size()]), ClassNode.EMPTY_ARRAY, expression.getCode());
         method.setSourcePosition(expression);
 
         VariableScope varScope = expression.getVariableScope();
@@ -81,7 +85,7 @@ public class ContractClosureWriter {
 
         // let's add a typesafe call method
         ArgumentListExpression arguments = new ArgumentListExpression();
-        for (Parameter parameter : parameters)  {
+        for (Parameter parameter : closureParameters)  {
             arguments.addExpression(new VariableExpression(parameter));
         }
 
@@ -89,7 +93,7 @@ public class ContractClosureWriter {
                 "call",
                 ACC_PUBLIC,
                 ClassHelper.Boolean_TYPE,
-                parameters,
+                closureParameters.toArray(new Parameter[closureParameters.size()]),
                 ClassNode.EMPTY_ARRAY,
                 new ReturnStatement(
                         new MethodCallExpression(

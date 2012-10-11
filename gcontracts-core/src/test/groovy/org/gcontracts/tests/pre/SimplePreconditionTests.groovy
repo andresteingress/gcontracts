@@ -400,25 +400,4 @@ class Account
 
             create_instance_of(source, ['test', 'test'])
         }
-
-    // this test failed on JDK 7.0
-    @Test void requires_with_generic_parameter_type()  {
-
-        def source = """
-            import org.gcontracts.annotations.*
-
-                class A {
-
-                    @Ensures ({ extensionType.isInstance( result ) })
-                    final public <T> T extension( String extensionName, Class<T> extensionType )
-                    {
-                        (( T ) 'test' )
-                    }
-                }
-
-         """
-
-        def a = create_instance_of(source)
-        a.extension('Test', String.class)
-    }
 }

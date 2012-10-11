@@ -213,4 +213,25 @@ class Account {
         a.sortForAll(["test1", "test2"]) == ["test1", "test2"]
 
     }
+
+    // this test failed on JDK 7.0
+    @Test void ensures_with_generic_parameter_type()  {
+
+        def source = """
+                import org.gcontracts.annotations.*
+
+                    class A {
+
+                        @Ensures ({ type.isInstance( result ) })
+                        final public <T> T extension( String param, Class<T> type )
+                        {
+                            (( T ) 'test' )
+                        }
+                    }
+
+             """
+
+        def a = create_instance_of(source)
+        a.extension('Test', String.class)
+    }
 }
