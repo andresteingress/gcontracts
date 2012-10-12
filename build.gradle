@@ -8,8 +8,8 @@ project.ext {
     asm = "org.ow2.asm:asm:4.0"
     junit = "junit:junit:4.10"
 
-    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_5
-    targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_5
+    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_6
+    targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_6
 }
 
 allprojects {
