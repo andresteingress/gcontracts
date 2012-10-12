@@ -60,14 +60,6 @@ import java.util.List;
 @GroovyASTTransformation(phase = CompilePhase.INSTRUCTION_SELECTION)
 public class GContractsASTTransformation extends BaseASTTransformation {
 
-    private void generateAnnotationClosureClasses(SourceUnit unit, ReaderSource source, List<ClassNode> classNodes) {
-        final AnnotationClosureVisitor annotationClosureVisitor = new AnnotationClosureVisitor(unit, source);
-
-        for (final ClassNode classNode : classNodes)  {
-            annotationClosureVisitor.visitClass(classNode);
-        }
-    }
-
     /**
      * {@link org.codehaus.groovy.transform.ASTTransformation#visit(org.codehaus.groovy.ast.ASTNode[], org.codehaus.groovy.control.SourceUnit)}
      */
@@ -75,10 +67,6 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         final ModuleNode moduleNode = unit.getAST();
 
         ReaderSource source = getReaderSource(unit);
-        final List<ClassNode> classNodes = new ArrayList<ClassNode>(moduleNode.getClasses());
-
-        generateAnnotationClosureClasses(unit, source, classNodes);
-
         for (final ClassNode classNode : moduleNode.getClasses())  {
             if (!CandidateChecks.isContractsCandidate(classNode)) continue;
 

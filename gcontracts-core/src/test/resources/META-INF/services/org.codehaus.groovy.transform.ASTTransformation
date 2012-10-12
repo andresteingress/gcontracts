@@ -1,1 +1,2 @@
 org.gcontracts.ast.GContractsASTTransformation
+org.gcontracts.ast.ClosureExpressionEvaluationASTTransformation
