@@ -1,13 +1,15 @@
 package org.gcontracts.ast;
 
-import org.codehaus.groovy.ast.ASTNode;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.ModuleNode;
+import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.io.ReaderSource;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.gcontracts.annotations.Contracted;
 import org.gcontracts.ast.visitor.AnnotationClosureVisitor;
+import org.gcontracts.ast.visitor.ConfigurationSetup;
+import org.gcontracts.ast.visitor.ContractElementVisitor;
+import org.gcontracts.generation.CandidateChecks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,18 @@ public class ClosureExpressionEvaluationASTTransformation extends BaseASTTransfo
 
         for (final ClassNode classNode : classNodes)  {
             annotationClosureVisitor.visitClass(classNode);
+
+            if (!CandidateChecks.isContractsCandidate(classNode)) continue;
+
+            final ContractElementVisitor contractElementVisitor = new ContractElementVisitor(unit, source);
+            contractElementVisitor.visitClass(classNode);
+
+            if (!contractElementVisitor.isFoundContractElement()) continue;
+
+            annotationClosureVisitor.visitClass(classNode);
+            markClassNodeAsContracted(classNode);
+
+            new ConfigurationSetup().init(classNode);
         }
     }
 
@@ -40,5 +54,12 @@ public class ClosureExpressionEvaluationASTTransformation extends BaseASTTransfo
         final List<ClassNode> classNodes = new ArrayList<ClassNode>(moduleNode.getClasses());
 
         generateAnnotationClosureClasses(unit, source, classNodes);
+    }
+
+    private void markClassNodeAsContracted(final ClassNode classNode) {
+        final ClassNode contractedAnnotationClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
+
+        if (classNode.getAnnotations(contractedAnnotationClassNode).isEmpty())
+            classNode.addAnnotation(new AnnotationNode(contractedAnnotationClassNode));
     }
 }

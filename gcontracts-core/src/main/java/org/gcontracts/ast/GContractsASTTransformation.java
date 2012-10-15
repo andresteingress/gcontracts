@@ -67,16 +67,10 @@ public class GContractsASTTransformation extends BaseASTTransformation {
         final ModuleNode moduleNode = unit.getAST();
 
         ReaderSource source = getReaderSource(unit);
+        final ClassNode contractedAnnotationClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
+
         for (final ClassNode classNode : moduleNode.getClasses())  {
-            if (!CandidateChecks.isContractsCandidate(classNode)) continue;
-
-            final ContractElementVisitor contractElementVisitor = new ContractElementVisitor(unit, source);
-            contractElementVisitor.visitClass(classNode);
-
-            if (!contractElementVisitor.isFoundContractElement()) continue;
-            markClassNodeAsContracted(classNode);
-
-            new ConfigurationSetup().init(classNode);
+            if (classNode.getAnnotations(contractedAnnotationClassNode).isEmpty()) continue;
 
             final ProcessingContextInformation pci = new ProcessingContextInformation(classNode, unit, source);
             new LifecycleBeforeTransformationVisitor(unit, source, pci).visitClass(classNode);
@@ -85,13 +79,6 @@ public class GContractsASTTransformation extends BaseASTTransformation {
             new LifecycleAfterTransformationVisitor(unit, source, pci).visitClass(classNode);
             new DynamicSetterInjectionVisitor(unit, source).visitClass(classNode);
         }
-    }
-
-    private void markClassNodeAsContracted(final ClassNode classNode) {
-        final ClassNode contractedAnnotationClassNode = ClassHelper.makeWithoutCaching(Contracted.class);
-
-        if (classNode.getAnnotations(contractedAnnotationClassNode).isEmpty())
-            classNode.addAnnotation(new AnnotationNode(contractedAnnotationClassNode));
     }
 }
 
