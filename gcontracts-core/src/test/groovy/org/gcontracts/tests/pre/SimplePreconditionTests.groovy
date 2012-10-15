@@ -400,4 +400,36 @@ class Account
 
             create_instance_of(source, ['test', 'test'])
         }
+
+    @Test void requires_with_default_parameters()  {
+
+        def source = """
+            import org.gcontracts.annotations.*
+
+                class A {
+
+                    @Requires({ a == 12 })
+                    def m(def a = 12) {}
+                }
+         """
+
+        def a = create_instance_of(source)
+        a.m()
+    }
+
+    @Test(expected = PreconditionViolation.class) void requires_on_private_methods()  {
+
+        def source = """
+                import org.gcontracts.annotations.*
+
+                    class A {
+
+                        @Requires({ a != null })
+                        private def m(def a) {}
+                    }
+             """
+
+        def a = create_instance_of(source)
+        a.m(null)
+    }
 }

@@ -12,7 +12,7 @@ import org.gcontracts.util.AnnotationUtils;
 
 /**
  * Checks whether the given {@link org.codehaus.groovy.ast.ClassNode} is relevant for
- * futher processing.
+ * further processing.
  *
  * @author andre.steingress@gmail.com
  */

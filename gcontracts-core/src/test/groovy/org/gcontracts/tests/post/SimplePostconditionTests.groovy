@@ -1,10 +1,10 @@
 package org.gcontracts.tests.post
 
+import org.gcontracts.PostconditionViolation
 import org.gcontracts.tests.basic.BaseTestClass
 import org.junit.Test
 
-import static org.junit.Assert.*
-import org.gcontracts.PostconditionViolation;
+import static org.junit.Assert.assertEquals
 
 /**
  * @author ast
@@ -233,5 +233,37 @@ class Account {
 
         def a = create_instance_of(source)
         a.extension('Test', String.class)
+    }
+
+    @Test void ensures_with_default_parameters()  {
+
+        def source = """
+                import org.gcontracts.annotations.*
+
+                    class A {
+
+                        @Ensures({ a == 12 })
+                        def m(def a = 12) {}
+                    }
+             """
+
+        def a = create_instance_of(source)
+        a.m()
+    }
+
+    @Test(expected = PostconditionViolation.class) void ensures_on_private_methods()  {
+
+        def source = """
+                    import org.gcontracts.annotations.*
+
+                        class A {
+
+                            @Ensures({ result != null })
+                            private def m(def a) { return null }
+                        }
+                 """
+
+        def a = create_instance_of(source)
+        a.m(null)
     }
 }

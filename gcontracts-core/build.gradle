@@ -3,6 +3,7 @@ project(":gcontracts-core") {
     compile asm
     testCompile junit
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+    testCompile "org.apache.ivy:ivy:2.2.0"
     testRuntime junit
   }
 }
