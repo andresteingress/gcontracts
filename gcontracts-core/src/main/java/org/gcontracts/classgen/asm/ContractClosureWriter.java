@@ -22,6 +22,7 @@
  */
 package org.gcontracts.classgen.asm;
 
+import groovyjarjarasm.asm.Opcodes;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.expr.*;
 import org.codehaus.groovy.ast.stmt.*;
@@ -67,7 +68,7 @@ public class ContractClosureWriter {
             closureParameters.add(closureParameter);
         }
 
-        ClassNode answer = new ClassNode(name, mods, ClassHelper.CLOSURE_TYPE.getPlainNodeReference());
+        ClassNode answer = new ClassNode(name, mods | Opcodes.ACC_FINAL, ClassHelper.CLOSURE_TYPE.getPlainNodeReference());
         answer.setSynthetic(true);
         answer.setSourcePosition(expression);
 
