@@ -1,16 +1,16 @@
-package org.gcontracts.util
+package org.gcontracts.console
 
 /**
  * User: asteingress
  * Date: 10/12/12
  */
-class ConsoleTests extends GroovyTestCase {
+class GroovyConsoleTests extends GroovyTestCase {
 
     void test_Grab_GContracts_import() {
 
         GroovyShell shell = new GroovyShell(getClass().getClassLoader())
         shell.evaluate('''
-            @Grab('org.gcontracts:gcontracts-core:1.2.9')
+            @Grab('org.gcontracts:gcontracts-core:1.2.10')
             import org.gcontracts.annotations.*
 
             @groovy.transform.CompileStatic
