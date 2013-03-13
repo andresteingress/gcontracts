@@ -1,0 +1,25 @@
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiType
+
+/**
+ * @author Andre Steingress
+ */
+PsiMethod findParentMethod(PsiElement start)  {
+    def psiElement = start
+    while (!(psiElement instanceof PsiMethod) && psiElement != null) psiElement = psiElement.parent
+    psiElement
+}
+
+contributor(scope: closureScope(annotationName: 'org.gcontracts.annotations.Ensures'))  {
+    variable(name: 'old', type: 'Map')
+
+    PsiMethod method = findParentMethod(place)
+    if (method == null) return
+
+    // if we have a void return type then we're done
+    if (method.returnType == PsiType.VOID) return
+
+    def type = method.returnType.canonicalText
+    if (type) variable(name: 'result', type: type)
+}

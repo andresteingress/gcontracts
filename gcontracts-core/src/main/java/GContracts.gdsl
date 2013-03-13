@@ -1,7 +1,0 @@
-/**
- * @author Andre Steingress
- */
-contributor(scope: closureScope(annotationName: 'org.gcontracts.annotations.Ensures'))  {
-    variable(name: 'result', type: 'Object')
-    variable(name: 'old', type: 'Map')
-}
