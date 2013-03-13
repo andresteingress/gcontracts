@@ -1,0 +1,20 @@
+import org.codehaus.groovy.ast.ClassHelper;
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.MethodNode;
+import org.codehaus.groovy.ast.Parameter;
+
+/**
+ * @author Andre Steingress
+ */
+contribute(currentType(bind(ms : methods(annotatedBy('org.gcontracts.annotations.Ensures'))))) {
+	property name : 'old', doc: 'java.util.Map of all property values before the method call.', provider: 'org.gcontracts', type : java.util.Map
+	
+	ms.each { MethodNode methodNode ->  
+		ClassNode returnType = methodNode.returnType
+		if (returnType == ClassHelper.VOID_TYPE) return
+		
+		println returnType
+		
+		property name : 'result', doc: 'The return value of this method.', provider: 'org.gcontracts', type : returnType
+	} 
+}
