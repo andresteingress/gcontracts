@@ -1,6 +1,0 @@
-project(":gcontracts-tests") {
-  dependencies {
-    testCompile junit
-    testCompile "org.apache.ivy:ivy:2.2.0"
-  }
-}

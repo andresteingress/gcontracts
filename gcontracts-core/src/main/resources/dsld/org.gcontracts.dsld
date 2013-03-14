@@ -1,0 +1,38 @@
+package dsld
+
+/**
+ * @author Andre Steingress
+ */
+contribute(bind(closure: enclosingClosure()) & bind(method: enclosingMethod(annotatedBy('org.gcontracts.annotations.Ensures')))) {
+	property name : 'old', doc: 'java.util.Map of all property values before the method call.', provider: 'org.gcontracts', type : java.util.Map
+
+	if (method.isEmpty()) return
+
+    methodNode.parameters.each  {
+		property name : it.name, provider: 'org.gcontracts', type : it.type
+	}
+
+	def methodNode = method.first()
+	def returnType = methodNode.returnType
+	if (returnType.name == 'void') return
+
+	property name : 'result', doc: 'The return value of this method.', provider: 'org.gcontracts', type : returnType
+}
+
+contribute(bind(closure: enclosingClosure()) & bind(method: enclosingMethod(annotatedBy('org.gcontracts.annotations.Requires')))) {
+	if (method.isEmpty()) return
+
+	def methodNode = method.first()
+	methodNode.parameters.each {
+		property name : it.name, provider: 'org.gcontracts', type : it.type
+	}
+}
+
+contribute(bind(closure: enclosingClosure()) & bind(clazz: enclosingClass(annotatedBy('org.gcontracts.annotations.Invariant')))) {
+	if (clazz.isEmpty()) return
+
+	def classNode = clazz.first()
+	classNode.properties.each  {
+		property name : it.name, provider: 'org.gcontracts', type : it.type
+	}
+}
