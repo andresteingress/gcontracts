@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, Andre Steingress
+ * Copyright (c) 2013, Andre Steingress
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
