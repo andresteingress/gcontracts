@@ -127,16 +127,16 @@ public abstract class BaseGenerator {
         ifBlockStatement.addStatement(
                 new IfStatement(
                         new BooleanExpression(
-                                new BinaryExpression(
-                                        new NotExpression($_gc_result),
-                                        Token.newSymbol(Types.LOGICAL_AND, -1, -1),
-                                        new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "violationsOccured", ArgumentListExpression.EMPTY_ARGUMENTS)
-                                )
+                            new NotExpression(new MethodCallExpression($_gc_result, "booleanValue", ArgumentListExpression.EMPTY_ARGUMENTS))
                         ),
-                        new TryCatchStatement(
+
+                        new IfStatement(
+                                new BooleanExpression(
+                                        new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "violationsOccured", ArgumentListExpression.EMPTY_ARGUMENTS)), new TryCatchStatement(
                                 new ExpressionStatement(new MethodCallExpression(new ClassExpression(violationTrackerClassNode), "rethrowFirst", ArgumentListExpression.EMPTY_ARGUMENTS)),
                                 finallyBlockStatement
-                        ),
+                        ), EmptyStatement.INSTANCE)
+                        ,
                         EmptyStatement.INSTANCE
                 )
         );
