@@ -91,39 +91,39 @@
     <span class="o">}</span>
 
     <span class="kt">boolean</span> <span class="nf">is_empty</span><span class="o">()</span>  <span class="o">{</span>
-        <span class="n">elements</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()</span>
     <span class="o">}</span>
 
     <span class="nd">@Requires</span><span class="o">({</span> <span class="o">!</span><span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
     <span class="n">T</span> <span class="nf">last_item</span><span class="o">()</span>  <span class="o">{</span>
-        <span class="n">elements</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">count</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">count</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
     <span class="o">}</span>
 
     <span class="kt">def</span> <span class="nf">count</span><span class="o">()</span> <span class="o">{</span>
-        <span class="n">elements</span><span class="o">.</span><span class="na">size</span><span class="o">()</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="o">.</span><span class="na">size</span><span class="o">()</span>
     <span class="o">}</span>
 
     <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">result</span> <span class="o">==</span> <span class="kc">true</span> <span class="o">?</span> <span class="n">count</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">:</span> <span class="n">count</span><span class="o">()</span> <span class="o">&gt;=</span> <span class="mi">0</span>  <span class="o">})</span>
     <span class="kt">boolean</span> <span class="nf">has</span><span class="o">(</span><span class="n">T</span> <span class="n">item</span><span class="o">)</span>  <span class="o">{</span>
-        <span class="n">elements</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
     <span class="o">}</span>
 
     <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">last_item</span><span class="o">()</span> <span class="o">==</span> <span class="n">item</span> <span class="o">})</span>
     <span class="kt">def</span> <span class="nf">push</span><span class="o">(</span><span class="n">T</span> <span class="n">item</span><span class="o">)</span>  <span class="o">{</span>
-       <span class="n">elements</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
+       <span class="k">return</span> <span class="n">elements</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
     <span class="o">}</span>
 
     <span class="nd">@Requires</span><span class="o">({</span> <span class="o">!</span><span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
     <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">last_item</span><span class="o">()</span> <span class="o">==</span> <span class="n">item</span> <span class="o">})</span>
     <span class="kt">def</span> <span class="nf">replace</span><span class="o">(</span><span class="n">T</span> <span class="n">item</span><span class="o">)</span>  <span class="o">{</span>
         <span class="n">remove</span><span class="o">()</span>
-        <span class="n">elements</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
     <span class="o">}</span>
 
     <span class="nd">@Requires</span><span class="o">({</span> <span class="o">!</span><span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
     <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">result</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">})</span>
     <span class="n">T</span> <span class="nf">remove</span><span class="o">()</span>  <span class="o">{</span>
-        <span class="n">elements</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">count</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">count</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
     <span class="o">}</span>
 
     <span class="n">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span> <span class="n">elements</span><span class="o">.</span><span class="na">toString</span><span class="o">()</span> <span class="o">}</span>
@@ -147,18 +147,17 @@
       <p>Project maintained by <a href="https://github.com/andresteingress">andresteingress</a></p>
       <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
     </footer>
-		<script type="text/javascript">
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-39336540-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
 
-			  var _gaq = _gaq || [];
-				  _gaq.push(['_setAccount', 'UA-39336540-1']);
-					  _gaq.push(['_trackPageview']);
-
-						  (function() {
-							    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-									    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-											    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-													  })();
-
-													</script>
   </body>
 </html>
