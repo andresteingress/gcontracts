@@ -1,1 +1,1 @@
-include 'gcontracts-core', 'gcontracts-doc', 'gcontracts-grails', 'gcontracts-tests'
+include 'gcontracts-core', 'gcontracts-doc', 'gcontracts-grails'
