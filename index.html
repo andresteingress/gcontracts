@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>GContracts by andresteingress</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>GContracts</h1>
+        <p>A Design by Contract Library</p>
+        <p class="view"><a href="https://github.com/andresteingress/gcontracts">View the Project on GitHub <small>andresteingress/gcontracts</small></a></p>
+        <ul>
+          <li><a href="https://github.com/andresteingress/gcontracts/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/andresteingress/gcontracts/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/andresteingress/gcontracts">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>Programming by Contract for Groovy</h3>
+
+<p>This project aims to provide contract annotations that support the specification of class-invariants, pre- and post-conditions on Groovy classes and interfaces. </p>
+
+<p>In addition, GContracts supports postconditions with the <code>old</code> and <code>result</code> variable and <em>inheritance</em> of all assertion types.</p>
+
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">org.gcontracts.annotations.*</span>
+
+<span class="nd">@Invariant</span><span class="o">({</span> <span class="n">speed</span><span class="o">()</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">})</span>
+<span class="kd">class</span> <span class="nc">Rocket</span> <span class="o">{</span> 
+
+    <span class="nd">@Requires</span><span class="o">({</span> <span class="n">isStarted</span><span class="o">()</span> <span class="o">})</span>
+    <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">old</span><span class="o">.</span><span class="na">speed</span> <span class="o">&lt;</span> <span class="n">speed</span> <span class="o">})</span>
+    <span class="kt">def</span> <span class="nf">accelerate</span><span class="o">()</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+
+    <span class="kt">boolean</span> <span class="nf">isStarted</span><span class="o">()</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span> 
+    <span class="kt">def</span> <span class="nf">speed</span><span class="o">()</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>GContracts comes as <em>single JAR file</em>, without any third-party dependencies.</p>
+
+<h3>More Features</h3>
+
+<ul>
+<li>definition of class invariants, pre- and post-conditions via <code>@Invariant</code>, <code>@Requires</code> and <code>@Ensures</code>
+</li>
+<li>inheritance of class invariants, pre- and post-conditions of concrete predecessor classes</li>
+<li>inheritance of class invariants, pre- and post-conditions in implemented interfaces</li>
+<li>usage of <tt>old</tt> and <tt>result</tt> variable in post-condition assertions</li>
+<li>custom implementation of the <code>Groovydoc</code> Ant task to generate Javadocs with contract information</li>
+<li>assertion injection in Plain Old Groovy Objects (POGOs)</li>
+<li>human-readable assertion messages, based on Groovy power asserts</li>
+<li>enabling contracts at package- or class-level with <tt>@AssertionsEnabled</tt>
+</li>
+<li>enable or disable contract checking with Java's <code>-ea</code> and <code>-da</code> VM parameters</li>
+<li>detection of circular assertion method calls</li>
+<li>multi-module Gradle projcet</li>
+</ul><p>If you want to know about more about some of these features, <a href="https://github.com/andresteingress/gcontracts/wiki/_pages">checkout the Wiki pages</a>.</p>
+
+<h3>The Stack Example</h3>
+
+<p>The <code>Stack</code> example is a classic way demonstrating the power of contracts in class libraries. Here is a Groovy example leveraging the GContracts library:</p>
+
+<div class="highlight"><pre><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">'org.gcontracts'</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">'gcontracts-core'</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">'[1.2.10,)'</span><span class="o">)</span>
+<span class="kn">import</span> <span class="nn">org.gcontracts.annotations.*</span>
+
+<span class="nd">@Invariant</span><span class="o">({</span> <span class="n">elements</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">})</span>
+<span class="kd">class</span> <span class="nc">Stack</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">elements</span>
+
+    <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
+    <span class="kt">def</span> <span class="nf">Stack</span><span class="o">()</span>  <span class="o">{</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="o">[]</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Requires</span><span class="o">({</span> <span class="n">preElements</span><span class="o">?.</span><span class="na">size</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">})</span>
+    <span class="nd">@Ensures</span><span class="o">({</span> <span class="o">!</span><span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
+    <span class="kt">def</span> <span class="nf">Stack</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">preElements</span><span class="o">)</span>  <span class="o">{</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">preElements</span>
+    <span class="o">}</span>
+
+    <span class="kt">boolean</span> <span class="nf">is_empty</span><span class="o">()</span>  <span class="o">{</span>
+        <span class="n">elements</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Requires</span><span class="o">({</span> <span class="o">!</span><span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
+    <span class="n">T</span> <span class="nf">last_item</span><span class="o">()</span>  <span class="o">{</span>
+        <span class="n">elements</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">count</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="o">}</span>
+
+    <span class="kt">def</span> <span class="nf">count</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">elements</span><span class="o">.</span><span class="na">size</span><span class="o">()</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">result</span> <span class="o">==</span> <span class="kc">true</span> <span class="o">?</span> <span class="n">count</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">:</span> <span class="n">count</span><span class="o">()</span> <span class="o">&gt;=</span> <span class="mi">0</span>  <span class="o">})</span>
+    <span class="kt">boolean</span> <span class="nf">has</span><span class="o">(</span><span class="n">T</span> <span class="n">item</span><span class="o">)</span>  <span class="o">{</span>
+        <span class="n">elements</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">last_item</span><span class="o">()</span> <span class="o">==</span> <span class="n">item</span> <span class="o">})</span>
+    <span class="kt">def</span> <span class="nf">push</span><span class="o">(</span><span class="n">T</span> <span class="n">item</span><span class="o">)</span>  <span class="o">{</span>
+       <span class="n">elements</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Requires</span><span class="o">({</span> <span class="o">!</span><span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
+    <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">last_item</span><span class="o">()</span> <span class="o">==</span> <span class="n">item</span> <span class="o">})</span>
+    <span class="kt">def</span> <span class="nf">replace</span><span class="o">(</span><span class="n">T</span> <span class="n">item</span><span class="o">)</span>  <span class="o">{</span>
+        <span class="n">remove</span><span class="o">()</span>
+        <span class="n">elements</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">item</span><span class="o">)</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Requires</span><span class="o">({</span> <span class="o">!</span><span class="n">is_empty</span><span class="o">()</span> <span class="o">})</span>
+    <span class="nd">@Ensures</span><span class="o">({</span> <span class="n">result</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">})</span>
+    <span class="n">T</span> <span class="nf">remove</span><span class="o">()</span>  <span class="o">{</span>
+        <span class="n">elements</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">count</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="o">}</span>
+
+    <span class="n">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span> <span class="n">elements</span><span class="o">.</span><span class="na">toString</span><span class="o">()</span> <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kt">def</span> <span class="n">stack</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Stack</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;()</span>
+</pre></div>
+
+<p>You can copy and paste the above example to your <code>groovyConsole</code> and hit the run button.</p>
+
+<h3>Installation/Requirements</h3>
+
+<p>GContracts is available at the <a href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22gcontracts-core%22">central Maven repository</a> and as <a href="https://github.com/andresteingress/gcontracts/downloads">binary download at Github</a>. Add <code>gcontracts-core-xxx.jar</code> to your project's classpath and you're ready to go.</p>
+
+<p>As of 1.2.11, GContracts comes with embedded support for the Groovy/Grails tool suite &gt;= 3.2.0 (Eclipse) and IntelliJ &gt;= 12.1.</p>
+
+<p>The library runs with Groovy &gt;= 1.8 and can be used in statically (with @CompileStatic) and dynamically typed code.</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/andresteingress">andresteingress</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
