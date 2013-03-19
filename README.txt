@@ -1,4 +1,6 @@
-To download the current version of GContracts visit: http://github.com/andresteingress/gcontracts/downloads
+GContracts - Design by Contract for Groovy 
+
+http://gcontracts.org
 
 If you want to fork, or send pull requests, check out http://help.github.com/.
 
