@@ -8,8 +8,8 @@ project.ext {
     asm = "org.ow2.asm:asm:4.0"
     junit = "junit:junit:4.10"
 
-    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_1_6
-    targetCompatibility = org.gradle.api.JavaVersion.VERSION_1_6
+    sourceCompatibility = '1.6'
+    targetCompatibility = '1.6'
 }
 
 task wrapper(type: Wrapper) {
@@ -22,7 +22,7 @@ allprojects {
     apply plugin: 'signing'
 
     group = "org.gcontracts"
-    version = "1.2.11"
+    version = "1.2.12"
 
     description = "GContracts provides Java annotations to support Programming by Contract for Groovy"
 }
