@@ -1,39 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>GContracts by andresteingress</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="GContracts : Design by Contract Library for Groovy" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <title>GContracts</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>GContracts</h1>
-        <p>Design by Contract Library for Groovy</p>
-        <p class="view"><a href="https://github.com/andresteingress/gcontracts">View the Project on GitHub <small>andresteingress/gcontracts</small></a></p>
-        <ul>
-          <li><a href="https://github.com/andresteingress/gcontracts/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/andresteingress/gcontracts/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/andresteingress/gcontracts">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h3>Programming by Contract for Groovy</h3>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/andresteingress/gcontracts">View on GitHub</a>
+
+          <h1 id="project_title">GContracts</h1>
+          <h2 id="project_tagline">Design by Contract Library for Groovy</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/andresteingress/gcontracts/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/andresteingress/gcontracts/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
+<a name="programming-by-contract-for-groovy" class="anchor" href="#programming-by-contract-for-groovy"><span class="octicon octicon-link"></span></a>Programming by Contract for Groovy</h3>
 
 <p>This project aims to provide contract annotations that support the specification of class-invariants, pre- and post-conditions on Groovy classes and interfaces. </p>
 
 <p>In addition, GContracts supports postconditions with the <code>old</code> and <code>result</code> variable and <em>inheritance</em> of all assertion types.</p>
 
-<div class="highlight"><pre><span class="kn">import</span> <span class="nn">org.gcontracts.annotations.*</span>
+<div class="highlight highlight-groovy"><pre><span class="kn">import</span> <span class="nn">org.gcontracts.annotations.*</span>
 
 <span class="nd">@Invariant</span><span class="o">({</span> <span class="n">speed</span><span class="o">()</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">})</span>
 <span class="kd">class</span> <span class="nc">Rocket</span> <span class="o">{</span> 
@@ -49,7 +54,8 @@
 
 <p>GContracts comes as <em>single JAR file</em>, without any third-party dependencies.</p>
 
-<h3>More Features</h3>
+<h3>
+<a name="more-features" class="anchor" href="#more-features"><span class="octicon octicon-link"></span></a>More Features</h3>
 
 <ul>
 <li>definition of class invariants, pre- and post-conditions via <code>@Invariant</code>, <code>@Requires</code> and <code>@Ensures</code>
@@ -67,11 +73,12 @@
 <li>multi-module Gradle projcet</li>
 </ul><p>If you want to know about more about some of these features, <a href="https://github.com/andresteingress/gcontracts/wiki/_pages">checkout the Wiki pages</a>.</p>
 
-<h3>The Stack Example</h3>
+<h3>
+<a name="the-stack-example" class="anchor" href="#the-stack-example"><span class="octicon octicon-link"></span></a>The Stack Example</h3>
 
 <p>The <code>Stack</code> example is a classic way demonstrating the power of contracts in class libraries. Here is a Groovy example leveraging the GContracts library:</p>
 
-<div class="highlight"><pre><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">'org.gcontracts'</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">'gcontracts-core'</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">'[1.2.12,)'</span><span class="o">)</span>
+<div class="highlight highlight-groovy"><pre><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">'org.gcontracts'</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">'gcontracts-core'</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">'[1.2.12,)'</span><span class="o">)</span>
 <span class="kn">import</span> <span class="nn">org.gcontracts.annotations.*</span>
 
 <span class="nd">@Invariant</span><span class="o">({</span> <span class="n">elements</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">})</span>
@@ -134,7 +141,8 @@
 
 <p>You can copy and paste the above example to your <code>groovyConsole</code> and hit the run button.</p>
 
-<h3>Installation/Requirements</h3>
+<h3>
+<a name="installationrequirements" class="anchor" href="#installationrequirements"><span class="octicon octicon-link"></span></a>Installation/Requirements</h3>
 
 <p>GContracts is available at the <a href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22gcontracts-core%22">central Maven repository</a> and as <a href="https://github.com/andresteingress/gcontracts/downloads">binary download at Github</a>. Add <code>gcontracts-core-xxx.jar</code> to your project's classpath and you're ready to go.</p>
 
@@ -143,11 +151,15 @@
 <p>The library runs with Groovy &gt;= 1.8 and can be used in statically (with @CompileStatic) and dynamically typed code.</p>
       </section>
     </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/andresteingress">andresteingress</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">GContracts maintained by <a href="https://github.com/andresteingress">andresteingress</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
@@ -158,6 +170,7 @@
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
+
 
   </body>
 </html>
