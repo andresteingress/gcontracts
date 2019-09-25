@@ -62,7 +62,7 @@ public class TryCatchBlockGenerator {
         catchBlock.addStatement(exp2);
         catchBlock.addStatement(new ThrowStatement(newErrorVariableExpression));
 
-        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertStatement, new EmptyStatement());
+        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertStatement, EmptyStatement.INSTANCE);
         tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error"), catchBlock));
 
         final BlockStatement assertBlockStatement = new BlockStatement();
@@ -106,7 +106,7 @@ public class TryCatchBlockGenerator {
         catchBlock.addStatement(expr);
         catchBlock.addStatement(exp2);
 
-        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertBlockStatement, new EmptyStatement());
+        final TryCatchStatement tryCatchStatement = new TryCatchStatement(assertBlockStatement, EmptyStatement.INSTANCE);
         tryCatchStatement.addCatch(new CatchStatement(new Parameter(ClassHelper.makeWithoutCaching(powerAssertionErrorClass), "error"), catchBlock));
 
         overallBlock.addStatement(tryCatchStatement);
