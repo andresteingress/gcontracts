@@ -8,12 +8,12 @@ project.ext {
     asm = "org.ow2.asm:asm:4.0"
     junit = "junit:junit:4.10"
 
-    sourceCompatibility = '1.6'
-    targetCompatibility = '1.6'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 }
 
 task wrapper(type: Wrapper) {
-	 gradleVersion = '1.3'
+    gradleVersion = '5.6.2'
 }
 
 allprojects {
@@ -28,68 +28,68 @@ allprojects {
 }
 
 subprojects {
-  apply plugin: "groovy"
-  apply plugin: 'maven'
+    apply plugin: "groovy"
+    apply plugin: 'maven'
 
-  compileGroovy.options.fork = true
-  compileTestGroovy.options.fork = true
+    compileGroovy.options.fork = true
+    compileTestGroovy.options.fork = true
 
-  dependencies {
-	  groovy group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.1.0'
-    compile asm
-  }
-
-  repositories {
-    mavenCentral()
-  }
-
-  // custom tasks for creating source/javadoc jars
-  task sourcesJar(type: Jar, dependsOn:classes) {
-     classifier = 'sources'
-     from sourceSets.main.allSource
-  }
-
-  task javadocJar(type: Jar, dependsOn:javadoc) {
-     classifier = 'javadoc'
-     from javadoc.destinationDir
-  }
-
-  // add javadoc/source jar the artifacts
-  artifacts {
-     archives sourcesJar
-     archives javadocJar
-  }
-
-  signing {
-    sign configurations.archives
-  }
-
-uploadArchives {
-  repositories.mavenDeployer {
-    configuration = configurations.archives
-
-    beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
-
-    repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-      authentication(userName: nexusUsername, password: nexusPassword)
+    dependencies {
+        compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.17'
+        compile asm
     }
 
-    pom.project {
-      name 'GContracts - Programming by Contract for Groovy'
-      packaging 'jar'
-      description 'GContracts provides annotations to implement interface contracts aka design by contract in Groovy classes.'
-      url 'http://github.com/andresteingress/gcontracts'
-      inceptionYear '2010'
+    repositories {
+        mavenCentral()
+    }
 
-      scm {
-        url 'scm:git:file:///Users/andre/Development/gcontracts'
-        connection 'scm:git:file:///Users/andre/Development/gcontracts'
-      }
+    // custom tasks for creating source/javadoc jars
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
 
-      licenses {
-        license {
-          name 'BSD License'
-          comments """
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    // add javadoc/source jar the artifacts
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    signing {
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            configuration = configurations.archives
+
+            beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
+
+            repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: nexusUsername, password: nexusPassword)
+            }
+
+            pom.project {
+                name 'GContracts - Programming by Contract for Groovy'
+                packaging 'jar'
+                description 'GContracts provides annotations to implement interface contracts aka design by contract in Groovy classes.'
+                url 'http://github.com/andresteingress/gcontracts'
+                inceptionYear '2010'
+
+                scm {
+                    url 'scm:git:file:///Users/andre/Development/gcontracts'
+                    connection 'scm:git:file:///Users/andre/Development/gcontracts'
+                }
+
+                licenses {
+                    license {
+                        name 'BSD License'
+                        comments """
                 /**
                 Copyright (c) 2012, Andre Steingress
                 All rights reserved.
@@ -113,23 +113,23 @@ uploadArchives {
                 USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 **/
           """
-          distribution 'repo'
-        }
-      }
+                        distribution 'repo'
+                    }
+                }
 
-      developers {
-        developer {
-          id 'andre'
-          name 'Andre Steingress'
-          email 'me@andresteingress.com'
-          url 'http://www.gcontracts.org'
-          roles{
-            role 'Developer'
-          }
-          timezone '+1'
+                developers {
+                    developer {
+                        id 'andre'
+                        name 'Andre Steingress'
+                        email 'me@andresteingress.com'
+                        url 'http://www.gcontracts.org'
+                        roles {
+                            role 'Developer'
+                        }
+                        timezone '+1'
+                    }
+                }
+            }
         }
-      }
     }
-  }
- }  
 }
